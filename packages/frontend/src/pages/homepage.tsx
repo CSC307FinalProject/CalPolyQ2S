@@ -20,14 +20,20 @@ function Homepage() {
           <Navbar />
         </div>
 
-          <div className="text-left bg-[#D7F5FF] text-[#047494] text-xs font-bold flex justify-baseline p-1.5 mt-10 rounded-xl w-fit">
-            CAL POLY SLO — QUARTER TO SEMESTER
-          </div>
+        <div className="text-left bg-[#D7F5FF] text-[#047494] text-xs font-bold flex justify-baseline p-1.5 mt-10 rounded-xl w-fit">
+          CAL POLY SLO — QUARTER TO SEMESTER
+        </div>
 
         <div className="text-left leading-tight flex justify-baseline text-white font-bold text-5xl w-[50vw]">
           Confused on the Quarter to Semester Change?
         </div>
-        <button className="btn-primary" onClick={() => console.log("clicked")}>
+        <div className="text-left text-white px-3 py-8 bg-black/5 backdrop-blur-md rounded-xl w-[50vw]">
+          Starting 2026, Cal Poly SLO is switching from the quarter system to
+          the semester system. Compare timelines, reduce your course load, and
+          see how classes connect—all in one place to choose the catalog that is
+          best.
+        </div>
+        <button className="btn-primary text-left leading-tight flex justify-baseline absolute bottom">
           Get Started
         </button>
       </div>
