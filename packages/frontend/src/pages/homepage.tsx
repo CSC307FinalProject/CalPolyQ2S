@@ -1,4 +1,3 @@
-import "./homepage.css";
 import Navbar from "../components/navbar";
 
 function Homepage() {
