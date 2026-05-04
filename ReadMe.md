@@ -12,6 +12,8 @@ This section of the ReadMe describes our coding standards, specifically the styl
   * This project will use Camel Case
   * Add comments where necessary but self-explanatory code triumphs
 
+  * Use Inter Bold for titles, Open Sans for smaller text and buttons
+
 ---
 
 ### Pre-commit Hooks
