@@ -1,28 +1,46 @@
 import LoginForm from "../components/loginform";
+import calPolyImg from "../assets/CalPolyArialView.jpg";
 
 
 function Login() {
-     return (
-    <div className="relative w-full h-screen">
+  return (
+    <div className="flex w-full h-screen">
 
-      <div className="absolute inset-0 -z-10"></div>
-
-        <div className="text-left leading-tight font-bold px-10 pt-5 pb-8 w-[50vw]">
+      {/* Left Side - Login Form */}
+      <div className="flex flex-col w-1/2 px-10 py-5">
+        <div className="text-left leading-tight font-bold">
           Cal Poly Q2S
         </div>
 
-        <div className="flex flex-col gap-1 px-10">
-          <div className="text-left leading-tight font-bold text-6xl w-[50vw]">
+        <div className="flex flex-col gap-1 mt-16">
+          <div className="text-left leading-tight font-bold text-6xl">
             Welcome Back
           </div>
           <div className="text-left text-xl">
             Log into your account
           </div>
         </div>
-        <div className="mt-25 px-10">
-            <LoginForm/>
+
+        <div className="mt-10">
+          <LoginForm />
         </div>
       </div>
+
+      {/* 
+        TODO: FIND HIGHER RES CAL POLY PHOTO, MAYBE FROM
+        https://ucm.calpoly.edu/photo-assets
+      */}
+
+      {/* Right Side - Cal Poly Photo */}
+      <div className="w-1/2 h-full p-4">
+        <img
+          src={calPolyImg}
+          alt="Cal Poly Arial View"
+          className="w-full h-full object-cover rounded-xl"
+        />
+      </div>
+
+    </div>
   );
 }
 
