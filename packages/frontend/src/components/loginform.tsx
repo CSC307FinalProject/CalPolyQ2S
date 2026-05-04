@@ -34,9 +34,8 @@ export default function LoginForm() {
     console.log("IMPLEMENT POST CALL TO BACKEND");
   };
 
-// CURRENT OVERALL TODOS: Add hover features to buttons and such
-// Make "Stay signed in" text a button so 
-// that text is not highlighted when clicked
+// CURRENT OVERALL TODOS: 
+// Add hover features to buttons and such
 // Replace "show" and "hide" with eye
 
   return (
@@ -81,7 +80,7 @@ export default function LoginForm() {
         </div>
       </div>
 
-      <label className="mt-2 mb-8 flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+      <label className="mt-2 mb-8 flex items-center gap-2 text-sm text-gray-700 cursor-pointer select-none">
         <input
           name="staySignedIn"
           type="checkbox"
