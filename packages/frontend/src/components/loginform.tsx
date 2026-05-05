@@ -1,4 +1,6 @@
 import { useState, type ChangeEvent, type ComponentProps } from 'react';
+import { Eye, EyeOff, Circle, CircleCheckBig } from 'lucide-react';
+
 
 interface FormData {
   email: string;
@@ -75,12 +77,12 @@ export default function LoginForm() {
             onClick={() => setShowPassword(!showPassword)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs cursor-pointer"
           >
-            {showPassword ? "hide" : "show"}
+            {showPassword ? <EyeOff/> : <Eye/> }
           </button>
         </div>
       </div>
 
-      <label className="mt-2 mb-8 flex items-center gap-2 text-sm text-gray-700 cursor-pointer select-none">
+      <label className="mt-2 mb-8 flex items-center gap-2 text-sm text-black cursor-pointer select-none hover:text-gray-600">
         <input
           name="staySignedIn"
           type="checkbox"
@@ -89,26 +91,23 @@ export default function LoginForm() {
           className="sr-only"
         />
 
-        <span className={`w-2 h-2 rounded-full border-2 flex-shrink-0 transition-colors 
-          ${formData.staySignedIn ? 'bg-black border-black' : 'bg-white'}`} />
+        { formData.staySignedIn ? <CircleCheckBig className='w-4'/> : <Circle className='w-4'/> }
         
         Keep me signed in
       
       </label>
 
       
-      <button
-        
+      <button  
         type="submit"
-        className="mb-2 w-full py-3 rounded-lg bg-black text-white font-semibold cursor-pointer"
-      
+        className="mb-2 w-full py-3 rounded-lg bg-black text-white font-semibold cursor-pointer hover:bg-calpoly-green"
       >
         Sign In
       </button>
 
       <p className="text-sm text-center text-gray-600">
         Need to sign up?{' '}
-        <a href="/registration" className="text-calpoly-green font-bold ">
+        <a href="/registration" className="text-calpoly-green font-bold hover:underline">
           Create Account
         </a>
       </p>

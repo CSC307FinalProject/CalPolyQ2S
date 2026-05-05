@@ -7,23 +7,28 @@ function Login() {
     <div className="flex w-full h-screen">
 
       {/* Left Side - Login Form */}
-      <div className="flex flex-col w-1/2 px-10 py-5">
+      <div className="flex w-1/2 px-10 py-5">
         <div className="text-left leading-tight font-bold">
           Cal Poly Q2S
         </div>
 
-        <div className="flex flex-col gap-1 mt-16">
-          <div className="text-left leading-tight font-bold text-6xl">
-            Welcome Back
+        <div className="justify-center items-center">
+          <div className="flex flex-col gap-1 mt-16">
+            <div className="text-left leading-tight font-bold text-6xl">
+              Welcome Back
+            </div>
+            <div className="text-left text-xl">
+              Log into your account
+            </div>
           </div>
-          <div className="text-left text-xl">
-            Log into your account
+
+          <div className="mt-10">
+            <LoginForm />
           </div>
+          
         </div>
 
-        <div className="mt-10">
-          <LoginForm />
-        </div>
+        
       </div>
 
       {/* 
