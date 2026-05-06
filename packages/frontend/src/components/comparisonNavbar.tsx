@@ -5,7 +5,7 @@ export default function Navbar() {
         Calpoly Q2S
       </span>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center">
         <button className="text-xs text-gray-600 font-medium px-3 py-2 rounded-md border border-white/0">
           Logged in as
         </button>
