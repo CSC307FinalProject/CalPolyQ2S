@@ -13,7 +13,7 @@ interface FormData {
 type FormSubmitHandler = NonNullable<ComponentProps<'form'>['onSubmit']>;
 
 
-export default function LoginForm() {
+export default function RegisterForm() {
   
   const [formData, setFormData] = useState<FormData>({
     email: '',
@@ -103,18 +103,18 @@ export default function LoginForm() {
         type="submit"
         className="mb-2 w-full py-3 rounded-lg bg-black text-white font-semibold cursor-pointer hover:bg-calpoly-green"
       >
-        Sign In
+        Sign Up
       </button>
 
       <label className="text-sm text-center text-gray-600">
         
-        Need to sign up?{' '}
+        Account already exists?{' '}
 
         <Link 
-          to="/register" 
+          to="/login" 
           className="text-calpoly-green font-bold hover:underline">
 
-            Create Account
+            Login
 
         </Link>
       

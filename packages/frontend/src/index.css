@@ -2,6 +2,13 @@
 /* Imported google API for Inter Bold and Open Sans fonts */
 @import "tailwindcss";
 
+
+/* IGNORE COMPILER WARNING, NOT REAL */
+@theme {
+  --color-calpoly-green: #154734;
+  --color-calpoly-gold: #BD8B13;
+}
+
 :root {
   --text: #000000;
   --text-h: #08060d;
@@ -19,11 +26,6 @@
   --heading: system-ui, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-
-  /* Added Cal Poly colors */
-  --color-calpoly-green: #154734;
-  --color-calpoly-gold: #BD8B13;
-
   font: 18px/145% var(--sans);
   letter-spacing: 0.18px;
   color-scheme: light dark;
@@ -36,7 +38,8 @@
 
   @media (max-width: 1024px) {
     font-size: 16px;
-  }
+  
+  }  
 }
 
 /* COMMENTED OUT, default to having a light mode only for now

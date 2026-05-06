@@ -1,12 +1,12 @@
-import LoginForm from "../components/loginform";
+import RegisterForm from "../components/registerform";
 import calPolyImg from "../assets/CalPolyArialView.jpg";
 
 
-function Login() {
+function Register() {
   return (
     <div className="flex w-full h-screen">
 
-      {/* Left Side - Login Form */}
+      {/* Left Side - Registration Form */}
       <div className="flex w-1/2 px-10 py-5">
         <div className="text-left leading-tight font-bold">
           Cal Poly Q2S
@@ -15,15 +15,15 @@ function Login() {
         <div className="justify-center items-center">
           <div className="flex flex-col gap-1 mt-16">
             <div className="text-left leading-tight font-bold text-6xl">
-              Welcome Back
+              Welcome
             </div>
             <div className="text-left text-xl ml-1">
-              Log into your account
+              Register your account
             </div>
           </div>
 
           <div className="mt-10">
-            <LoginForm />
+            <RegisterForm />
           </div>
           
         </div>
@@ -49,4 +49,4 @@ function Login() {
   );
 }
 
-export default Login;
+export default Register;
