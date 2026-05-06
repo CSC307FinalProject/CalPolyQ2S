@@ -32,6 +32,8 @@ const quarterCourses = [
     status: "Completed",
   },
   { id: 5, title: "Databases", code: "CSC 365", units: 4, status: "Completed" },
+  { id: 6, title: "Databases", code: "CSC 365", units: 4, status: "Completed" },
+  { id: 7, title: "Databases", code: "CSC 365", units: 4, status: "Completed" }
 ];
 
 const semesterCourses = [
@@ -194,6 +196,8 @@ export default function Comparison() {
 
   const quartersLeftPercent = Math.min(((12 - quartersLeft) / 12) * 100, 100);
 
+  const Recommended = Math.min(2 * quartersLeft, 3 * semestersLeft);
+
   return (
     <div className="pt-5 bg-white ">
       <Navbar />
@@ -204,11 +208,12 @@ export default function Comparison() {
         >
           <div className="flex items-center gap-2 mb-4">
             <h2 className="text-black! text-sm">Quarter Catalog (2022-2026)</h2>
-            {/* <span className="bg-green-100 text-green-800 text-xs font-medium px-3 py-0.5 rounded-full">
-              Recommended
-            </span> */}
+            {Recommended === quartersLeft * 2 && (
+              <span className="bg-green-100 text-green-800 text-xs font-medium px-3 py-0.5 rounded-full">
+                Recommended
+              </span>
+            )}
           </div>
-
           <div className="bg-gray-50 rounded-lg p-4 mb-4">
             <p className="text-xs font-medium uppercase tracking-widest text-gray-400 mb-3">
               Progress
@@ -291,9 +296,11 @@ export default function Comparison() {
               <h2 className="text-black! text-sm">
                 Semester Catalog (2026-2030)
               </h2>
-              <span className="bg-green-100 text-green-800 text-xs font-medium px-3 py-0.5 rounded-full">
-                Recommended
-              </span>
+              {Recommended === semestersLeft * 3 && (
+                <span className="bg-green-100 text-green-800 text-xs font-medium px-3 py-0.5 rounded-full">
+                  Recommended
+                </span>
+              )}
             </div>
 
             <div className="bg-gray-50 rounded-lg p-4 mb-4">
