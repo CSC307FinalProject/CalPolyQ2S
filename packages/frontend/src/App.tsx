@@ -2,8 +2,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Homepage from './pages/homepage';
 import Login from "./pages/login";
 import Register from "./pages/register";
+import ClassSelector from "./pages/class-selector
 
-import ClassSelector from "./pages/classSelector";
+import Comparison from "./pages/comparison";
 
 function App() {
   return (
@@ -12,6 +13,7 @@ function App() {
         <Route path="/" element={<Homepage/>}/>
         <Route path="/login" element={<Login/>}/>
         <Route path="/register" element={<Register/>}/>
+        <Route path="/" element={<Homepage />} />
         <Route path="/class-selector" element={<ClassSelector />} />
       </Routes>
     </BrowserRouter>
