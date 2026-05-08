@@ -1,4 +1,5 @@
 import Navbar from "../components/hero-navbar";
+import { Link } from "react-router-dom";
 
 function Homepage() {
   return (
@@ -32,8 +33,9 @@ function Homepage() {
           see how classes connect—all in one place to choose the catalog that is
           best.
         </div>
-        <button
-          className="
+        <Link to="/register">
+          <button
+            className="
     text-left text-black bg-white
     px-6 py-4 rounded-2xl
     text-lg font-semibold leading-tight
@@ -43,9 +45,10 @@ function Homepage() {
     active:scale-95 active:bg-gray-100
     cursor-pointer select-none
   "
-        >
-          Get Started
-        </button>
+          >
+            Get Started
+          </button>
+        </Link>
       </div>
     </div>
   );

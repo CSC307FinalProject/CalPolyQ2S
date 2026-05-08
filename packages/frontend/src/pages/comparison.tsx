@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Navbar from "../components/comparisonNavbar";
+import Navbar from "../components/navbar";
 
 const filters = ["All", "Completed", "Active", "Remaining"];
 const quarterCourses = [
@@ -199,7 +199,7 @@ export default function Comparison() {
   const Recommended = Math.min(2 * quartersLeft, 3 * semestersLeft);
 
   return (
-    <div className="pt-5 bg-white ">
+    <div className="bg-white ">
       <Navbar />
       <div className="bg-white flex items-stretch">
         <div

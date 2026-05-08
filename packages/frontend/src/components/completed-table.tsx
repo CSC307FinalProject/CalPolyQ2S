@@ -1,6 +1,7 @@
 import { CourseButton } from "./class-table";
 import type { Course } from "../data/courses";
-import {ContinueButton, BackButton} from "./nav-buttons";
+import { ContinueButton, BackButton } from "./nav-buttons";
+import { Link } from "react-router-dom";
 interface CompletedTableProps {
   courses: Course[];
   onRemoveCourse: (courseNumber: string) => void;
@@ -30,9 +31,12 @@ export default function CompletedTable({
       </div>
 
       <div className="border-t flex justify-between border-gray-200 pt-3">
-        <BackButton  />
-        <ContinueButton label="Translate Classes" />
-
+        <Link to="/login">
+          <BackButton />
+        </Link>
+        <Link to="/q2s-comparison">
+          <ContinueButton label="Translate Classes" />
+        </Link>
       </div>
     </div>
   );

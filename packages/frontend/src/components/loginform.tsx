@@ -42,7 +42,7 @@ export default function LoginForm() {
 // Add hover features to buttons and such
 
   return (
-    <form className="gap-4 mt-4 w-80 text-left" onSubmit={handleSubmit}>
+    <form className="gap-4 mt-4 w-full text-left" onSubmit={handleSubmit}>
 
       <div className="gap-1">
         <label className="text-sm text-gray-800 font-medium">
@@ -99,12 +99,14 @@ export default function LoginForm() {
       </label>
 
       
+      <Link to="/class-selector">
       <button  
         type="submit"
         className="mb-2 w-full py-3 rounded-lg bg-black text-white font-semibold cursor-pointer hover:bg-calpoly-green"
       >
         Sign In
       </button>
+      </Link>
 
       <label className="text-sm text-center text-gray-600">
         

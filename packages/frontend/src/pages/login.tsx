@@ -1,5 +1,6 @@
 import LoginForm from "../components/loginform";
 import calPolyImg from "../assets/CalPolyArialView.jpg";
+import { Link } from "react-router-dom";
 
 
 function Login() {
@@ -8,9 +9,11 @@ function Login() {
 
       {/* Left Side - Login Form */}
       <div className="flex w-1/2 px-10 py-5">
+      <Link to="/">
         <div className="text-left leading-tight font-bold">
           Cal Poly Q2S
         </div>
+        </Link>
 
         <div className="justify-center items-center">
           <div className="flex flex-col gap-1 mt-16">
