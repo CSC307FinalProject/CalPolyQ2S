@@ -66,7 +66,7 @@ function TableHeader() {
   }
 
   return (
-    <nav className="w-full flex items-center gap-2 border shadow-sm rounded-2xl ">
+    <nav className="w-full flex items-center gap-2 border border-gray-400 shadow-sm rounded-2xl ">
       <div className="space-y-2 min-w-75">
         <div className="relative">
           <input
@@ -118,7 +118,7 @@ function TableHeader() {
       </ul>
       <button
         type="submit"
-        className="bg-black self-stretch ml-auto -my-px -mr-px justify-end rounded-l-xl hover:text-white cursor-pointer transition-colors duration-300 p-3 text-sm rounded-r-2xl"
+        className="bg-black text-gray-400 self-stretch ml-auto -my-px -mr-px justify-end rounded-l-xl hover:text-white cursor-pointer transition-colors duration-300 p-3 text-sm rounded-r-2xl"
       >
         <Save />
       </button>
