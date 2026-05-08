@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@700&family=Open+Sans:wght@400&display=swap");
+/* Imported google API for Inter Bold and Open Sans fonts */
 
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
