@@ -9,6 +9,17 @@
   --color-calpoly-gold: #BD8B13;
 }
 
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
 :root {
   --text: #000000;
   --text-h: #08060d;
