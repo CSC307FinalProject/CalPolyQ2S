@@ -1,6 +1,13 @@
-@import "tailwindcss";
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@700&family=Open+Sans:wght@400&display=swap");
 /* Imported google API for Inter Bold and Open Sans fonts */
+@import "tailwindcss";
+
+
+/* IGNORE COMPILER WARNING, NOT REAL */
+@theme {
+  --color-calpoly-green: #154734;
+  --color-calpoly-gold: #BD8B13;
+}
 
 @layer utilities {
   .no-scrollbar::-webkit-scrollbar {
@@ -14,7 +21,7 @@
 }
 
 :root {
-  --text: #6b6375;
+  --text: #000000;
   --text-h: #08060d;
   --bg: #fff;
   --border: #e5e4e7;
@@ -42,8 +49,11 @@
 
   @media (max-width: 1024px) {
     font-size: 16px;
-  }
+  
+  }  
 }
+
+/* COMMENTED OUT, default to having a light mode only for now
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -64,6 +74,7 @@
     filter: invert(1) brightness(2);
   }
 }
+*/
 
 #root {
   max-width: 100%;
