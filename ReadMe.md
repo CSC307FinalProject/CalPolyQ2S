@@ -50,88 +50,20 @@ To ensure consistent formatting and linting, install the following extensions:
    ```
 
 
-# Database Setup (PostgreSQL)
+# Database Details (Supabase PostgreSQL)
 
-This project uses PostgreSQL. Follow the steps below to set up the database locally.
-
----
-
-## 1. Install PostgreSQL
-
-### macOS (Homebrew)
-```bash
-brew install postgresql
-brew services start postgresql
-```
-
-### Ubuntu / WSL
-```bash
-sudo apt update
-sudo apt install postgresql postgresql-contrib
-sudo service postgresql start
-```
-
-### Windows
-Download and install from:
-https://www.postgresql.org/download/windows/
+This project uses a hosted PostgreSQL database via Supabase. Below are instruction to connect the databse to a DataGrip session.
 
 ---
 
-## 2. Create a Database
+In DataGrip:
 
-```bash
-createdb calpolyq2s
 ```
-
----
-
-## 3. Load the Schema
-
-From the project root:
-
-```bash
-psql -d calpolyq2s -f db/schema.sql
-```
-
----
-
-## 5. Verify Connection
-
-```bash
-psql -d calpolyq2s
-```
-
-Then inside:
-
-```sql
-SELECT current_database(), current_user;
-```
-
----
-
-## 6. Environment Variables
-
-Create a `.env` file (do NOT commit this file):
-
-```env
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=calpolyq2s
-DB_USER=your_username
-DB_PASSWORD=your_password
-```
-
----
-
-## 7. Connecting with DataGrip (Optional)
-
-```text
-Host: localhost
-Port: 5432
-Database: calpolyq2s
-User: your_username
-Password: your_password
-SSL: Disable
+Host: db.YOUR_PROJECT_REF.supabase.co
+Port: 5432 
+Database: postgres
+User: postgres
+Password: your database password
 ```
 
 ---
