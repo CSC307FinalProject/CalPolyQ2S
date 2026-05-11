@@ -276,7 +276,7 @@ export default function Comparison() {
                 <button
                   key={filter}
                   onClick={() => setActiveFilter(filter)}
-                  className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                  className={` cursor-pointer text-xs px-3 py-1 rounded-full border transition-colors ${
                     activeFilter === filter
                       ? "bg-gray-900 text-white border-gray-900"
                       : "bg-white text-gray-500 border-gray-300 hover:bg-gray-50"
@@ -366,7 +366,7 @@ export default function Comparison() {
                     <button
                       key={filter}
                       onClick={() => setActiveFilter1(filter)}
-                      className={`text-xs px-3 py-1 rounded-full border transition-colors ${
+                      className={`cursor-pointer text-xs px-3 py-1 rounded-full border transition-colors ${
                         activeFilter1 === filter
                           ? "bg-gray-900 text-white border-gray-900"
                           : "bg-white text-gray-500 border-gray-300 hover:bg-gray-50"
