@@ -227,7 +227,7 @@ export default function Comparison() {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-1.5 mb-3">
               <div
-                className="h-1.5 rounded-full bg-linear-to-r from-indigo-600 to-indigo-400"
+                className="h-1.5 rounded-full bg-calpoly-green"
                 style={{ width: `${quarterPercent}%` }}
               ></div>
             </div>
@@ -240,7 +240,7 @@ export default function Comparison() {
             </div>
             <div className="w-full bg-gray-200 rounded-full h-1.5">
               <div
-                className="h-1.5 rounded-full bg-linear-to-r from-purple-700 to-purple-400"
+                className="h-1.5 rounded-full bg-calpoly-green"
                 style={{ width: `${quartersLeftPercent}%` }}
               ></div>
             </div>
@@ -316,7 +316,7 @@ export default function Comparison() {
               </div>
               <div className="w-full bg-gray-200 rounded-full h-1.5 mb-3">
                 <div
-                  className="h-1.5 rounded-full bg-linear-to-r from-indigo-600 to-indigo-400"
+                  className="h-1.5 rounded-full bg-calpoly-green"
                   style={{ width: `${semesterPercent}%` }}
                 ></div>
               </div>
@@ -329,7 +329,7 @@ export default function Comparison() {
               </div>
               <div className="w-full bg-gray-200 rounded-full h-1.5">
                 <div
-                  className="h-1.5 rounded-full bg-linear-to-r from-purple-700 to-purple-400"
+                  className="h-1.5 rounded-full bg-calpoly-green"
                   style={{ width: `${semestersLeftPercent}%` }}
                 ></div>
               </div>
