@@ -14,13 +14,13 @@ type FormSubmitHandler = NonNullable<ComponentProps<'form'>['onSubmit']>;
 
 
 export default function RegisterForm() {
-  
+
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
     staySignedIn: false,
   });
-  
+
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -36,9 +36,9 @@ export default function RegisterForm() {
     // TODO: IMPLEMENT POST CALL HERE
     console.log("IMPLEMENT POST CALL TO BACKEND");
   };
-  
 
-// CURRENT OVERALL TODOS: 
+
+// CURRENT OVERALL TODOS:
 // Add hover features to buttons and such
 
   return (
@@ -62,17 +62,18 @@ export default function RegisterForm() {
         <label className="text-sm text-gray-800 font-medium">
           Password
         </label>
-        
+
         <div className="relative">
           <input
             name="password"
+            minLength={8}
             type={showPassword ? 'text' : 'password'}
             placeholder="Enter your password"
             value={formData.password}
             onChange={handleChange}
             className="px-4 py-3 rounded-lg border border-gray-300 bg-white text-black placeholder-gray-400 outline-none focus:border-gray-500 w-full pr-12"
           />
-          
+
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
@@ -93,13 +94,13 @@ export default function RegisterForm() {
         />
 
         { formData.staySignedIn ? <CircleCheckBig className='w-4'/> : <Circle className='w-4'/> }
-        
+
         Keep me signed in
-      
+
       </label>
 
-      
-      <button  
+
+      <button
         type="submit"
         className="mb-2 w-full py-3 rounded-lg bg-black text-white font-semibold cursor-pointer hover:bg-calpoly-green"
       >
@@ -107,17 +108,17 @@ export default function RegisterForm() {
       </button>
 
       <label className="text-sm text-center text-gray-600">
-        
+
         Account already exists?{' '}
 
-        <Link 
-          to="/login" 
+        <Link
+          to="/login"
           className="text-calpoly-green font-bold hover:underline">
 
             Login
 
         </Link>
-      
+
       </label>
 
     </form>

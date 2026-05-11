@@ -1,6 +1,6 @@
-import { CourseButton } from "./class-table";
+import { CourseButton } from "./classTable";
 import type { Course } from "../data/courses";
-import { ContinueButton, BackButton } from "./nav-buttons";
+import { ContinueButton, BackButton } from "./navButtons";
 import { Link } from "react-router-dom";
 interface CompletedTableProps {
   courses: Course[];

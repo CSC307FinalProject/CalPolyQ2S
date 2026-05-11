@@ -1,4 +1,4 @@
-import Navbar from "../components/hero-navbar";
+import Navbar from "../components/heroNavbar";
 import { Link } from "react-router-dom";
 
 function Homepage() {

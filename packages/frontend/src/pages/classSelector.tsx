@@ -1,7 +1,7 @@
 import Navbar from "../components/navbar";
 import { SearchBar } from "../components/search";
-import ClassTable from "../components/class-table";
-import CompletedTable from "../components/completed-table";
+import ClassTable from "../components/classTable";
+import CompletedTable from "../components/completedTable";
 import type { Course } from "../data/courses";
 import { Courses } from "../data/courses";
 import { useState } from "react";
