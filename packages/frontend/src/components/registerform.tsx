@@ -42,7 +42,7 @@ export default function RegisterForm() {
 // Add hover features to buttons and such
 
   return (
-    <form className="gap-4 mt-4 w-80 text-left" onSubmit={handleSubmit}>
+    <form className="gap-4 mt-4 w-full text-left" onSubmit={handleSubmit}>
 
       <div className="gap-1">
         <label className="text-sm text-gray-800 font-medium">

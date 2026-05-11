@@ -2,11 +2,10 @@
 /* Imported google API for Inter Bold and Open Sans fonts */
 @import "tailwindcss";
 
-
 /* IGNORE COMPILER WARNING, NOT REAL */
 @theme {
   --color-calpoly-green: #154734;
-  --color-calpoly-gold: #BD8B13;
+  --color-calpoly-gold: #bd8b13;
 }
 
 @layer utilities {
@@ -41,16 +40,15 @@
   letter-spacing: 0.18px;
   color-scheme: light dark;
   color: var(--text);
-  background: var(--bg);
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: white;
 
   @media (max-width: 1024px) {
     font-size: 16px;
-  
-  }  
+  }
 }
 
 /* COMMENTED OUT, default to having a light mode only for now
@@ -80,7 +78,6 @@
   max-width: 100%;
   margin: 0 auto;
   text-align: center;
-  border-inline: 1px solid var(--border);
   min-height: 100svh;
   display: flex;
   flex-direction: column;
@@ -141,4 +138,12 @@ input:-webkit-autofill:active {
   -webkit-box-shadow: 0 0 0px 1000px white inset !important;
   -webkit-text-fill-color: black !important;
   transition: background-color 5000s ease-in-out 0s;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100%;
 }
