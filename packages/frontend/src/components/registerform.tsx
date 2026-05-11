@@ -66,6 +66,7 @@ export default function RegisterForm() {
         <div className="relative">
           <input
             name="password"
+            minLength={8}
             type={showPassword ? 'text' : 'password'}
             placeholder="Enter your password"
             value={formData.password}
