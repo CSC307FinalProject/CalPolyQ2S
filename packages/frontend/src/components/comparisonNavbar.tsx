@@ -10,7 +10,7 @@ export default function Navbar() {
           Logged in as
         </button>
         <button className="text-xs font-semibold bg-white text-black px-3 py-2 rounded-md transition-all duration-200 hover:bg-white/90 hover:scale-105 active:scale-95">
-          Gold Digger
+          Goal Digger
         </button>
       </div>
     </nav>
