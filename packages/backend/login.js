@@ -2,6 +2,7 @@ import sql from "./db/index.js";
 import cors from "cors";
 import express from "express";
 import "dotenv/config";
+import bcrypt from "bcrypt";
 
 const app = express();
 const PORT = 3000;
@@ -19,12 +20,19 @@ app.post("/login", async (req, res) => {
       SELECT student_id, email, password_hash
       FROM public.students
       WHERE email = ${email}
-      AND password_hash = ${password}
     `;
 
     console.log("DB users:", users);
 
     if (users.length === 0) {
+      return res.status(401).json({ error: "Invalid email or password." });
+    }
+
+    const user = users[0];
+
+    const passwordMatch = await bcrypt.hash("password", 10);
+
+    if (!passwordMatch) {
       return res.status(401).json({ error: "Invalid email or password." });
     }
 
