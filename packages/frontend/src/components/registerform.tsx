@@ -1,7 +1,6 @@
-import { useState, type ChangeEvent, type ComponentProps } from 'react';
-import { Eye, EyeOff, Circle, CircleCheckBig } from 'lucide-react';
+import { useState, type ChangeEvent, type ComponentProps } from "react";
+import { Eye, EyeOff, Circle, CircleCheckBig } from "lucide-react";
 import { Link } from "react-router-dom";
-
 
 interface FormData {
   email: string;
@@ -9,15 +8,13 @@ interface FormData {
   staySignedIn: boolean;
 }
 
-
-type FormSubmitHandler = NonNullable<ComponentProps<'form'>['onSubmit']>;
-
+type FormSubmitHandler = NonNullable<ComponentProps<"form">["onSubmit"]>;
 
 export default function RegisterForm() {
 
   const [formData, setFormData] = useState<FormData>({
-    email: '',
-    password: '',
+    email: "",
+    password: "",
     staySignedIn: false,
   });
 
@@ -27,7 +24,7 @@ export default function RegisterForm() {
     const { name, value, type, checked } = event.target;
     setFormData({
       ...formData,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === "checkbox" ? checked : value,
     });
   };
 
@@ -37,13 +34,8 @@ export default function RegisterForm() {
     console.log("IMPLEMENT POST CALL TO BACKEND");
   };
 
-
-// CURRENT OVERALL TODOS:
-// Add hover features to buttons and such
-
   return (
     <form className="gap-4 mt-4 w-full text-left" onSubmit={handleSubmit}>
-
       <div className="gap-1">
         <label className="text-sm text-gray-800 font-medium">
           Email Address
@@ -59,15 +51,13 @@ export default function RegisterForm() {
       </div>
 
       <div className="gap-1 mt-6">
-        <label className="text-sm text-gray-800 font-medium">
-          Password
-        </label>
+        <label className="text-sm text-gray-800 font-medium">Password</label>
 
         <div className="relative">
           <input
             name="password"
             minLength={8}
-            type={showPassword ? 'text' : 'password'}
+            type={showPassword ? "text" : "password"}
             placeholder="Enter your password"
             value={formData.password}
             onChange={handleChange}
@@ -79,7 +69,7 @@ export default function RegisterForm() {
             onClick={() => setShowPassword(!showPassword)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs cursor-pointer"
           >
-            {showPassword ? <EyeOff/> : <Eye/> }
+            {showPassword ? <EyeOff /> : <Eye />}
           </button>
         </div>
       </div>
@@ -92,13 +82,13 @@ export default function RegisterForm() {
           onChange={handleChange}
           className="sr-only"
         />
-
-        { formData.staySignedIn ? <CircleCheckBig className='w-4'/> : <Circle className='w-4'/> }
-
+        {formData.staySignedIn ? (
+          <CircleCheckBig className="w-4" />
+        ) : (
+          <Circle className="w-4" />
+        )}
         Keep me signed in
-
       </label>
-
 
       <button
         type="submit"
@@ -108,19 +98,14 @@ export default function RegisterForm() {
       </button>
 
       <label className="text-sm text-center text-gray-600">
-
-        Account already exists?{' '}
-
+        Account already exists?{" "}
         <Link
           to="/login"
-          className="text-calpoly-green font-bold hover:underline">
-
-            Login
-
+          className="text-calpoly-green font-bold hover:underline"
+        >
+          Login
         </Link>
-
       </label>
-
     </form>
   );
 }
