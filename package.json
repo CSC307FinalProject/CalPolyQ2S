@@ -21,5 +21,11 @@
     "hooks": {
       "pre-commit": "lint-staged"
     }
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.105.3"
+  },
+  "devDependencies": {
+    "supabase": "^2.98.2"
   }
 }
