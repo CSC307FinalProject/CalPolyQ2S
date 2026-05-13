@@ -67,3 +67,9 @@ Password: your database password
 ```
 
 ---
+
+# Sequence Diagrams
+<img width="886" height="531" alt="User_Signup_Sequence_Diagram" src="https://github.com/user-attachments/assets/1cd577c4-4c1a-4821-9e00-d479b876b0f1" />
+<img width="858" height="531" alt="User_Login_Sequence_Diagram" src="https://github.com/user-attachments/assets/39f45c11-c8eb-42b9-a0d1-4f81c2610725" />
+
+
