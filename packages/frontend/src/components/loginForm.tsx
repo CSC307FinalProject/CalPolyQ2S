@@ -1,6 +1,10 @@
 import { useState, type ChangeEvent, type ComponentProps } from 'react';
 import { Eye, EyeOff, Circle, CircleCheckBig } from 'lucide-react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+
+// Import API URL from .env
+const API_URL = import.meta.env.VITE_API_URL;
 
 
 interface FormData {
@@ -14,7 +18,9 @@ type FormSubmitHandler = NonNullable<ComponentProps<'form'>['onSubmit']>;
 
 
 export default function LoginForm() {
-  
+
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
@@ -33,13 +39,24 @@ export default function LoginForm() {
 
   const handleSubmit: FormSubmitHandler = (event) => {
     event.preventDefault();
-    // TODO: IMPLEMENT POST CALL HERE
-    console.log("IMPLEMENT POST CALL TO BACKEND");
+
+    fetch(`${API_URL}/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: formData.email, password: formData.password }),
+    })
+      .then((response) => {
+        if (response.status === 200) {
+          response.json().then((payload) => {
+            localStorage.setItem("token", payload.token);
+            navigate("/class-selector");
+          });
+        }
+      })
+      .catch(() => {});
   };
   
 
-// CURRENT OVERALL TODOS: 
-// Add hover features to buttons and such
 
   return (
     <form className="gap-4 mt-4 w-full text-left" onSubmit={handleSubmit}>
@@ -99,14 +116,12 @@ export default function LoginForm() {
       </label>
 
       
-      <Link to="/class-selector">
-      <button  
+      <button
         type="submit"
         className="mb-2 w-full py-3 rounded-lg bg-black text-white font-semibold cursor-pointer hover:bg-calpoly-green"
       >
         Sign In
       </button>
-      </Link>
 
       <label className="text-sm text-center text-gray-600">
         
