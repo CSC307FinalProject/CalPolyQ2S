@@ -1,7 +1,14 @@
-import { LoaderCircle, Search, Plus, Delete, Save } from "lucide-react";
+import {
+  LoaderCircle,
+  Search,
+  Plus,
+  Delete,
+  Save,
+  CircleCheckBig,
+  CircleX,
+} from "lucide-react";
 import { useState, useRef } from "react";
 import type { Course } from "../data/courses";
-import { getStoredUser } from "../components/authStorage";
 
 // Maps header filter labels to their corresponding course tag values
 const FILTER_TAG_MAP: Record<string, string | null> = {
@@ -9,52 +16,33 @@ const FILTER_TAG_MAP: Record<string, string | null> = {
   GE: "GE",
   "UPPER DIV": "UPPER DIV",
   SUPPORT: "SUPPORT",
-  MATH: "SUPPORT",
+  "LOWER DIV": "LOWER DIV",
 };
 
 // Controls the display order of tag sections in the course list
 const TAG_DISPLAY_ORDER = ["LOWER DIV", "UPPER DIV", "SUPPORT", "GE"];
-const FILTER_LABELS     = ["MAJOR", "GE", "MATH", "UPPER DIV", "SUPPORT"];
+const FILTER_LABELS = ["MAJOR", "GE", "LOWER DIV", "UPPER DIV", "SUPPORT"];
 
 // ─── ClassTable (root) ────────────────────────────────────────────────────────
 interface ClassTableProps {
   courses: Course[];
   completed: Course[];
   onAddCourse: (course: Course) => void;
+  onSaveCourses: (completed_courses: Course[]) => Promise<void>;
 }
 
-export default function ClassTable({ courses, completed, onAddCourse }: ClassTableProps) {
+export default function ClassTable({
+  courses,
+  completed,
+  onAddCourse,
+  onSaveCourses,
+}: ClassTableProps) {
   // set up filters and query states
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
   async function handleSaveCourses() {
-    const user = getStoredUser();
-
-    if (!user) {
-      alert("Please log in first.");
-      return;
-    }
-
-    const response = await fetch("http://localhost:3000/save-courses", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        student_id: user.student_id,
-        courses: completed,
-      }),
-    });
-
-    const json = await response.json();
-
-    if (!response.ok) {
-      alert(json.error || "Failed to save courses.");
-      return;
-    }
-
-    alert("Courses saved!");
+    await onSaveCourses(completed);
   }
 
   function handleFilterChange(label: string) {
@@ -84,7 +72,7 @@ export default function ClassTable({ courses, completed, onAddCourse }: ClassTab
         onSearchChange={setSearchQuery}
         activeFilter={activeFilter}
         onFilterChange={handleFilterChange}
-        onSaveCourses={handleSaveCourses}
+        handleSaveCourses={handleSaveCourses}
       />
       <TableBody
         courses={visibleCourses}
@@ -96,13 +84,12 @@ export default function ClassTable({ courses, completed, onAddCourse }: ClassTab
 }
 
 // ─── TableHeader ──────────────────────────────────────────────────────────────
-
 interface TableHeaderProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
   activeFilter: string | null;
   onFilterChange: (label: string) => void;
-  onSaveCourses: () => void;
+  handleSaveCourses: () => Promise<void>;
 }
 
 function TableHeader({
@@ -110,9 +97,25 @@ function TableHeader({
   onSearchChange,
   activeFilter,
   onFilterChange,
-  onSaveCourses,
+  handleSaveCourses,
 }: TableHeaderProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [saveState, setSaveState] = useState<
+    "idle" | "saving" | "saved" | "failed"
+  >("idle");
+
+  // function to call the save courses function
+  // used to set the loading animation for save
+  async function handleSave() {
+    setSaveState("saving");
+    try {
+      await handleSaveCourses();
+      setSaveState("saved");
+    } catch {
+      setSaveState("failed");
+    }
+    setTimeout(() => setSaveState("idle"), 2000);
+  }
 
   // Tracks the floating hover cursor position behind filter labels
   const [hoverCursor, setHoverCursor] = useState({
@@ -122,12 +125,14 @@ function TableHeader({
   });
   const filterListRef = useRef<HTMLUListElement>(null);
 
+  // when the search bar changes, call onSearchChange with curr value
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
     onSearchChange(e.target.value);
     setIsLoading(true);
     setTimeout(() => setIsLoading(false), 300);
   }
 
+  // for hovering over the filter
   function handleFilterHover(e: React.MouseEvent<HTMLLIElement>) {
     const li = e.currentTarget;
     const list = filterListRef.current;
@@ -147,7 +152,7 @@ function TableHeader({
 
   return (
     <nav className="w-full flex items-center gap-2 border border-gray-400 shadow-sm rounded-2xl">
-      {/* Search input */}
+      {/* SEARCH INPUT -- Customized for this component*/}
       <div className="space-y-2 min-w-75">
         <div className="relative">
           <input
@@ -173,7 +178,7 @@ function TableHeader({
         </div>
       </div>
 
-      {/* Filter tabs — hover cursor animates beneath; active tab gets solid black bg */}
+      {/* FILTER TABS -- used to filter courses*/}
       <ul
         ref={filterListRef}
         onMouseLeave={handleFilterListLeave}
@@ -187,6 +192,7 @@ function TableHeader({
             opacity: hoverCursor.opacity,
           }}
         />
+        {/* looping over filters to apply active filters and animations  */}
         {FILTER_LABELS.map((label) => {
           const isActive =
             activeFilter !== null && activeFilter === FILTER_TAG_MAP[label];
@@ -204,19 +210,26 @@ function TableHeader({
         })}
       </ul>
 
+      {/*SAVE BUTTON -- save current completed courses */}
       <button
         type="button"
-        onClick={onSaveCourses}
-        className="bg-black text-gray-400 self-stretch ml-auto -my-px -mr-px justify-end rounded-l-xl hover:text-white cursor-pointer transition-colors duration-300 p-3 text-sm rounded-r-2xl"
+        onClick={handleSave}
+        disabled={saveState !== "idle"}
+        className={`self-stretch ml-auto -my-px -mr-px justify-end rounded-l-xl cursor-pointer transition-all duration-300 p-3 text-sm rounded-r-2xl disabled:cursor-default
+          ${saveState === "saved" ? "bg-calpoly-green text-white" : saveState === "failed" ? "bg-red-600 text-white" : "bg-black text-gray-400 hover:text-white"}`}
       >
-        <Save />
+        {saveState === "saving" && (
+          <LoaderCircle className="animate-spin" size={24} />
+        )}
+        {saveState === "saved" && <CircleCheckBig size={24} />}
+        {saveState === "failed" && <CircleX size={24} />}
+        {saveState === "idle" && <Save size={24} />}
       </button>
     </nav>
   );
 }
 
 // ─── TableBody ────────────────────────────────────────────────────────────────
-
 interface TableBodyProps {
   courses: Course[];
   completed: Course[];
@@ -234,6 +247,9 @@ function TableBody({ courses, completed, onAddCourse }: TableBodyProps) {
     [],
   );
 
+  {
+    /* EDGE CASE */
+  }
   if (groups.length === 0) {
     return (
       <div className="flex items-center justify-center w-full flex-1 min-h-0 mt-2 border rounded-xl border-gray-200 text-gray-400 text-sm">
@@ -256,9 +272,11 @@ function TableBody({ courses, completed, onAddCourse }: TableBodyProps) {
           <div className="divide-y divide-gray-100">
             {tagCourses.map((course) => (
               <CourseButton
-                key={course.course_code}
+                key={course.course_id}
                 {...course}
-                isSelected={completed.some((c) => c.course_code === course.course_code)}
+                isSelected={completed.some(
+                  (c) => c.course_id === course.course_id,
+                )}
                 onClick={() => onAddCourse(course)}
               />
             ))}
@@ -277,17 +295,26 @@ interface CourseButtonProps extends Course {
 }
 
 // Used in both the course list (class-table) and the completed sidebar (completed-table)
-export function CourseButton({ course_code, course_name, onClick, isSelected }: CourseButtonProps) {
+export function CourseButton({
+  course_code,
+  course_name,
+  onClick,
+  isSelected,
+}: CourseButtonProps) {
   return (
     <button
       onClick={onClick}
       className={`w-full flex items-center gap-4 px-4 py-3 text-left transition-colors duration-150 cursor-pointer
         ${isSelected ? "hover:bg-red-50" : "hover:bg-gray-50"}`}
     >
-      <span className={`w-20 shrink-0 text-sm font-mono font-semibold ${isSelected ? "text-black" : "text-gray-700"}`}>
+      <span
+        className={`w-20 shrink-0 text-sm font-mono font-semibold ${isSelected ? "text-black" : "text-gray-700"}`}
+      >
         {course_code}
       </span>
-      <span className={`flex-1 text-sm ${isSelected ? "text-black font-medium" : "text-gray-500"}`}>
+      <span
+        className={`flex-1 text-sm ${isSelected ? "text-black font-medium" : "text-gray-500"}`}
+      >
         {course_name}
       </span>
       <span
