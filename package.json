@@ -12,13 +12,13 @@
     ]
   },
   "scripts": {
-    "lint": "npx eslint . && npx prettier --check .",
+    "lint": "eslint . && prettier --check .",
     "dev:frontend": "npm run dev --workspace react-frontend",
     "dev:backend": "nodemon express-backend",
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "build": "npm run build --workspace react-frontend",
     "start": "node express-backend",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"No tests yet\" && exit 0"
   },
   "workspaces": [
     "packages/*"
