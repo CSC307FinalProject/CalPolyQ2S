@@ -24,7 +24,6 @@ app.get("/saved-courses/:student_id", async (req, res) => {
     return res.json({ courses });
   } catch (error) {
     console.error("Get saved courses error:", error);
-
     return res.status(500).json({
       error: "Failed to load saved courses.",
       details: error.message,
