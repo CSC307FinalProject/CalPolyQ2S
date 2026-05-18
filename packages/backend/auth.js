@@ -62,61 +62,6 @@ export async function loginUser(req, res) {
   }
 }
 
-
-// ----------------------------------------------------------------------
-
-app.get("/saved-courses/:student_id", async (req, res) => {
-  const { student_id } = req.params;
-
-  try {
-    const courses = await sql`
-      SELECT course_id, catalog_id, subject, course_number, class_name, units, tech_elective_eligible
-      FROM public.student_courses
-      WHERE student_id = ${student_id}
-      ORDER BY id
-    `;
-
-    return res.json({ courses });
-  } catch (error) {
-    console.error("Get saved courses error:", error);
-
-    return res.status(500).json({
-      error: "Failed to load saved courses.",
-      details: error.message,
-    });
-  }
-});
-
-app.post("/save-courses", async (req, res) => {
-  const { student_id, courses } = req.body;
-
-  const { error: deleteError } = await supabase
-    .from("student_courses")
-    .delete()
-    .eq("student_id", student_id);
-
-  if (deleteError) {
-    return res.status(500).json({ error: deleteError.message });
-  }
-
-  const rows = courses.map((course) => ({
-    student_id,
-    course_number: course.courseNumber,
-    course_title: course.courseTitle,
-    tag: course.tag,
-  }));
-
-  const { error: insertError } = await supabase
-    .from("student_courses")
-    .insert(rows);
-
-  if (insertError) {
-    return res.status(500).json({ error: insertError.message });
-  }
-
-  return res.json({ message: "Courses saved successfully." });
-});
-
 // ----------------------------------------------------------------------
 
 
