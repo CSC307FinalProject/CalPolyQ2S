@@ -13,8 +13,7 @@ const FILTER_TAG_MAP: Record<string, string | null> = {
 
 // Controls the display order of tag sections in the course list
 const TAG_DISPLAY_ORDER = ["LOWER DIV", "UPPER DIV", "SUPPORT", "GE"];
-
-const FILTER_LABELS = ["MAJOR", "GE", "MATH", "UPPER DIV", "SUPPORT"];
+const FILTER_LABELS     = ["MAJOR", "GE", "MATH", "UPPER DIV", "SUPPORT"];
 
 // ─── ClassTable (root) ────────────────────────────────────────────────────────
 interface ClassTableProps {
@@ -24,6 +23,7 @@ interface ClassTableProps {
 }
 
 export default function ClassTable({ courses, completed, onAddCourse }: ClassTableProps) {
+  // set up filters and query states
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
@@ -42,8 +42,8 @@ export default function ClassTable({ courses, completed, onAddCourse }: ClassTab
     // if search is empty, show every course, else only show matching
     const matchesSearch =
       !q ||
-      course.courseNumber.toLowerCase().includes(q) ||
-      course.courseTitle.toLowerCase().includes(q);
+      course.course_name?.toLowerCase().includes(q) ||
+      course.course_code?.toLowerCase().includes(q);
     return matchesTag && matchesSearch;
   });
 
@@ -193,9 +193,9 @@ function TableBody({ courses, completed, onAddCourse }: TableBodyProps) {
           <div className="divide-y divide-gray-100">
             {tagCourses.map((course) => (
               <CourseButton
-                key={course.courseNumber}
+                key={course.course_code}
                 {...course}
-                isSelected={completed.some((c) => c.courseNumber === course.courseNumber)}
+                isSelected={completed.some((c) => c.course_code === course.course_code)}
                 onClick={() => onAddCourse(course)}
               />
             ))}
@@ -214,7 +214,7 @@ interface CourseButtonProps extends Course {
 }
 
 // Used in both the course list (class-table) and the completed sidebar (completed-table)
-export function CourseButton({ courseNumber, courseTitle, onClick, isSelected }: CourseButtonProps) {
+export function CourseButton({ course_code, course_name, onClick, isSelected }: CourseButtonProps) {
   return (
     <button
       onClick={onClick}
@@ -222,10 +222,10 @@ export function CourseButton({ courseNumber, courseTitle, onClick, isSelected }:
         ${isSelected ? "hover:bg-red-50" : "hover:bg-gray-50"}`}
     >
       <span className={`w-20 shrink-0 text-sm font-mono font-semibold ${isSelected ? "text-black" : "text-gray-700"}`}>
-        {courseNumber}
+        {course_code}
       </span>
       <span className={`flex-1 text-sm ${isSelected ? "text-black font-medium" : "text-gray-500"}`}>
-        {courseTitle}
+        {course_name}
       </span>
       <span className={`shrink-0 w-6 h-6 flex items-center justify-center rounded-full border transition-colors duration-150
         ${isSelected ? "border-red-300 text-red-400" : "border-gray-300 text-gray-400"}`}>

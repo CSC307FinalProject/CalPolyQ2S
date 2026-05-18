@@ -3,23 +3,40 @@ import { SearchBar } from "../components/search";
 import ClassTable from "../components/classTable";
 import CompletedTable from "../components/completedTable";
 import type { Course } from "../data/courses";
-import { Courses } from "../data/courses";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+// Import API URL from .env
+const API_URL = import.meta.env.VITE_API_URL;
 
 function ClassSelector() {
   const [completed, setCompleted] = useState<Course[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+
+  // set the courses
+  useEffect(() => {
+    fetch(`${API_URL}/class-selector`)
+      .then((res) => {
+        if (res.ok){
+          console.log("Successfully queried classes from db")
+          return res.json();
+        }
+        return [];
+      })
+      .then((data) => setCourses(data ?? []))
+      .catch(err => console.log(err))
+  }, []);
 
   function handleAddCourse(course: Course) {
     const isalreadyadded = completed.find(
-      (c) => c.courseNumber === course.courseNumber,
+      (c) => c.course_id === course.course_id,
     );
     if (!isalreadyadded) {
       setCompleted([...completed, course]);
     }
   }
 
-  function handleRemoveCourse(courseNumber: string) {
-    setCompleted(completed.filter((c) => c.courseNumber !== courseNumber));
+  function handleRemoveCourse(course_id: number) {
+    setCompleted(completed.filter((c) => c.course_id !== course_id));
   }
 
   return (
@@ -39,7 +56,7 @@ function ClassSelector() {
           </div>
           <div className="mt-4 flex-1 min-h-0 h-full pb-6">
             <ClassTable
-              courses={Courses}
+              courses={courses}
               completed={completed}
               onAddCourse={handleAddCourse}
             />
