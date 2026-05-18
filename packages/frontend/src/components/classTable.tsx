@@ -1,6 +1,7 @@
 import { LoaderCircle, Search, Plus, Delete, Save } from "lucide-react";
 import { useState, useRef } from "react";
 import type { Course } from "../data/courses";
+import { getStoredUser } from "../components/authStorage";
 
 // Maps header filter labels to their corresponding course tag values
 const FILTER_TAG_MAP: Record<string, string | null> = {
@@ -26,6 +27,35 @@ interface ClassTableProps {
 export default function ClassTable({ courses, completed, onAddCourse }: ClassTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+
+  async function handleSaveCourses() {
+  const user = getStoredUser();
+
+  if (!user) {
+    alert("Please log in first.");
+    return;
+  }
+
+  const response = await fetch("http://localhost:3000/save-courses", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      student_id: user.student_id,
+      courses: completed,
+    }),
+  });
+
+  const json = await response.json();
+
+  if (!response.ok) {
+    alert(json.error || "Failed to save courses.");
+    return;
+  }
+
+  alert("Courses saved!");
+}
 
   function handleFilterChange(label: string) {
     const tag = FILTER_TAG_MAP[label];

@@ -10,6 +10,11 @@ interface FormData {
 
 type FormSubmitHandler = NonNullable<ComponentProps<"form">["onSubmit"]>;
 
+export function logout() {
+  localStorage.removeItem("user");
+  sessionStorage.removeItem("user");
+}
+
 export default function LoginForm() {
   const [formData, setFormData] = useState<FormData>({
     email: "",
@@ -49,7 +54,7 @@ export default function LoginForm() {
         },
         body: JSON.stringify({
           email: formData.email,
-          password_hash: formData.password,
+          password: formData.password,
         }),
       });
 
@@ -59,6 +64,12 @@ export default function LoginForm() {
       if (!response.ok) {
         setAuthMessage(json.error || "Login failed. Please try again.");
         return;
+      }
+
+      if (formData.staySignedIn) {
+        localStorage.setItem("user", JSON.stringify(json.user));
+      } else {
+        sessionStorage.setItem("user", JSON.stringify(json.user));
       }
 
       navigate("/class-selector");

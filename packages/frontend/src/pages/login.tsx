@@ -1,4 +1,4 @@
-import LoginForm from "../components/loginForm";
+import LoginForm from "../components/loginform";
 import calPolyImg from "../assets/CalPolyArialView.jpg";
 import { Link } from "react-router-dom";
 

@@ -1,4 +1,7 @@
 import { Link } from "react-router-dom";
+import { getStoredUser } from "./authStorage";
+
+const user = getStoredUser();
 
 export default function Navbar() {
   return (
@@ -11,7 +14,7 @@ export default function Navbar() {
 
       <div className="flex items-center gap-3">
         <button className="text-xs font-semibold border border-gray-200 text-black px-3 py-3 rounded-md transition-all duration-200 hover:bg-white/90 hover:scale-105 active:scale-95">
-          Username
+          {user?.email?.split("@")[0]}{" "}
         </button>
       </div>
     </nav>
