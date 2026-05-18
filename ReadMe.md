@@ -50,88 +50,26 @@ To ensure consistent formatting and linting, install the following extensions:
    ```
 
 
-# Database Setup (PostgreSQL)
+# Database Details (Supabase PostgreSQL)
 
-This project uses PostgreSQL. Follow the steps below to set up the database locally.
-
----
-
-## 1. Install PostgreSQL
-
-### macOS (Homebrew)
-```bash
-brew install postgresql
-brew services start postgresql
-```
-
-### Ubuntu / WSL
-```bash
-sudo apt update
-sudo apt install postgresql postgresql-contrib
-sudo service postgresql start
-```
-
-### Windows
-Download and install from:
-https://www.postgresql.org/download/windows/
+This project uses a hosted PostgreSQL database via Supabase. Below are instruction to connect the databse to a DataGrip session.
 
 ---
 
-## 2. Create a Database
+In DataGrip:
 
-```bash
-createdb calpolyq2s
+```
+Host: db.YOUR_PROJECT_REF.supabase.co
+Port: 5432 
+Database: postgres
+User: postgres
+Password: your database password
 ```
 
 ---
 
-## 3. Load the Schema
+# Sequence Diagrams
+<img width="886" height="531" alt="User_Signup_Sequence_Diagram" src="https://github.com/user-attachments/assets/1cd577c4-4c1a-4821-9e00-d479b876b0f1" />
+<img width="858" height="531" alt="User_Login_Sequence_Diagram" src="https://github.com/user-attachments/assets/39f45c11-c8eb-42b9-a0d1-4f81c2610725" />
 
-From the project root:
 
-```bash
-psql -d calpolyq2s -f db/schema.sql
-```
-
----
-
-## 5. Verify Connection
-
-```bash
-psql -d calpolyq2s
-```
-
-Then inside:
-
-```sql
-SELECT current_database(), current_user;
-```
-
----
-
-## 6. Environment Variables
-
-Create a `.env` file (do NOT commit this file):
-
-```env
-DB_HOST=localhost
-DB_PORT=5432
-DB_NAME=calpolyq2s
-DB_USER=your_username
-DB_PASSWORD=your_password
-```
-
----
-
-## 7. Connecting with DataGrip (Optional)
-
-```text
-Host: localhost
-Port: 5432
-Database: calpolyq2s
-User: your_username
-Password: your_password
-SSL: Disable
-```
-
----

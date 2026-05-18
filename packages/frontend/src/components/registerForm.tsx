@@ -1,6 +1,8 @@
 import { useState, type ChangeEvent, type ComponentProps } from 'react';
 import { Eye, EyeOff, Circle, CircleCheckBig } from 'lucide-react';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+const API_URL = import.meta.env.VITE_API_URL;
 
 
 interface FormData {
@@ -13,14 +15,16 @@ interface FormData {
 type FormSubmitHandler = NonNullable<ComponentProps<'form'>['onSubmit']>;
 
 
-export default function LoginForm() {
-  
+export default function RegisterForm() {
+
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
     staySignedIn: false,
   });
-  
+
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -33,14 +37,25 @@ export default function LoginForm() {
 
   const handleSubmit: FormSubmitHandler = (event) => {
     event.preventDefault();
-    // TODO: IMPLEMENT POST CALL HERE
-    console.log("IMPLEMENT POST CALL TO BACKEND");
+
+    fetch(`${API_URL}/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: formData.email, password: formData.password }),
+    })
+      .then((response) => {
+        if (response.status === 201) {
+          response.json().then((payload) => {
+            localStorage.setItem("token", payload.token);
+            navigate("/class-selector");
+          });
+        }
+      })
+      .catch(() => {});
   };
+
+
   
-
-// CURRENT OVERALL TODOS: 
-// Add hover features to buttons and such
-
   return (
     <form className="gap-4 mt-4 w-full text-left" onSubmit={handleSubmit}>
 
@@ -62,17 +77,18 @@ export default function LoginForm() {
         <label className="text-sm text-gray-800 font-medium">
           Password
         </label>
-        
+
         <div className="relative">
           <input
             name="password"
+            minLength={8}
             type={showPassword ? 'text' : 'password'}
             placeholder="Enter your password"
             value={formData.password}
             onChange={handleChange}
             className="px-4 py-3 rounded-lg border border-gray-300 bg-white text-black placeholder-gray-400 outline-none focus:border-gray-500 w-full pr-12"
           />
-          
+
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
@@ -93,33 +109,31 @@ export default function LoginForm() {
         />
 
         { formData.staySignedIn ? <CircleCheckBig className='w-4'/> : <Circle className='w-4'/> }
-        
+
         Keep me signed in
-      
+
       </label>
 
-      
-      <Link to="/class-selector">
-      <button  
+
+      <button
         type="submit"
         className="mb-2 w-full py-3 rounded-lg bg-black text-white font-semibold cursor-pointer hover:bg-calpoly-green"
       >
-        Sign In
+        Sign Up
       </button>
-      </Link>
 
       <label className="text-sm text-center text-gray-600">
-        
-        Need to sign up?{' '}
 
-        <Link 
-          to="/register" 
+        Account already exists?{' '}
+
+        <Link
+          to="/login"
           className="text-calpoly-green font-bold hover:underline">
 
-            Create Account
+            Login
 
         </Link>
-      
+
       </label>
 
     </form>
