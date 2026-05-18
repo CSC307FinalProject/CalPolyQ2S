@@ -16,10 +16,9 @@ app.get("/saved-courses/:student_id", async (req, res) => {
 
   try {
     const courses = await sql`
-      SELECT course_id, catalog_id, subject, course_number, class_name, units, tech_elective_eligible
+      SELECT student_id, course_id
       FROM public.student_courses
       WHERE student_id = ${student_id}
-      ORDER BY id
     `;
 
     return res.json({ courses });
@@ -47,9 +46,7 @@ app.post("/save-courses", async (req, res) => {
 
   const rows = courses.map((course) => ({
     student_id,
-    course_number: course.courseNumber,
-    course_title: course.courseTitle,
-    tag: course.tag,
+    course_id: course.courseNumber,
   }));
 
   const { error: insertError } = await supabase

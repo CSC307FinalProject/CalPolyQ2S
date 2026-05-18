@@ -109,7 +109,6 @@ interface TableHeaderProps {
   onSaveCourses: () => void;
 }
 
-
 function TableHeader({
   searchQuery,
   onSearchChange,
@@ -210,7 +209,8 @@ function TableHeader({
       </ul>
 
       <button
-        type="submit"
+        type="button"
+        onClick={onSaveCourses}
         className="bg-black text-gray-400 self-stretch ml-auto -my-px -mr-px justify-end rounded-l-xl hover:text-white cursor-pointer transition-colors duration-300 p-3 text-sm rounded-r-2xl"
       >
         <Save />
