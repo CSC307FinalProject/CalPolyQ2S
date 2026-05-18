@@ -7,11 +7,14 @@ import sql from "./db/index.js";
 export async function registerUser(req, res) {
   const { email, password } = req.body;
 
+  // Input validity check
   if (!email || !password) {
     return res.status(400).send("Bad request: Invalid input");
   }
 
   try {
+
+    // Find potential existing email already in DB
     const existing = await sql`SELECT 1 FROM students WHERE email = ${email}`;
 
     // Only register new account if email not in DB
@@ -24,16 +27,23 @@ export async function registerUser(req, res) {
     const name = email.split("@")[0];
 
 
+    // Salt and hash the user's input with bcrypt 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
     
+
+    // Password MUST be hashed here!!
+
+    // Add to students table
     await sql`
       INSERT INTO students (name, email, password_hash) 
       VALUES (${name}, ${email}, ${hashedPassword})
     `;
 
+    // Generate and return access token
     const token = await generateAccessToken(email);
     return res.status(201).send({ token });
+
   } 
   catch (error) {
     console.error("Register error:", error);
