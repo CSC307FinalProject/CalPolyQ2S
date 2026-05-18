@@ -1,3 +1,7 @@
+import { getStoredUser } from "./authStorage";
+
+const user = getStoredUser();
+
 export default function Navbar() {
   return (
     <nav className="flex items-center justify-between w-full px-8 py-3 bg-black/5 backdrop-black rounded-xl">
@@ -10,7 +14,7 @@ export default function Navbar() {
           Logged in as
         </button>
         <button className="text-xs font-semibold bg-white text-black px-3 py-2 rounded-md transition-all duration-200 hover:bg-white/90 hover:scale-105 active:scale-95">
-          Goal Digger
+          {user?.email?.split("@")[0]}{" "}
         </button>
       </div>
     </nav>

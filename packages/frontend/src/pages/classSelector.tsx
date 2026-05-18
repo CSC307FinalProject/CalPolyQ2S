@@ -7,6 +7,14 @@ import { useEffect, useState } from "react";
 
 // Import API URL from .env
 const API_URL = import.meta.env.VITE_API_URL;
+import { Navigate } from "react-router-dom";
+import { getStoredUser } from "../components/authStorage";
+
+const user = getStoredUser();
+
+if (!user) {
+  <Navigate to="/login" replace />;
+}
 
 function ClassSelector() {
   const [completed, setCompleted] = useState<Course[]>([]);

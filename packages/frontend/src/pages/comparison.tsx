@@ -1,85 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "../components/navbar";
+import { getStoredUser } from "../components/authStorage";
+
+type SavedCourse = {
+  id: number;
+  title: string;
+  code: string;
+  units: number;
+  status: string;
+};
 
 const filters = ["All", "Completed", "Active", "Remaining"];
-const quarterCourses = [
-  {
-    id: 1,
-    title: "Introduction to Programming",
-    code: "CSC 101",
-    units: 3,
-    status: "Remaining",
-  },
-  {
-    id: 2,
-    title: "Data Structures",
-    code: "CSC 202",
-    units: 4,
-    status: "Active",
-  },
-  {
-    id: 3,
-    title: "Computer Architecture",
-    code: "CPE 233",
-    units: 4,
-    status: "Completed",
-  },
-  {
-    id: 4,
-    title: "Operating Systems",
-    code: "CSC 453",
-    units: 4,
-    status: "Completed",
-  },
-  { id: 5, title: "Databases", code: "CSC 365", units: 4, status: "Completed" },
-  { id: 6, title: "Databases", code: "CSC 365", units: 4, status: "Completed" },
-  { id: 7, title: "Databases", code: "CSC 365", units: 4, status: "Completed" }
-];
-
-const semesterCourses = [
-  {
-    id: 1,
-    title: "Introduction to Programming",
-    code: "CSC 1011",
-    units: 3,
-    status: "Remaining",
-  },
-  {
-    id: 2,
-    title: "Data Structures",
-    code: "CSC 2022",
-    units: 4,
-    status: "Active",
-  },
-  {
-    id: 3,
-    title: "Computer Architecture",
-    code: "CPE 2333",
-    units: 4,
-    status: "Completed",
-  },
-  {
-    id: 4,
-    title: "Operating Systems",
-    code: "CSC 4533",
-    units: 4,
-    status: "Completed",
-  },
-  {
-    id: 5,
-    title: "Databases",
-    code: "CSC 3654",
-    units: 4,
-    status: "Completed",
-  },
-  {
-    id: 6,
-    title: "Databases",
-    code: "CSC 3655",
-    units: 4,
-    status: "Completed",
-  },
-];
 
 const getStatusStyles = (status: string) => {
   switch (status) {
@@ -97,6 +28,41 @@ const getStatusStyles = (status: string) => {
 export default function Comparison() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeFilter1, setActiveFilter1] = useState("All");
+
+  const [quarterCourses, setQuarterCourses] = useState<SavedCourse[]>([]);
+  const [semesterCourses, setSemesterCourses] = useState<SavedCourse[]>([]);
+
+  useEffect(() => {
+    async function loadSavedCourses() {
+      const user = getStoredUser();
+
+      if (!user) return;
+
+      const response = await fetch(
+        `http://localhost:3000/saved-courses/${user.student_id}`
+      );
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        console.error(json.error || "Failed to load saved courses.");
+        return;
+      }
+
+      const saved = json.courses.map((course: any) => ({
+        id: course.id,
+        code: course.course_number,
+        title: course.course_title,
+        units: 4,
+        status: "Completed",
+      }));
+
+      setQuarterCourses(saved);
+      setSemesterCourses(saved);
+    }
+
+    loadSavedCourses();
+  }, []);
 
   function CourseListQuarter({ activeFilter }: { activeFilter: string }) {
     const filteredCourses = quarterCourses.filter((course) => {
