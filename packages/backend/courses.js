@@ -1,3 +1,5 @@
+import sql from "./db/index.js";
+
 export async function getSavedCourses(req, res) {
   const { student_id } = req.params;
 
