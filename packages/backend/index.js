@@ -5,7 +5,7 @@ import "dotenv/config";
 import { authenticateUser, loginUser, registerUser } from "./auth.js";
 
 const app = express();
-const PORT = process.env.PORT;
+const port = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
@@ -20,4 +20,4 @@ app.post("/users", authenticateUser, async (req, res) => {
   res.status(201).send(user);
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(port, () => console.log(`Server running on port ${port}`));

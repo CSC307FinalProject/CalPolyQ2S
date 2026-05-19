@@ -6,7 +6,7 @@ import bcrypt from "bcrypt";
 import { supabase } from "./supabaseClient.js";
 
 const app = express();
-const PORT = 3000;
+const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -99,6 +99,6 @@ app.post("/login", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Backend server listening on http://localhost:${PORT}`);
+app.listen(port, () => {
+  console.log(`Backend server listening on http://localhost:${port}`);
 });
