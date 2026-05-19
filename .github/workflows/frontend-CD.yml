@@ -18,6 +18,19 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18"
+
+      - name: Install dependencies
+        working-directory: ./packages/frontend
+        run: npm install
+
+      - name: Build frontend
+        working-directory: ./packages/frontend
+        run: npm run build
+
       - name: Debug SWA token presence
         run: |
           if [ -z "${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}" ]; then
