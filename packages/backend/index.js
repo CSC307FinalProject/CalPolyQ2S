@@ -1,9 +1,9 @@
+import "dotenv/config";
 import sql from "./db/index.js"
 import cors from "cors";
 import express from "express";
-import "dotenv/config";
 import { authenticateUser, loginUser, registerUser } from "./auth.js";
-
+import { getSavedCourses, saveCourses } from "./courses.js";
 
 const sql = postgres(process.env.DATABASE_URL);
 
@@ -12,12 +12,8 @@ app.use(express.json());
 
 app.post("/login", loginUser);
 app.post("/register", registerUser);
-
-app.post("/users", authenticateUser, async (req, res) => {
-  const {email} = req.body;
-  const [user] = await sql`INSERT INTO students (email) VALUES (${email}) RETURNING *`;
-  res.status(201).send(user);
-});
+app.get("/saved-courses/:student_id", authenticateUser, getSavedCourses);
+app.post("/save-courses", authenticateUser, saveCourses);
 
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
