@@ -3,7 +3,7 @@
 import { Input } from "./input";
 
 import { LoaderCircle, Mic, Search } from "lucide-react";
-import { ChangeEvent, useEffect, useId, useState } from "react";
+import { useEffect, useId, useState, type ChangeEvent } from "react";
 
 interface SearchBarProps {
   placeholder: string;
