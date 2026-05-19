@@ -12,11 +12,6 @@ interface FormData {
 
 type FormSubmitHandler = NonNullable<ComponentProps<"form">["onSubmit"]>;
 
-export function logout() {
-  localStorage.removeItem("token");
-  sessionStorage.removeItem("token");
-}
-
 export default function LoginForm() {
   const [formData, setFormData] = useState<FormData>({
     email: "",
@@ -68,10 +63,16 @@ export default function LoginForm() {
         return;
       }
 
+      // create a user obj for session
+      const userObj = JSON.stringify({
+        token: json.token,
+        student_id: json.student_id,
+        email: formData.email,
+      });
       if (formData.staySignedIn) {
-        localStorage.setItem("token", json.token);
+        localStorage.setItem("user", userObj);
       } else {
-        sessionStorage.setItem("token", json.token);
+        sessionStorage.setItem("user", userObj);
       }
 
       navigate("/class-selector");
