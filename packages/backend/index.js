@@ -1,10 +1,13 @@
 import "dotenv/config";
 import sql from "./db/index.js";
+import sql from "./db/index.js";
 import cors from "cors";
 import express from "express";
 import { authenticateUser, loginUser, registerUser } from "./auth.js";
 import classSelectorRouter from "./routes/class-selector.js";
 
+const app = express();
+const PORT = process.env.PORT;
 const app = express();
 const PORT = process.env.PORT;
 
