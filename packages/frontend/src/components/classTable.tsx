@@ -1,6 +1,7 @@
 import { LoaderCircle, Search, Plus, Delete, Save } from "lucide-react";
 import { useState, useRef } from "react";
 import type { Course } from "../data/courses";
+import { getStoredUser } from "../components/authStorage";
 
 // Maps header filter labels to their corresponding course tag values
 const FILTER_TAG_MAP: Record<string, string | null> = {
@@ -23,9 +24,42 @@ interface ClassTableProps {
   onAddCourse: (course: Course) => void;
 }
 
-export default function ClassTable({ courses, completed, onAddCourse }: ClassTableProps) {
+export default function ClassTable({
+  courses,
+  completed,
+  onAddCourse,
+}: ClassTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
+
+  async function handleSaveCourses() {
+    const user = getStoredUser();
+
+    if (!user) {
+      alert("Please log in first.");
+      return;
+    }
+
+    const response = await fetch("http://localhost:3000/save-courses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        student_id: user.student_id,
+        courses: completed,
+      }),
+    });
+
+    const json = await response.json();
+
+    if (!response.ok) {
+      alert(json.error || "Failed to save courses.");
+      return;
+    }
+
+    alert("Courses saved!");
+  }
 
   function handleFilterChange(label: string) {
     const tag = FILTER_TAG_MAP[label];
@@ -54,6 +88,7 @@ export default function ClassTable({ courses, completed, onAddCourse }: ClassTab
         onSearchChange={setSearchQuery}
         activeFilter={activeFilter}
         onFilterChange={handleFilterChange}
+        onSaveCourses={handleSaveCourses}
       />
       <TableBody
         courses={visibleCourses}
@@ -71,13 +106,24 @@ interface TableHeaderProps {
   onSearchChange: (value: string) => void;
   activeFilter: string | null;
   onFilterChange: (label: string) => void;
+  onSaveCourses: () => void;
 }
 
-function TableHeader({ searchQuery, onSearchChange, activeFilter, onFilterChange }: TableHeaderProps) {
+function TableHeader({
+  searchQuery,
+  onSearchChange,
+  activeFilter,
+  onFilterChange,
+  onSaveCourses,
+}: TableHeaderProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   // Tracks the floating hover cursor position behind filter labels
-  const [hoverCursor, setHoverCursor] = useState({ left: 0, width: 0, opacity: 0 });
+  const [hoverCursor, setHoverCursor] = useState({
+    left: 0,
+    width: 0,
+    opacity: 0,
+  });
   const filterListRef = useRef<HTMLUListElement>(null);
 
   function handleSearchChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -92,7 +138,11 @@ function TableHeader({ searchQuery, onSearchChange, activeFilter, onFilterChange
     if (!list) return;
     const liRect = li.getBoundingClientRect();
     const listRect = list.getBoundingClientRect();
-    setHoverCursor({ left: liRect.left - listRect.left, width: liRect.width, opacity: 1 });
+    setHoverCursor({
+      left: liRect.left - listRect.left,
+      width: liRect.width,
+      opacity: 1,
+    });
   }
 
   function handleFilterListLeave() {
@@ -113,7 +163,13 @@ function TableHeader({ searchQuery, onSearchChange, activeFilter, onFilterChange
           />
           <div className="pointer-events-none absolute inset-y-0 inset-s-0 flex items-center justify-center ps-3 text-gray-400 peer-disabled:opacity-50">
             {isLoading ? (
-              <LoaderCircle className="animate-spin" size={16} strokeWidth={2} role="status" aria-label="Loading..." />
+              <LoaderCircle
+                className="animate-spin"
+                size={16}
+                strokeWidth={2}
+                role="status"
+                aria-label="Loading..."
+              />
             ) : (
               <Search size={16} strokeWidth={2} aria-hidden="true" />
             )}
@@ -129,10 +185,15 @@ function TableHeader({ searchQuery, onSearchChange, activeFilter, onFilterChange
       >
         <div
           className="absolute z-0 h-full rounded-full bg-black transition-all duration-200"
-          style={{ left: hoverCursor.left, width: hoverCursor.width, opacity: hoverCursor.opacity }}
+          style={{
+            left: hoverCursor.left,
+            width: hoverCursor.width,
+            opacity: hoverCursor.opacity,
+          }}
         />
         {FILTER_LABELS.map((label) => {
-          const isActive = activeFilter !== null && activeFilter === FILTER_TAG_MAP[label];
+          const isActive =
+            activeFilter !== null && activeFilter === FILTER_TAG_MAP[label];
           return (
             <li
               key={label}
@@ -148,7 +209,8 @@ function TableHeader({ searchQuery, onSearchChange, activeFilter, onFilterChange
       </ul>
 
       <button
-        type="submit"
+        type="button"
+        onClick={onSaveCourses}
         className="bg-black text-gray-400 self-stretch ml-auto -my-px -mr-px justify-end rounded-l-xl hover:text-white cursor-pointer transition-colors duration-300 p-3 text-sm rounded-r-2xl"
       >
         <Save />
@@ -167,11 +229,14 @@ interface TableBodyProps {
 
 function TableBody({ courses, completed, onAddCourse }: TableBodyProps) {
   // init an array that groups courses by tag in the defined display order
-  const groups = TAG_DISPLAY_ORDER.reduce<{ tag: string; courses: Course[] }[]>((acc, tag) => {
-    const matching = courses.filter((c) => c.tag === tag);
-    if (matching.length > 0) acc.push({ tag, courses: matching });
-    return acc;
-  }, []);
+  const groups = TAG_DISPLAY_ORDER.reduce<{ tag: string; courses: Course[] }[]>(
+    (acc, tag) => {
+      const matching = courses.filter((c) => c.tag === tag);
+      if (matching.length > 0) acc.push({ tag, courses: matching });
+      return acc;
+    },
+    [],
+  );
 
   if (groups.length === 0) {
     return (
@@ -187,7 +252,9 @@ function TableBody({ courses, completed, onAddCourse }: TableBodyProps) {
         <div key={tag}>
           {/* Section header with divider line */}
           <div className="flex items-center gap-3 px-4 pt-4 pb-1">
-            <span className="text-xs font-semibold uppercase tracking-wider text-gray-400 shrink-0">{tag}</span>
+            <span className="text-xs font-semibold uppercase tracking-wider text-gray-400 shrink-0">
+              {tag}
+            </span>
             <hr className="flex-1 border-gray-200" />
           </div>
           <div className="divide-y divide-gray-100">
@@ -195,7 +262,9 @@ function TableBody({ courses, completed, onAddCourse }: TableBodyProps) {
               <CourseButton
                 key={course.courseNumber}
                 {...course}
-                isSelected={completed.some((c) => c.courseNumber === course.courseNumber)}
+                isSelected={completed.some(
+                  (c) => c.courseNumber === course.courseNumber,
+                )}
                 onClick={() => onAddCourse(course)}
               />
             ))}
@@ -214,22 +283,33 @@ interface CourseButtonProps extends Course {
 }
 
 // Used in both the course list (class-table) and the completed sidebar (completed-table)
-export function CourseButton({ courseNumber, courseTitle, onClick, isSelected }: CourseButtonProps) {
+export function CourseButton({
+  courseNumber,
+  courseTitle,
+  onClick,
+  isSelected,
+}: CourseButtonProps) {
   return (
     <button
       onClick={onClick}
       className={`w-full flex items-center gap-4 px-4 py-3 text-left transition-colors duration-150 cursor-pointer
         ${isSelected ? "hover:bg-red-50" : "hover:bg-gray-50"}`}
     >
-      <span className={`w-20 shrink-0 text-sm font-mono font-semibold ${isSelected ? "text-black" : "text-gray-700"}`}>
+      <span
+        className={`w-20 shrink-0 text-sm font-mono font-semibold ${isSelected ? "text-black" : "text-gray-700"}`}
+      >
         {courseNumber}
       </span>
-      <span className={`flex-1 text-sm ${isSelected ? "text-black font-medium" : "text-gray-500"}`}>
+      <span
+        className={`flex-1 text-sm ${isSelected ? "text-black font-medium" : "text-gray-500"}`}
+      >
         {courseTitle}
       </span>
-      <span className={`shrink-0 w-6 h-6 flex items-center justify-center rounded-full border transition-colors duration-150
-        ${isSelected ? "border-red-300 text-red-400" : "border-gray-300 text-gray-400"}`}>
-        {isSelected ? <Delete size={12} /> : <Plus size={12}  />}
+      <span
+        className={`shrink-0 w-6 h-6 flex items-center justify-center rounded-full border transition-colors duration-150
+        ${isSelected ? "border-red-300 text-red-400" : "border-gray-300 text-gray-400"}`}
+      >
+        {isSelected ? <Delete size={12} /> : <Plus size={12} />}
       </span>
     </button>
   );

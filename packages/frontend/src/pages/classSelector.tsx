@@ -5,6 +5,14 @@ import CompletedTable from "../components/completedTable";
 import type { Course } from "../data/courses";
 import { Courses } from "../data/courses";
 import { useState } from "react";
+import { Navigate } from "react-router-dom";
+import { getStoredUser } from "../components/authStorage";
+
+const user = getStoredUser();
+
+if (!user) {
+  <Navigate to="/login" replace />;
+}
 
 function ClassSelector() {
   const [completed, setCompleted] = useState<Course[]>([]);

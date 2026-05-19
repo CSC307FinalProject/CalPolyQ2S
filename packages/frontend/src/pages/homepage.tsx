@@ -1,9 +1,14 @@
 import Navbar from "../components/heroNavbar";
 import { Link } from "react-router-dom";
+import { getStoredUser } from "../components/authStorage";
 
 function Homepage() {
+  const user = getStoredUser();
   return (
-    <div id="root" className="relative w-full min-h-screen overflow-hidden bg-black">
+    <div
+      id="root"
+      className="relative w-full min-h-screen overflow-hidden bg-black"
+    >
       <video
         autoPlay
         loop
@@ -30,7 +35,7 @@ function Homepage() {
           see how classes connect—all in one place to choose the catalog that is
           best.
         </div>
-        <Link to="/register">
+        <Link to={user ? "/class-selector" : "/register"}>
           <button className="text-left text-black bg-white px-6 py-4 rounded-2xl text-lg font-semibold leading-tight flex items-center justify-start mt-5 transition-all duration-150 ease-out hover:scale-105 hover:bg-gray-50 active:scale-95 active:bg-gray-100 cursor-pointer select-none">
             Get Started
           </button>
