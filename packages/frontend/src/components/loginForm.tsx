@@ -10,11 +10,6 @@ interface FormData {
 
 type FormSubmitHandler = NonNullable<ComponentProps<"form">["onSubmit"]>;
 
-export function logout() {
-  localStorage.removeItem("user");
-  sessionStorage.removeItem("user");
-}
-
 export default function LoginForm() {
   const [formData, setFormData] = useState<FormData>({
     email: "",

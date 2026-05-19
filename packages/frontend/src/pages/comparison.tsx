@@ -33,7 +33,7 @@ const quarterCourses = [
   },
   { id: 5, title: "Databases", code: "CSC 365", units: 4, status: "Completed" },
   { id: 6, title: "Databases", code: "CSC 365", units: 4, status: "Completed" },
-  { id: 7, title: "Databases", code: "CSC 365", units: 4, status: "Completed" }
+  { id: 7, title: "Databases", code: "CSC 365", units: 4, status: "Completed" },
 ];
 
 const semesterCourses = [
@@ -94,81 +94,81 @@ const getStatusStyles = (status: string) => {
   }
 };
 
+function CourseListQuarter({ activeFilter }: { activeFilter: string }) {
+  const filteredCourses = quarterCourses.filter((course) => {
+    if (activeFilter === "All") return true;
+    return course.status === activeFilter;
+  });
+
+  return (
+    <div className="screen">
+      <div className="h-100 overflow-y-auto no-scrollbar p-4">
+        {filteredCourses.map((course) => (
+          <div key={course.id} className="bg-white shadow p-5">
+            <div className="flex items-start">
+              <div>
+                <h2 className="text-black! flex">{course.code}</h2>
+                <span className="text-xl text-gray-500">{course.title}</span>
+              </div>
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-sm px-3 py-1 rounded-full flex items-end">
+                  {course.units} units
+                </span>
+                <span
+                  className={`text-sm px-3 py-1 rounded-full ml-auto ${getStatusStyles(
+                    course.status,
+                  )}`}
+                >
+                  {course.status}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CourseListSemester({ activeFilter }: { activeFilter: string }) {
+  const filteredCourses = semesterCourses.filter((course) => {
+    if (activeFilter === "All") return true;
+    return course.status === activeFilter;
+  });
+
+  return (
+    <div className="screen">
+      <div className="h-100 overflow-y-auto no-scrollbar p-4">
+        {filteredCourses.map((course) => (
+          <div key={course.id} className="bg-white shadow p-5">
+            <div className="flex items-start">
+              <div>
+                <h2 className="text-black! flex">{course.code}</h2>
+                <span className="text-xl text-gray-500">{course.title}</span>
+              </div>
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-sm px-3 py-1 rounded-full flex items-end">
+                  {course.units} units
+                </span>
+                <span
+                  className={`text-sm px-3 py-1 rounded-full ml-auto ${getStatusStyles(
+                    course.status,
+                  )}`}
+                >
+                  {course.status}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Comparison() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeFilter1, setActiveFilter1] = useState("All");
-
-  function CourseListQuarter({ activeFilter }: { activeFilter: string }) {
-    const filteredCourses = quarterCourses.filter((course) => {
-      if (activeFilter === "All") return true;
-      return course.status === activeFilter;
-    });
-
-    return (
-      <div className="screen">
-        <div className="h-100 overflow-y-auto no-scrollbar p-4">
-          {filteredCourses.map((course) => (
-            <div key={course.id} className="bg-white shadow p-5">
-              <div className="flex items-start">
-                <div>
-                  <h2 className="text-black! flex">{course.code}</h2>
-                  <span className="text-xl text-gray-500">{course.title}</span>
-                </div>
-                <div className="ml-auto flex items-center gap-2">
-                  <span className="text-sm px-3 py-1 rounded-full flex items-end">
-                    {course.units} units
-                  </span>
-                  <span
-                    className={`text-sm px-3 py-1 rounded-full ml-auto ${getStatusStyles(
-                      course.status,
-                    )}`}
-                  >
-                    {course.status}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  function CourseListSemester({ activeFilter }: { activeFilter: string }) {
-    const filteredCourses = semesterCourses.filter((course) => {
-      if (activeFilter === "All") return true;
-      return course.status === activeFilter;
-    });
-
-    return (
-      <div className="screen">
-        <div className="h-100 overflow-y-auto no-scrollbar p-4">
-          {filteredCourses.map((course) => (
-            <div key={course.id} className="bg-white shadow p-5">
-              <div className="flex items-start">
-                <div>
-                  <h2 className="text-black! flex">{course.code}</h2>
-                  <span className="text-xl text-gray-500">{course.title}</span>
-                </div>
-                <div className="ml-auto flex items-center gap-2">
-                  <span className="text-sm px-3 py-1 rounded-full flex items-end">
-                    {course.units} units
-                  </span>
-                  <span
-                    className={`text-sm px-3 py-1 rounded-full ml-auto ${getStatusStyles(
-                      course.status,
-                    )}`}
-                  >
-                    {course.status}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
 
   const semesterUnitsDone = semesterCourses.reduce((total, course) => {
     if (course.status === "Completed") {

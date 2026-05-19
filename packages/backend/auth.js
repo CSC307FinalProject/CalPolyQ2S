@@ -10,7 +10,7 @@ export async function registerUser(req, res) {
   }
 
   const existing = await sql`SELECT 1 FROM students WHERE email = ${email}`;
-  
+
   // Only register new account if email not in DB
   if (existing.length > 0) {
     return res.status(409).send("Email already taken");
@@ -21,14 +21,14 @@ export async function registerUser(req, res) {
   await sql`INSERT INTO students (email, password_hash) VALUES (${email}, ${hashedPassword})`;
 
   const token = await generateAccessToken(email);
-  res.status(201).send({token});
+  res.status(201).send({ token });
 }
 
 export async function loginUser(req, res) {
-  
   const { email, password } = req.body;
 
-  const [user] = await sql`SELECT password_hash FROM students WHERE email = ${email}`;
+  const [user] =
+    await sql`SELECT password_hash FROM students WHERE email = ${email}`;
   if (!user) {
     return res.status(401).send("Unauthenticated");
   }
@@ -46,7 +46,7 @@ export async function loginUser(req, res) {
 function generateAccessToken(email) {
   return new Promise((resolve, reject) => {
     jwt.sign(
-      { email: email }, 
+      { email: email },
       process.env.TOKEN_SECRET,
       { expiresIn: "1d" },
       (error, token) => {
@@ -55,7 +55,7 @@ function generateAccessToken(email) {
         } else {
           resolve(token);
         }
-      }
+      },
     );
   });
 }
@@ -69,17 +69,13 @@ export function authenticateUser(req, res, next) {
     console.log("No token received");
     res.status(401).end();
   } else {
-    jwt.verify(
-      token,
-      process.env.TOKEN_SECRET,
-      (error, decoded) => {
-        if (decoded) {
-          next();
-        } else {
-          console.log("JWT error:", error);
-          res.status(401).end();
-        }
+    jwt.verify(token, process.env.TOKEN_SECRET, (error, decoded) => {
+      if (decoded) {
+        next();
+      } else {
+        console.log("JWT error:", error);
+        res.status(401).end();
       }
-    );
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom"
+import { Link } from "react-router-dom";
 
 export default function HomepageNavbar() {
   return (
@@ -20,14 +20,14 @@ export default function HomepageNavbar() {
 
       <div className="flex items-center gap-3">
         <Link to="/login">
-        <button className="text-xs cursor-pointer text-gray-300 font-medium px-3 py-2 rounded-md border border-white/0 hover:border-white/30 hover:text-white transition-all duration-200">
-          Login
-        </button>
+          <button className="text-xs cursor-pointer text-gray-300 font-medium px-3 py-2 rounded-md border border-white/0 hover:border-white/30 hover:text-white transition-all duration-200">
+            Login
+          </button>
         </Link>
         <Link to="/register">
-        <button className="text-xs cursor-pointer font-semibold bg-white text-black px-3 py-2 rounded-md transition-all duration-200 hover:bg-white/90 hover:scale-105 active:scale-95">
-          Sign up
-        </button>
+          <button className="text-xs cursor-pointer font-semibold bg-white text-black px-3 py-2 rounded-md transition-all duration-200 hover:bg-white/90 hover:scale-105 active:scale-95">
+            Sign up
+          </button>
         </Link>
       </div>
     </nav>

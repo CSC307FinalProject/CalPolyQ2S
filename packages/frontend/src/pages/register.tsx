@@ -16,7 +16,9 @@ function Register() {
             <div className="text-left leading-tight font-bold text-4xl sm:text-5xl md:text-6xl">
               Welcome
             </div>
-            <div className="text-left text-lg sm:text-xl ml-1 mt-1">Register your account</div>
+            <div className="text-left text-lg sm:text-xl ml-1 mt-1">
+              Register your account
+            </div>
           </div>
 
           <div className="mt-8 md:mt-10 w-full max-w-sm">

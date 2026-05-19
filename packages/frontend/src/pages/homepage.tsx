@@ -3,7 +3,10 @@ import { Link } from "react-router-dom";
 
 function Homepage() {
   return (
-    <div id="root" className="relative w-full min-h-screen overflow-hidden bg-black">
+    <div
+      id="root"
+      className="relative w-full min-h-screen overflow-hidden bg-black"
+    >
       <video
         autoPlay
         loop
