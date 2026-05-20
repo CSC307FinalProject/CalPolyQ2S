@@ -14,15 +14,13 @@ function SearchBar({ placeholder }: SearchBarProps) {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    if (inputValue) {
-      setIsLoading(true);
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-    setIsLoading(false);
-  }, [inputValue]);
+    if (!inputValue || !isLoading) return;
+
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [inputValue, isLoading]);
 
   return (
     <div className="space-y-2 min-w-75">
@@ -33,7 +31,11 @@ function SearchBar({ placeholder }: SearchBarProps) {
           placeholder={placeholder}
           type="search"
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={(e) => {
+            const nextValue = e.target.value;
+            setInputValue(nextValue);
+            setIsLoading(Boolean(nextValue));
+          }}
         />
         <div className="pointer-events-none absolute inset-y-0 inset-s-0 flex items-center justify-center ps-3 text-gray-400 peer-disabled:opacity-50">
           {isLoading ? (

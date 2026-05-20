@@ -29,21 +29,67 @@ const getStatusStyles = (status: string) => {
   }
 };
 
+type SavedCourseResponse = {
+  id: number;
+  course_code: string;
+  course_name: string;
+  units: number;
+};
+
+type CourseListProps = {
+  activeFilter: string;
+  courses: SavedCourse[];
+};
+
+function CourseList({ activeFilter, courses }: CourseListProps) {
+  const filteredCourses = courses.filter((course) => {
+    if (activeFilter === "All") return true;
+    return course.status === activeFilter;
+  });
+
+  return (
+    <div className="screen">
+      <div className="h-100 overflow-y-auto no-scrollbar p-4">
+        {filteredCourses.map((course) => (
+          <div key={course.id} className="bg-white shadow p-5">
+            <div className="flex items-start">
+              <div>
+                <h2 className="text-black! flex">{course.code}</h2>
+                <span className="text-xl text-gray-500">{course.title}</span>
+              </div>
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-sm px-3 py-1 rounded-full flex items-end">
+                  {course.units} units
+                </span>
+                <span
+                  className={`text-sm px-3 py-1 rounded-full ml-auto ${getStatusStyles(
+                    course.status,
+                  )}`}
+                >
+                  {course.status}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Comparison() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeFilter1, setActiveFilter1] = useState("All");
 
   const [quarterCourses, setQuarterCourses] = useState<SavedCourse[]>([]);
   const [semesterCourses, setSemesterCourses] = useState<SavedCourse[]>([]);
-  const user = getStoredUser();
+  const studentId = getStoredUser()?.student_id;
 
   useEffect(() => {
     async function loadSavedCourses() {
-      if (!user) return;
+      if (!studentId) return;
 
-      const response = await fetch(
-        `${API_URL}/q2s-comparison/${user.student_id}`,
-      );
+      const response = await fetch(`${API_URL}/q2s-comparison/${studentId}`);
 
       const json = await response.json();
 
@@ -52,7 +98,7 @@ export default function Comparison() {
         return;
       }
 
-      const saved = json.courses.map((course: any) => ({
+      const saved = (json.courses ?? []).map((course: SavedCourseResponse) => ({
         id: course.id,
         code: course.course_code,
         title: course.course_name,
@@ -65,79 +111,7 @@ export default function Comparison() {
     }
 
     loadSavedCourses();
-  }, []);
-
-  function CourseListQuarter({ activeFilter }: { activeFilter: string }) {
-    const filteredCourses = quarterCourses.filter((course) => {
-      if (activeFilter === "All") return true;
-      return course.status === activeFilter;
-    });
-
-    return (
-      <div className="screen">
-        <div className="h-100 overflow-y-auto no-scrollbar p-4">
-          {filteredCourses.map((course) => (
-            <div key={course.id} className="bg-white shadow p-5">
-              <div className="flex items-start">
-                <div>
-                  <h2 className="text-black! flex">{course.code}</h2>
-                  <span className="text-xl text-gray-500">{course.title}</span>
-                </div>
-                <div className="ml-auto flex items-center gap-2">
-                  <span className="text-sm px-3 py-1 rounded-full flex items-end">
-                    {course.units} units
-                  </span>
-                  <span
-                    className={`text-sm px-3 py-1 rounded-full ml-auto ${getStatusStyles(
-                      course.status,
-                    )}`}
-                  >
-                    {course.status}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  function CourseListSemester({ activeFilter }: { activeFilter: string }) {
-    const filteredCourses = semesterCourses.filter((course) => {
-      if (activeFilter === "All") return true;
-      return course.status === activeFilter;
-    });
-
-    return (
-      <div className="screen">
-        <div className="h-100 overflow-y-auto no-scrollbar p-4">
-          {filteredCourses.map((course) => (
-            <div key={course.id} className="bg-white shadow p-5">
-              <div className="flex items-start">
-                <div>
-                  <h2 className="text-black! flex">{course.code}</h2>
-                  <span className="text-xl text-gray-500">{course.title}</span>
-                </div>
-                <div className="ml-auto flex items-center gap-2">
-                  <span className="text-sm px-3 py-1 rounded-full flex items-end">
-                    {course.units} units
-                  </span>
-                  <span
-                    className={`text-sm px-3 py-1 rounded-full ml-auto ${getStatusStyles(
-                      course.status,
-                    )}`}
-                  >
-                    {course.status}
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  }, [studentId]);
 
   const semesterUnitsDone = semesterCourses.reduce((total, course) => {
     if (course.status === "Completed") {
@@ -256,7 +230,7 @@ export default function Comparison() {
               ))}
             </div>
           </div>
-          <CourseListQuarter activeFilter={activeFilter} />
+          <CourseList activeFilter={activeFilter} courses={quarterCourses} />
         </div>
 
         <div className="w-full bg-white" style={{ width: "50%" }}>
@@ -347,7 +321,10 @@ export default function Comparison() {
                 </div>
               </div>
             </div>
-            <CourseListSemester activeFilter={activeFilter1} />
+            <CourseList
+              activeFilter={activeFilter1}
+              courses={semesterCourses}
+            />
           </div>
         </div>
       </div>
