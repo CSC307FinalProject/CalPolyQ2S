@@ -23,6 +23,7 @@ export default function RegisterForm() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = event.target;
@@ -34,6 +35,7 @@ export default function RegisterForm() {
 
   const handleSubmit: FormSubmitHandler = (event) => {
     event.preventDefault();
+    setEmailError("");
 
     fetch(`${API_URL}/register`, {
       method: "POST",
@@ -46,6 +48,8 @@ export default function RegisterForm() {
             localStorage.setItem("token", payload.token);
             navigate("/class-selector");
           });
+        } else if (response.status === 409) {
+          setEmailError("An account with this email already exists.");
         }
       })
       .catch(() => {});
@@ -66,6 +70,9 @@ export default function RegisterForm() {
           onChange={handleChange}
           className="px-4 py-3 rounded-lg border border-gray-300 bg-white text-black placeholder-gray-400 outline-none focus:border-gray-500 w-full"
         />
+        {emailError && (
+          <p className="mt-1 text-sm text-red-500">{emailError}</p>
+        )}
       </div>
 
       <div className="gap-1 mt-6">
