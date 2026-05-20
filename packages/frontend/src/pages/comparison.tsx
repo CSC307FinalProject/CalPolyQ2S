@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import Navbar from "../components/navbar";
 import { getStoredUser } from "../components/authStorage";
+import { BackButton } from "../components/navButtons";
+import { Link } from "react-router-dom";
 
 type SavedCourse = {
   id: number;
@@ -39,7 +41,7 @@ export default function Comparison() {
       if (!user) return;
 
       const response = await fetch(
-        `http://localhost:3000/saved-courses/${user.student_id}`
+        `http://localhost:3000/saved-courses/${user.student_id}`,
       );
 
       const json = await response.json();
@@ -348,6 +350,9 @@ export default function Comparison() {
           </div>
         </div>
       </div>
+      <Link to="/class-selector">
+        <BackButton />
+      </Link>
     </div>
   );
 }
