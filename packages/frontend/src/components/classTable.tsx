@@ -35,9 +35,13 @@ export default function ClassTable({
   courses,
   completed,
   onAddCourse,
+<<<<<<< HEAD
+}: ClassTableProps) {
+=======
   onSaveCourses,
 }: ClassTableProps) {
   // set up filters and query states
+>>>>>>> origin/main
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
 
@@ -97,7 +101,10 @@ function TableHeader({
   onSearchChange,
   activeFilter,
   onFilterChange,
+<<<<<<< HEAD
+=======
   handleSaveCourses,
+>>>>>>> origin/main
 }: TableHeaderProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [saveState, setSaveState] = useState<
@@ -275,7 +282,11 @@ function TableBody({ courses, completed, onAddCourse }: TableBodyProps) {
                 key={course.course_id}
                 {...course}
                 isSelected={completed.some(
+<<<<<<< HEAD
+                  (c) => c.courseNumber === course.courseNumber,
+=======
                   (c) => c.course_id === course.course_id,
+>>>>>>> origin/main
                 )}
                 onClick={() => onAddCourse(course)}
               />
@@ -296,8 +307,13 @@ interface CourseButtonProps extends Course {
 
 // Used in both the course list (class-table) and the completed sidebar (completed-table)
 export function CourseButton({
+<<<<<<< HEAD
+  courseNumber,
+  courseTitle,
+=======
   course_code,
   course_name,
+>>>>>>> origin/main
   onClick,
   isSelected,
 }: CourseButtonProps) {
@@ -310,12 +326,20 @@ export function CourseButton({
       <span
         className={`w-20 shrink-0 text-sm font-mono font-semibold ${isSelected ? "text-black" : "text-gray-700"}`}
       >
+<<<<<<< HEAD
+        {courseNumber}
+=======
         {course_code}
+>>>>>>> origin/main
       </span>
       <span
         className={`flex-1 text-sm ${isSelected ? "text-black font-medium" : "text-gray-500"}`}
       >
+<<<<<<< HEAD
+        {courseTitle}
+=======
         {course_name}
+>>>>>>> origin/main
       </span>
       <span
         className={`shrink-0 w-6 h-6 flex items-center justify-center rounded-full border transition-colors duration-150

@@ -20,6 +20,21 @@ export async function registerUser(req, res) {
     return res.status(400).send("Bad request: Invalid input");
   }
 
+<<<<<<< HEAD
+  const existing = await sql`SELECT 1 FROM students WHERE email = ${email}`;
+
+  // Only register new account if email not in DB
+  if (existing.length > 0) {
+    return res.status(409).send("Email already taken");
+  }
+
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+  await sql`INSERT INTO students (email, password_hash) VALUES (${email}, ${hashedPassword})`;
+
+  const token = await generateAccessToken(email);
+  res.status(201).send({ token });
+=======
   try {
 
     // Find potential existing email already in DB
@@ -59,10 +74,20 @@ export async function registerUser(req, res) {
     console.error("Register error:", error);
     return res.status(500).json({ error: "Registration failed.", details: error.message });
   }
+>>>>>>> origin/main
 }
 
 // Login
 export async function loginUser(req, res) {
+<<<<<<< HEAD
+  const { email, password } = req.body;
+
+  const [user] =
+    await sql`SELECT password_hash FROM students WHERE email = ${email}`;
+  if (!user) {
+    return res.status(401).send("Unauthenticated");
+  }
+=======
   console.log("Login request body:", req.body);
 
   const { email, password } = req.body;
@@ -74,6 +99,7 @@ export async function loginUser(req, res) {
       FROM public.students
       WHERE email = ${email}
     `;
+>>>>>>> origin/main
 
     console.log("DB users:", users);
 
@@ -139,6 +165,15 @@ export function authenticateUser(req, res, next) {
   if (!token) {
     console.log("No token received");
     res.status(401).end();
+<<<<<<< HEAD
+  } else {
+    jwt.verify(token, process.env.TOKEN_SECRET, (error, decoded) => {
+      if (decoded) {
+        next();
+      } else {
+        console.log("JWT error:", error);
+        res.status(401).end();
+=======
   } 
   else { // Otherwise, verify token
     jwt.verify(
@@ -151,7 +186,8 @@ export function authenticateUser(req, res, next) {
           console.log("JWT error:", error);
           res.status(401).end();
         }
+>>>>>>> origin/main
       }
-    );
+    });
   }
 }

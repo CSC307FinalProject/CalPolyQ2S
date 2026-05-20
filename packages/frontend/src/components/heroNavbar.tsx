@@ -1,5 +1,9 @@
+<<<<<<< HEAD
+import { Link } from "react-router-dom";
+=======
 import { Link } from "react-router-dom"
 import { getStoredUser, logout } from "./authStorage";
+>>>>>>> origin/main
 
 export default function HomepageNavbar() {
   const user = getStoredUser();
@@ -22,6 +26,18 @@ export default function HomepageNavbar() {
       </div>
 
       <div className="flex items-center gap-3">
+<<<<<<< HEAD
+        <Link to="/login">
+          <button className="text-xs cursor-pointer text-gray-300 font-medium px-3 py-2 rounded-md border border-white/0 hover:border-white/30 hover:text-white transition-all duration-200">
+            Login
+          </button>
+        </Link>
+        <Link to="/register">
+          <button className="text-xs cursor-pointer font-semibold bg-white text-black px-3 py-2 rounded-md transition-all duration-200 hover:bg-white/90 hover:scale-105 active:scale-95">
+            Sign up
+          </button>
+        </Link>
+=======
         {user ? (
           <>
             <span className="text-xs text-white font-medium">
@@ -55,6 +71,7 @@ export default function HomepageNavbar() {
             </Link>
           </>
         )}
+>>>>>>> origin/main
       </div>
     </nav>
   );

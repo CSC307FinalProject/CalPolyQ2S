@@ -44,16 +44,26 @@ export default function LoginForm() {
     }
 
     try {
+<<<<<<< HEAD
+      const response = await fetch(
+        "https://calpolyq2s-dxdbewd5aufve0gf.westus3-01.azurewebsites.net/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+          }),
+=======
       const response = await fetch(`${API_URL}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+>>>>>>> origin/main
         },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
+      );
 
       const json = await response.json();
       setLoading(false);
