@@ -7,6 +7,7 @@ on:
   push:
     branches:
       - main
+      - feature/CI/CD
   workflow_dispatch:
 
 jobs:
@@ -25,16 +26,21 @@ jobs:
 
       - name: npm install, build, and test
         run: |
-          npm install --workspaces=false
-          npm run -w backend build --if-present
-          npm run -w backend test --if-present
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+          npm run build --if-present
+          npm test --if-present
         working-directory: packages/backend
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: node-app
-          path: packages/backend
+          path: .
+        working-directory: packages/backend
 
   deploy:
     runs-on: ubuntu-latest
@@ -62,4 +68,4 @@ jobs:
         with:
           app-name: "CalPolyQ2S"
           slot-name: "Production"
-          package: .
+          package: ./node-app

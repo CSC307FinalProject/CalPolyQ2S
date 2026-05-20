@@ -1,5 +1,5 @@
-import { useState, type ChangeEvent, type ComponentProps } from 'react';
-import { Eye, EyeOff, Circle, CircleCheckBig } from 'lucide-react';
+import { useState, type ChangeEvent, type ComponentProps } from "react";
+import { Eye, EyeOff, Circle, CircleCheckBig } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
 const API_URL = import.meta.env.VITE_API_URL;
@@ -13,7 +13,6 @@ interface FormData {
 type FormSubmitHandler = NonNullable<ComponentProps<"form">["onSubmit"]>;
 
 export default function RegisterForm() {
-
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<FormData>({
@@ -38,7 +37,10 @@ export default function RegisterForm() {
     fetch(`${API_URL}/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: formData.email, password: formData.password }),
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+      }),
     })
       .then((response) => {
         if (response.status === 201) {
@@ -50,7 +52,6 @@ export default function RegisterForm() {
       })
       .catch(() => {});
   };
-  
 
   return (
     <form className="gap-4 mt-4 w-full text-left" onSubmit={handleSubmit}>

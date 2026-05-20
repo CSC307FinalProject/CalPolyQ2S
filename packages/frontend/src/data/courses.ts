@@ -54,4 +54,4 @@ export interface Course {
   course_name: string;
   course_code: string;
   tag: string;
-};
+}

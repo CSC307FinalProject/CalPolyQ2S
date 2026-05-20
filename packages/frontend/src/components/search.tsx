@@ -1,14 +1,14 @@
 "use client";
 
-import { Input } from "./input"
+import { Input } from "./input";
 
 import { LoaderCircle, Mic, Search } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 
 interface SearchBarProps {
-    placeholder: string
+  placeholder: string;
 }
-function SearchBar({placeholder}: SearchBarProps) {
+function SearchBar({ placeholder }: SearchBarProps) {
   const id = useId();
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -53,7 +53,12 @@ function SearchBar({placeholder}: SearchBarProps) {
           aria-label="Press to speak"
           type="submit"
         >
-          <Mic size={16} strokeWidth={2} aria-hidden="true" className="hover:text-black" />
+          <Mic
+            size={16}
+            strokeWidth={2}
+            aria-hidden="true"
+            className="hover:text-black"
+          />
         </button>
       </div>
     </div>
