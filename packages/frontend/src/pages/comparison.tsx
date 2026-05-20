@@ -1,7 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Navbar from "../components/navbar";
+import { getStoredUser } from "../components/authStorage";
+import { BackButton } from "../components/navButtons";
+import { Link } from "react-router-dom";
+
+const API_URL = import.meta.env.VITE_API_URL;
+
+type SavedCourse = {
+  id: number;
+  title: string;
+  code: string;
+  units: number;
+  status: string;
+};
 
 const filters = ["All", "Completed", "Active", "Remaining"];
+<<<<<<< HEAD
 const quarterCourses = [
   {
     id: 1,
@@ -80,6 +94,8 @@ const semesterCourses = [
     status: "Completed",
   },
 ];
+=======
+>>>>>>> origin/main
 
 const getStatusStyles = (status: string) => {
   switch (status) {
@@ -170,6 +186,115 @@ export default function Comparison() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeFilter1, setActiveFilter1] = useState("All");
 
+<<<<<<< HEAD
+=======
+  const [quarterCourses, setQuarterCourses] = useState<SavedCourse[]>([]);
+  const [semesterCourses, setSemesterCourses] = useState<SavedCourse[]>([]);
+  const user = getStoredUser();
+
+  useEffect(() => {
+    async function loadSavedCourses() {
+      if (!user) return;
+
+      const response = await fetch(
+        `${API_URL}/q2s-comparison/${user.student_id}`,
+      );
+
+      const json = await response.json();
+
+      if (!response.ok) {
+        console.error(json.error || "Failed to load saved courses.");
+        return;
+      }
+
+      const saved = json.courses.map((course: any) => ({
+        id: course.id,
+        code: course.course_code,
+        title: course.course_name,
+        units: course.units,
+        status: "Completed",
+      }));
+
+      setQuarterCourses(saved);
+      setSemesterCourses(saved);
+    }
+
+    loadSavedCourses();
+  }, []);
+
+  function CourseListQuarter({ activeFilter }: { activeFilter: string }) {
+    const filteredCourses = quarterCourses.filter((course) => {
+      if (activeFilter === "All") return true;
+      return course.status === activeFilter;
+    });
+
+    return (
+      <div className="screen">
+        <div className="h-100 overflow-y-auto no-scrollbar p-4">
+          {filteredCourses.map((course) => (
+            <div key={course.id} className="bg-white shadow p-5">
+              <div className="flex items-start">
+                <div>
+                  <h2 className="text-black! flex">{course.code}</h2>
+                  <span className="text-xl text-gray-500">{course.title}</span>
+                </div>
+                <div className="ml-auto flex items-center gap-2">
+                  <span className="text-sm px-3 py-1 rounded-full flex items-end">
+                    {course.units} units
+                  </span>
+                  <span
+                    className={`text-sm px-3 py-1 rounded-full ml-auto ${getStatusStyles(
+                      course.status,
+                    )}`}
+                  >
+                    {course.status}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  function CourseListSemester({ activeFilter }: { activeFilter: string }) {
+    const filteredCourses = semesterCourses.filter((course) => {
+      if (activeFilter === "All") return true;
+      return course.status === activeFilter;
+    });
+
+    return (
+      <div className="screen">
+        <div className="h-100 overflow-y-auto no-scrollbar p-4">
+          {filteredCourses.map((course) => (
+            <div key={course.id} className="bg-white shadow p-5">
+              <div className="flex items-start">
+                <div>
+                  <h2 className="text-black! flex">{course.code}</h2>
+                  <span className="text-xl text-gray-500">{course.title}</span>
+                </div>
+                <div className="ml-auto flex items-center gap-2">
+                  <span className="text-sm px-3 py-1 rounded-full flex items-end">
+                    {course.units} units
+                  </span>
+                  <span
+                    className={`text-sm px-3 py-1 rounded-full ml-auto ${getStatusStyles(
+                      course.status,
+                    )}`}
+                  >
+                    {course.status}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+>>>>>>> origin/main
   const semesterUnitsDone = semesterCourses.reduce((total, course) => {
     if (course.status === "Completed") {
       return total + course.units;
@@ -382,6 +507,9 @@ export default function Comparison() {
           </div>
         </div>
       </div>
+      <Link to="/class-selector" className="fixed bottom-0 left-0 m-2">
+        <BackButton />
+      </Link>
     </div>
   );
 }

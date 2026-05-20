@@ -23,9 +23,9 @@ export function ContinueButton({ label }: { label?: string }) {
   );
 }
 
-export function BackButton({ label = "Go Back" }: { label?: string }) {
+export function BackButton({ label = "Go Back", onClick }: { label?: string; onClick?: () => void }) {
   return (
-    <button className="group relative overflow-hidden inline-flex items-center justify-center bg-black text-white border-none rounded-xl px-4 h-11 text-sm font-medium cursor-pointer transition-transform active:scale-95">
+    <button onClick={onClick} className="group relative overflow-hidden inline-flex items-center justify-center bg-black text-white border-none rounded-xl px-4 h-11 text-sm font-medium cursor-pointer transition-transform active:scale-95">
       {/* icon pill on the LEFT */}
       <span className="absolute left-1 top-1 bottom-1 w-7 rounded-md bg-white/15 grid place-items-center transition-all duration-400 group-hover:w-[calc(100%-0.5rem)] z-10">
         <svg

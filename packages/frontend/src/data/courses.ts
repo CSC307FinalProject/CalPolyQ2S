@@ -50,7 +50,8 @@ export const Courses = [
 ];
 
 export interface Course {
-  courseTitle: string;
-  courseNumber: string;
+  course_id: number;
+  course_name: string;
+  course_code: string;
   tag: string;
 }

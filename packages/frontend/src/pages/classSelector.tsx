@@ -3,23 +3,74 @@ import { SearchBar } from "../components/search";
 import ClassTable from "../components/classTable";
 import CompletedTable from "../components/completedTable";
 import type { Course } from "../data/courses";
-import { Courses } from "../data/courses";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
+import { getStoredUser } from "../components/authStorage";
+// Import API URL from .env
+const API_URL = import.meta.env.VITE_API_URL;
 
 function ClassSelector() {
+  const user = getStoredUser();
+
+  if (!user) return <Navigate to="/login" replace />;
   const [completed, setCompleted] = useState<Course[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
+
+  // set the courses
+  useEffect(() => {
+    // get the data from the db
+    fetch(`${API_URL}/class-selector`)
+      .then((res) => {
+        if (res.ok) {
+          console.log("Successfully queried classes from db");
+          return res.json();
+        }
+        return [];
+      })
+      .then((data) => setCourses(data?.courses ?? []))
+      .catch((err) => console.log(err));
+  }, []);
+
+  // set the saved courses from the previous entry
+  useEffect(() => {
+    fetch(`${API_URL}/class-selector/${user?.student_id}`)
+      .then((res) => {
+        if (res.ok) {
+          console.log("Successfully queried classes from db");
+          return res.json();
+        }
+        return [];
+      })
+      .then((data) => setCompleted(data?.courses ?? []))
+      .catch((err) => console.log(err));
+  }, []);
 
   function handleAddCourse(course: Course) {
     const isalreadyadded = completed.find(
-      (c) => c.courseNumber === course.courseNumber,
+      (c) => c.course_id === course.course_id,
     );
     if (!isalreadyadded) {
       setCompleted([...completed, course]);
     }
   }
 
-  function handleRemoveCourse(courseNumber: string) {
-    setCompleted(completed.filter((c) => c.courseNumber !== courseNumber));
+  function handleRemoveCourse(course_id: number) {
+    setCompleted(completed.filter((c) => c.course_id !== course_id));
+  }
+
+  // function to handle saves
+  async function handleSave(completed_courses: Course[]) {
+    // try to send data to route -- on failure print error
+    try {
+      const res = await fetch(`${API_URL}/class-selector/${user?.student_id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ courses: completed_courses }),
+      });
+      if (!res.ok) throw new Error(`Save failed: ${res.status}`);
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   return (
@@ -39,9 +90,10 @@ function ClassSelector() {
           </div>
           <div className="mt-4 flex-1 min-h-0 h-full pb-6">
             <ClassTable
-              courses={Courses}
+              courses={courses}
               completed={completed}
               onAddCourse={handleAddCourse}
+              onSaveCourses={handleSave}
             />
           </div>
         </div>

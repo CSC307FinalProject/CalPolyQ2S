@@ -2,6 +2,8 @@ import { useState, type ChangeEvent, type ComponentProps } from "react";
 import { Eye, EyeOff, Circle, CircleCheckBig } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 interface FormData {
   email: string;
   password: string;
@@ -42,6 +44,7 @@ export default function LoginForm() {
     }
 
     try {
+<<<<<<< HEAD
       const response = await fetch(
         "https://calpolyq2s-dxdbewd5aufve0gf.westus3-01.azurewebsites.net/login",
         {
@@ -53,6 +56,12 @@ export default function LoginForm() {
             email: formData.email,
             password: formData.password,
           }),
+=======
+      const response = await fetch(`${API_URL}/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+>>>>>>> origin/main
         },
       );
 
@@ -64,10 +73,16 @@ export default function LoginForm() {
         return;
       }
 
+      // create a user obj for session
+      const userObj = JSON.stringify({
+        token: json.token,
+        student_id: json.student_id,
+        email: formData.email,
+      });
       if (formData.staySignedIn) {
-        localStorage.setItem("user", JSON.stringify(json.user));
+        localStorage.setItem("user", userObj);
       } else {
-        sessionStorage.setItem("user", JSON.stringify(json.user));
+        sessionStorage.setItem("user", userObj);
       }
 
       navigate("/class-selector");

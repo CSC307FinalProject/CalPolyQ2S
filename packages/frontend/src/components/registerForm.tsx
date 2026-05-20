@@ -52,6 +52,10 @@ export default function RegisterForm() {
       })
       .catch(() => {});
   };
+<<<<<<< HEAD
+=======
+  
+>>>>>>> origin/main
 
   return (
     <form className="gap-4 mt-4 w-full text-left" onSubmit={handleSubmit}>
