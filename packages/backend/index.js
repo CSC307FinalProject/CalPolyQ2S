@@ -25,21 +25,23 @@ const allowedOrigins = new Set([
   ...configuredAllowedOrigins,
 ]);
 
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin || allowedOrigins.has(origin)) {
-        callback(null, true);
-        return;
-      }
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(origin)) {
+      callback(null, true);
+      return;
+    }
 
-      callback(new Error(`Not allowed by CORS: ${origin}`));
-    },
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
-  }),
-);
+    callback(new Error(`Not allowed by CORS: ${origin}`));
+  },
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
+
+app.options(/.*/, cors(corsOptions));
+app.use(cors(corsOptions));
 app.use(express.json());
 
 app.post("/login", loginUser);

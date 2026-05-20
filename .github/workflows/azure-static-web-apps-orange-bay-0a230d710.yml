@@ -21,6 +21,22 @@ jobs:
         with:
           submodules: true
           lfs: false
+      - name: Validate frontend API URL
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+        run: |
+          if [ -z "$VITE_API_URL" ]; then
+            echo "VITE_API_URL is not set. Add it as a GitHub repository secret."
+            exit 1
+          fi
+
+          case "$VITE_API_URL" in
+            http://*|https://*) ;;
+            *)
+              echo "VITE_API_URL must start with http:// or https://"
+              exit 1
+              ;;
+          esac
       - name: Build And Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
