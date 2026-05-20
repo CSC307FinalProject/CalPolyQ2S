@@ -1,8 +1,7 @@
 import { useState, type ChangeEvent, type ComponentProps } from "react";
 import { Eye, EyeOff, Circle, CircleCheckBig } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { apiUrl } from "../lib/api";
 
 interface FormData {
   email: string;
@@ -44,7 +43,7 @@ export default function LoginForm() {
     }
 
     try {
-      const response = await fetch(`${API_URL}/login`, {
+      const response = await fetch(apiUrl("/login"), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

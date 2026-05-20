@@ -46,6 +46,8 @@ export async function saveCourses(req, res) {
     return res.json({ message: "Courses saved successfully." });
   } catch (error) {
     console.error("Save courses error:", error);
-    return res.status(500).json({ error: "Failed to save courses.", details: error.message });
+    return res
+      .status(500)
+      .json({ error: "Failed to save courses.", details: error.message });
   }
 }

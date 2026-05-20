@@ -1,28 +1,26 @@
 "use client";
 
-import { Input } from "./input"
+import { Input } from "./input";
 
 import { LoaderCircle, Mic, Search } from "lucide-react";
 import { useEffect, useId, useState } from "react";
 
 interface SearchBarProps {
-    placeholder: string
+  placeholder: string;
 }
-function SearchBar({placeholder}: SearchBarProps) {
+function SearchBar({ placeholder }: SearchBarProps) {
   const id = useId();
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
-    if (inputValue) {
-      setIsLoading(true);
-      const timer = setTimeout(() => {
-        setIsLoading(false);
-      }, 500);
-      return () => clearTimeout(timer);
-    }
-    setIsLoading(false);
-  }, [inputValue]);
+    if (!inputValue || !isLoading) return;
+
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [inputValue, isLoading]);
 
   return (
     <div className="space-y-2 min-w-75">
@@ -33,7 +31,11 @@ function SearchBar({placeholder}: SearchBarProps) {
           placeholder={placeholder}
           type="search"
           value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
+          onChange={(e) => {
+            const nextValue = e.target.value;
+            setInputValue(nextValue);
+            setIsLoading(Boolean(nextValue));
+          }}
         />
         <div className="pointer-events-none absolute inset-y-0 inset-s-0 flex items-center justify-center ps-3 text-gray-400 peer-disabled:opacity-50">
           {isLoading ? (
@@ -53,7 +55,12 @@ function SearchBar({placeholder}: SearchBarProps) {
           aria-label="Press to speak"
           type="submit"
         >
-          <Mic size={16} strokeWidth={2} aria-hidden="true" className="hover:text-black" />
+          <Mic
+            size={16}
+            strokeWidth={2}
+            aria-hidden="true"
+            className="hover:text-black"
+          />
         </button>
       </div>
     </div>
