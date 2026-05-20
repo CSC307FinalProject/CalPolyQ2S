@@ -1,18 +1,14 @@
-import LoginForm from "../components/loginform";
+import LoginForm from "../components/loginForm";
 import calPolyImg from "../assets/CalPolyArialView.jpg";
 import { Link } from "react-router-dom";
-
 
 function Login() {
   return (
     <div className="flex flex-col md:flex-row w-full min-h-screen">
-
       {/* Left Side - Login Form */}
       <div className="flex flex-col w-full md:w-1/2 px-8 sm:px-12 md:px-14 py-8">
         <Link to="/">
-          <div className="text-left leading-tight font-bold">
-            Cal Poly Q2S
-          </div>
+          <div className="text-left leading-tight font-bold">Cal Poly Q2S</div>
         </Link>
 
         <div className="flex flex-col mt-10 md:mt-16">
@@ -44,7 +40,6 @@ function Login() {
           className="w-full h-full object-cover rounded-xl"
         />
       </div>
-
     </div>
   );
 }

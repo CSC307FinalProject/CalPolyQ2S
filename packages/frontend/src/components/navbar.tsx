@@ -26,7 +26,7 @@ export default function Navbar() {
           {user && (
             <button
               onClick={() => setShowLogoutPopup(true)}
-              className="text-xs font-semibold border border-gray-200 text-black px-3 py-3 rounded-md transition-all duration-200 hover:bg-gray-100"
+              className="cursor-pointer text-xs font-semibold border border-gray-200 text-black px-3 py-3 rounded-md transition-all duration-200 hover:bg-gray-100"
             >
               {user?.email?.split("@")[0]}{" "}
             </button>
@@ -41,21 +41,21 @@ export default function Navbar() {
               Logout?
             </h2>
 
-            <p className="text-sm text-gray-500 mb-6">
+            <p className="text-sm m-2 text-gray-500">
               Are you sure you want to log out of your account?
             </p>
 
-            <div className="flex justify-end gap-3">
+            <div className="flex justify-center gap-3 m-2">
               <button
                 onClick={() => setShowLogoutPopup(false)}
-                className="px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 transition-colors"
+                className="cursor-pointer px-4 py-2 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-100 transition-colors"
               >
                 Cancel
               </button>
 
               <button
                 onClick={handleLogout}
-                className="px-4 py-2 text-sm rounded-lg bg-black text-white hover:bg-gray-800 transition-colors"
+                className="cursor-pointer px-4 py-2 text-sm rounded-lg bg-black text-white hover:bg-gray-800 transition-colors"
               >
                 Logout
               </button>
