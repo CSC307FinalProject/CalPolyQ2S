@@ -6,6 +6,9 @@
   "author": "",
   "type": "module",
   "main": "index.js",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "start": "node index.js",
     "test": "node --check index.js && node --check auth.js && node --check courses.js && node --check db/index.js && node --check routes/class-selector.js && node --check routes/comparison.js"

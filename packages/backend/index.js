@@ -44,6 +44,14 @@ app.options(/.*/, cors(corsOptions));
 app.use(cors(corsOptions));
 app.use(express.json());
 
+app.get("/", (req, res) => {
+  res.status(200).json({ status: "ok", service: "CalPolyQ2S backend" });
+});
+
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok" });
+});
+
 app.post("/login", loginUser);
 app.post("/register", registerUser);
 
