@@ -1,7 +1,15 @@
+import "dotenv/config";
+import sql from "./index.js";
+import cors from "cors";
+import express from "express";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import sql from "./db/index.js";
+import { supabase } from "./supabaseClient.js";
 
+const app = express();
+const PORT = 3000;
+
+app.use(cors());
+app.use(express.json());
 
 // Registration
 export async function registerUser(req, res) {

@@ -1,10 +1,11 @@
-import sql from "./db/index.js"
+import "dotenv/config";
 import cors from "cors";
 import express from "express";
-import "dotenv/config";
+import postgres from "postgres";
 import { authenticateUser, loginUser, registerUser } from "./auth.js";
 
-
+const app = express();
+const PORT = 3000;
 const sql = postgres(process.env.DATABASE_URL);
 
 app.use(cors());
@@ -21,4 +22,6 @@ app.post("/users", authenticateUser, async (req, res) => {
 
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+export default sql;
 
