@@ -9,8 +9,37 @@ import comparisonRouter from "./routes/comparison.js";
 const app = express();
 const PORT = process.env.PORT || 3000;
 const sql = postgres(process.env.DATABASE_URL);
+const defaultAllowedOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:4173",
+  "http://127.0.0.1:4173",
+  "https://orange-bay-0a230d710.7.azurestaticapps.net",
+];
+const configuredAllowedOrigins = (process.env.CORS_ORIGINS || "")
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+const allowedOrigins = new Set([
+  ...defaultAllowedOrigins,
+  ...configuredAllowedOrigins,
+]);
 
-app.use(cors());
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.has(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error(`Not allowed by CORS: ${origin}`));
+    },
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  }),
+);
 app.use(express.json());
 
 app.post("/login", loginUser);

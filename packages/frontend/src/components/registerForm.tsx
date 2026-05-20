@@ -1,8 +1,7 @@
 import { useState, type ChangeEvent, type ComponentProps } from "react";
 import { Eye, EyeOff, Circle, CircleCheckBig } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { apiUrl } from "../lib/api";
 
 interface FormData {
   email: string;
@@ -31,26 +30,38 @@ export default function RegisterForm() {
     });
   };
 
-  const handleSubmit: FormSubmitHandler = (event) => {
+  const handleSubmit: FormSubmitHandler = async (event) => {
     event.preventDefault();
 
-    fetch(`${API_URL}/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: formData.email,
-        password: formData.password,
-      }),
-    })
-      .then((response) => {
-        if (response.status === 201) {
-          response.json().then((payload) => {
-            localStorage.setItem("token", payload.token);
-            navigate("/class-selector");
-          });
+    try {
+      const response = await fetch(("/register"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      if (response.status === 201) {
+        const payload = await response.json();
+        const userObj = JSON.stringify({
+          token: payload.token,
+          student_id: payload.student_id,
+          email: payload.email,
+        });
+
+        if (formData.staySignedIn) {
+          localStorage.setItem("user", userObj);
+        } else {
+          sessionStorage.setItem("user", userObj);
         }
-      })
-      .catch(() => {});
+
+        navigate("/class-selector");
+      }
+    } catch (error) {
+      console.error("Register error:", error);
+    }
   };
 
   return (

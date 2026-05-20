@@ -6,8 +6,7 @@ import type { Course } from "../data/courses";
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { getStoredUser } from "../components/authStorage";
-// Import API URL from .env
-const API_URL = import.meta.env.VITE_API_URL;
+import { apiUrl } from "../lib/api";
 
 function ClassSelector() {
   const user = getStoredUser();
@@ -20,7 +19,7 @@ function ClassSelector() {
     if (!studentId) return;
 
     // get the data from the db
-    fetch(`${API_URL}/class-selector`)
+    fetch(apiUrl("/class-selector"))
       .then((res) => {
         if (res.ok) {
           console.log("Successfully queried classes from db");
@@ -36,7 +35,7 @@ function ClassSelector() {
   useEffect(() => {
     if (!studentId) return;
 
-    fetch(`${API_URL}/class-selector/${studentId}`)
+    fetch(apiUrl(`/class-selector/${studentId}`))
       .then((res) => {
         if (res.ok) {
           console.log("Successfully queried classes from db");
@@ -67,7 +66,7 @@ function ClassSelector() {
   async function handleSave(completed_courses: Course[]) {
     // try to send data to route -- on failure print error
     try {
-      const res = await fetch(`${API_URL}/class-selector/${studentId}`, {
+      const res = await fetch(apiUrl(`/class-selector/${studentId}`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ courses: completed_courses }),

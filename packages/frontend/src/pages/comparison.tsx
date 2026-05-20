@@ -3,8 +3,7 @@ import Navbar from "../components/navbar";
 import { getStoredUser } from "../components/authStorage";
 import { BackButton } from "../components/navButtons";
 import { Link } from "react-router-dom";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { apiUrl } from "../lib/api";
 
 type SavedCourse = {
   id: number;
@@ -89,7 +88,7 @@ export default function Comparison() {
     async function loadSavedCourses() {
       if (!studentId) return;
 
-      const response = await fetch(`${API_URL}/q2s-comparison/${studentId}`);
+      const response = await fetch(apiUrl(`/q2s-comparison/${studentId}`));
 
       const json = await response.json();
 
