@@ -4,7 +4,7 @@ import { ContinueButton, BackButton } from "./navButtons";
 import { Link } from "react-router-dom";
 interface CompletedTableProps {
   courses: Course[];
-  onRemoveCourse: (courseNumber: string) => void;
+  onRemoveCourse: (course_id: number) => void;
 }
 
 export default function CompletedTable({
@@ -17,14 +17,13 @@ export default function CompletedTable({
         <div className="text-xl font-bold text-black border-b border-gray-200 pb-2">
           Completed Classes
         </div>
-
         <div className="flex flex-wrap gap-2 min-h-0 overflow-hidden content-start">
           {courses.map((course) => (
             <CourseButton
-              key={course.courseNumber}
+              key={course.course_id}
               {...course}
               isSelected={true}
-              onClick={() => onRemoveCourse(course.courseNumber)}
+              onClick={() => onRemoveCourse(course.course_id)}
             />
           ))}
         </div>

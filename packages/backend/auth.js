@@ -2,7 +2,6 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import sql from "./db/index.js";
 
-
 // Registration
 export async function registerUser(req, res) {
   const { email, password } = req.body;
@@ -34,15 +33,17 @@ export async function registerUser(req, res) {
 
     // Password MUST be hashed here!!
 
-    // Add to students table
-    await sql`
+    // Add to students table, get the values
+    // use js destructuring to pull out first element of new user (student id)
+   const [newUser] = await sql`
       INSERT INTO students (name, email, password_hash) 
       VALUES (${name}, ${email}, ${hashedPassword})
+      RETURNING student_id;
     `;
 
     // Generate and return access token
     const token = await generateAccessToken(email);
-    return res.status(201).send({ token });
+    return res.status(201).send({ token, student_id:  newUser.student_id, email});
 
   } 
   catch (error) {
@@ -84,7 +85,7 @@ export async function loginUser(req, res) {
 
     // Generate and return access token
     const token = await generateAccessToken(email);
-    return res.status(200).json({ token });
+    return res.status(200).json({ token, student_id: user.student_id, email: user.email });
 
   } 
   catch (error) {
@@ -104,7 +105,7 @@ export async function loginUser(req, res) {
 function generateAccessToken(email) {
   return new Promise((resolve, reject) => {
     jwt.sign(
-      { email: email }, 
+      { email: email },
       process.env.TOKEN_SECRET,
       { expiresIn: "1d" },
       (error, token) => {
@@ -113,7 +114,7 @@ function generateAccessToken(email) {
         } else {
           resolve(token);
         }
-      }
+      },
     );
   });
 }
