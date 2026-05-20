@@ -4,6 +4,8 @@ import { getStoredUser } from "../components/authStorage";
 import { BackButton } from "../components/navButtons";
 import { Link } from "react-router-dom";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 type SavedCourse = {
   id: number;
   title: string;
@@ -33,15 +35,14 @@ export default function Comparison() {
 
   const [quarterCourses, setQuarterCourses] = useState<SavedCourse[]>([]);
   const [semesterCourses, setSemesterCourses] = useState<SavedCourse[]>([]);
+  const user = getStoredUser();
 
   useEffect(() => {
     async function loadSavedCourses() {
-      const user = getStoredUser();
-
       if (!user) return;
 
       const response = await fetch(
-        `http://localhost:3000/saved-courses/${user.student_id}`,
+        `${API_URL}/q2s-comparison/${user.student_id}`,
       );
 
       const json = await response.json();
@@ -53,9 +54,9 @@ export default function Comparison() {
 
       const saved = json.courses.map((course: any) => ({
         id: course.id,
-        code: course.course_number,
-        title: course.course_title,
-        units: 4,
+        code: course.course_code,
+        title: course.course_name,
+        units: course.units,
         status: "Completed",
       }));
 
@@ -350,7 +351,7 @@ export default function Comparison() {
           </div>
         </div>
       </div>
-      <Link to="/class-selector">
+      <Link to="/class-selector" className="fixed bottom-0 left-0 m-2">
         <BackButton />
       </Link>
     </div>

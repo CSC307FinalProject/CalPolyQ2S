@@ -4,6 +4,7 @@ import cors from "cors";
 import express from "express";
 import { authenticateUser, loginUser, registerUser } from "./auth.js";
 import classSelectorRouter from "./routes/class-selector.js";
+import comparisonRouter from "./routes/comparison.js"
 
 const app = express();
 const PORT = process.env.PORT;
@@ -23,5 +24,9 @@ app.post("/users", authenticateUser, async (req, res) => {
 
 // define router from class selector
 app.use("/class-selector", classSelectorRouter);
+
+// define router for q2s comparison
+app.use("/q2s-comparison", comparisonRouter);
+
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
