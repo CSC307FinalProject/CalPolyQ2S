@@ -12,6 +12,8 @@ const sql = postgres(process.env.DATABASE_URL);
 const defaultAllowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
+  "http://localhost:5179",
+  "http://127.0.0.1:5179",
   "http://localhost:4173",
   "http://127.0.0.1:4173",
   "https://orange-bay-0a230d710.7.azurestaticapps.net",
