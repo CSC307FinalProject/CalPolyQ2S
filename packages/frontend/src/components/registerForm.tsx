@@ -22,6 +22,8 @@ export default function RegisterForm() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [authMessage, setAuthMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = event.target;
@@ -31,31 +33,48 @@ export default function RegisterForm() {
     });
   };
 
-  const handleSubmit: FormSubmitHandler = (event) => {
+  const handleSubmit: FormSubmitHandler = async (event) => {
     event.preventDefault();
+    setLoading(true);
+    setAuthMessage(null);
 
-    fetch(`${API_URL}/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: formData.email,
-        password: formData.password,
-      }),
-    })
-      .then((response) => {
-        if (response.status === 201) {
-          response.json().then((payload) => {
-            localStorage.setItem("token", payload.token);
-            navigate("/class-selector");
-          });
-        }
-      })
-      .catch(() => {});
+    if (!formData.email || !formData.password) {
+      setAuthMessage("Please enter both email and password.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      if (response.status === 201) {
+        const payload = await response.json();
+        localStorage.setItem("token", payload.token);
+        navigate("/class-selector");
+        return;
+      }
+
+      if (response.status === 409) {
+        setAuthMessage("An account with this email already exists. Please log in.");
+        return;
+      }
+
+      const fallbackMessage =
+        (await response.text()) || "Registration failed. Please try again.";
+      setAuthMessage(fallbackMessage);
+    } catch {
+      setAuthMessage("Unable to reach the registration server.");
+    } finally {
+      setLoading(false);
+    }
   };
-<<<<<<< HEAD
-=======
-  
->>>>>>> origin/main
 
   return (
     <form className="gap-4 mt-4 w-full text-left" onSubmit={handleSubmit}>
@@ -113,11 +132,16 @@ export default function RegisterForm() {
         Keep me signed in
       </label>
 
+      {authMessage ? (
+        <div className="mb-4 text-sm text-red-600">{authMessage}</div>
+      ) : null}
+
       <button
         type="submit"
-        className="mb-2 w-full py-3 rounded-lg bg-black text-white font-semibold cursor-pointer hover:bg-calpoly-green"
+        disabled={loading}
+        className="mb-2 w-full py-3 rounded-lg bg-black text-white font-semibold cursor-pointer hover:bg-calpoly-green disabled:cursor-not-allowed disabled:opacity-60"
       >
-        Sign Up
+        {loading ? "Signing up..." : "Sign Up"}
       </button>
 
       <label className="text-sm text-center text-gray-600">
