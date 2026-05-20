@@ -4,12 +4,45 @@ import cors from "cors";
 import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
 
 const app = express();
 const PORT = 3000;
 
 app.use(cors());
 app.use(express.json());
+
+
+// Create a transporter using SMTP
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+
+// Send Email
+
+// Replace "hayk.chaloyan@gmail.com" with email once done
+export async function sendEmail(email) {
+  try {
+    const info = await transporter.sendMail({
+      from: `"Cal Poly Q2S" <${process.env.SMTP_USER}>`,
+      to: "hayk.chaloyan@gmail.com", // list of recipients
+      subject: "Verify your Cal Poly Q2S Account", // subject line
+      html: "<b>Hello world?</b>", // HTML body
+    });
+
+    console.log("Message sent: %s", info.messageId);
+    // Preview URL is only available when using an Ethereal test account
+    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+  } catch (err) {
+    console.error("Error while sending mail:", err);
+  }
+}
+
 
 // Registration
 export async function registerUser(req, res) {
@@ -52,6 +85,7 @@ export async function registerUser(req, res) {
 
     // Generate and return access token
     const token = await generateAccessToken(email);
+    await sendEmail(email)
     return res.status(201).send({ token, student_id:  newUser.student_id, email});
 
   } 
