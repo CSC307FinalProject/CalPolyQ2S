@@ -6,20 +6,20 @@ import type { Course } from "../data/courses";
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { getStoredUser } from "../components/authStorage";
-// Import API URL from .env
-const API_URL = import.meta.env.VITE_API_URL;
+import { apiUrl } from "../lib/api";
 
 function ClassSelector() {
   const user = getStoredUser();
-
-  if (!user) return <Navigate to="/login" replace />;
+  const studentId = user?.student_id;
   const [completed, setCompleted] = useState<Course[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
 
   // set the courses
   useEffect(() => {
+    if (!studentId) return;
+
     // get the data from the db
-    fetch(`${API_URL}/class-selector`)
+    fetch(apiUrl("/class-selector"))
       .then((res) => {
         if (res.ok) {
           console.log("Successfully queried classes from db");
@@ -29,11 +29,13 @@ function ClassSelector() {
       })
       .then((data) => setCourses(data?.courses ?? []))
       .catch((err) => console.log(err));
-  }, []);
+  }, [studentId]);
 
   // set the saved courses from the previous entry
   useEffect(() => {
-    fetch(`${API_URL}/class-selector/${user?.student_id}`)
+    if (!studentId) return;
+
+    fetch(apiUrl(`/class-selector/${studentId}`))
       .then((res) => {
         if (res.ok) {
           console.log("Successfully queried classes from db");
@@ -43,7 +45,9 @@ function ClassSelector() {
       })
       .then((data) => setCompleted(data?.courses ?? []))
       .catch((err) => console.log(err));
-  }, []);
+  }, [studentId]);
+
+  if (!user) return <Navigate to="/login" replace />;
 
   function handleAddCourse(course: Course) {
     const isalreadyadded = completed.find(
@@ -62,11 +66,12 @@ function ClassSelector() {
   async function handleSave(completed_courses: Course[]) {
     // try to send data to route -- on failure print error
     try {
-      const res = await fetch(`${API_URL}/class-selector/${user?.student_id}`, {
+      const res = await fetch(apiUrl(`/class-selector/${studentId}`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ courses: completed_courses }),
       });
+      console.log("Saving completed courses:", completed_courses);
       if (!res.ok) throw new Error(`Save failed: ${res.status}`);
     } catch (err) {
       console.log(err);
@@ -93,7 +98,7 @@ function ClassSelector() {
               courses={courses}
               completed={completed}
               onAddCourse={handleAddCourse}
-              onSaveCourses={handleSave}
+              onSaveCourses={() => handleSave(completed)}
             />
           </div>
         </div>
@@ -102,6 +107,7 @@ function ClassSelector() {
           <CompletedTable
             courses={completed}
             onRemoveCourse={handleRemoveCourse}
+            onSaveCourses={() => handleSave(completed)}
           />
         </div>
       </main>

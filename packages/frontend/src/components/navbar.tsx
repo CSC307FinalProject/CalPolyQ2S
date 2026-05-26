@@ -37,9 +37,7 @@ export default function Navbar() {
       {showLogoutPopup && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-[320px]">
-            <h2 className="text-lg font-semibold text-black mb-2">
-              Logout?
-            </h2>
+            <h2 className="text-lg font-semibold text-black mb-2">Logout?</h2>
 
             <p className="text-sm m-2 text-gray-500">
               Are you sure you want to log out of your account?

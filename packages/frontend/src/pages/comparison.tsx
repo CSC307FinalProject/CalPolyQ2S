@@ -3,8 +3,7 @@ import Navbar from "../components/navbar";
 import { getStoredUser } from "../components/authStorage";
 import { BackButton } from "../components/navButtons";
 import { Link } from "react-router-dom";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { apiUrl } from "../lib/api";
 
 type SavedCourse = {
   id: number;
@@ -35,13 +34,73 @@ const getStatusStyles = (status: string) => {
   }
 };
 
+type SavedCourseResponse = {
+  course_id: number;
+  course_code: string;
+  course_name: string;
+  units: number;
+  converted_course_id?: number | null;
+  converted_course_code?: string | null;
+  converted_course_name?: string | null;
+  converted_units?: number | null;
+};
+
+type CourseListProps = {
+  activeFilter: string;
+  courses: ConversionCourse[];
+  onCourseClick: (course: ConversionCourse) => void;
+};
+
+function CourseList({ activeFilter, courses, onCourseClick }: CourseListProps) {
+  const filteredCourses = courses.filter((course) => {
+    if (activeFilter === "All") return true;
+    return course.status === activeFilter;
+  });
+
+  return (
+    <div className="screen">
+      <div className="h-100 overflow-y-auto no-scrollbar p-4">
+        {filteredCourses.map((course) => (
+          <button
+            key={course.id}
+            type="button"
+            onClick={() => onCourseClick(course)}
+            className="w-full text-left bg-white shadow p-5 hover:bg-gray-50 transition-colors"
+          >
+            <div className="flex items-start">
+              <div>
+                <h2 className="text-black! flex">{course.code}</h2>
+                <span className="text-xl text-gray-500">{course.title}</span>
+              </div>
+
+              <div className="ml-auto flex items-center gap-2">
+                <span className="text-sm px-3 py-1 rounded-full flex items-end">
+                  {course.units} units
+                </span>
+
+                <span
+                  className={`text-sm px-3 py-1 rounded-full ml-auto ${getStatusStyles(
+                    course.status,
+                  )}`}
+                >
+                  {course.status}
+                </span>
+              </div>
+            </div>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function Comparison() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeFilter1, setActiveFilter1] = useState("All");
 
-  const [quarterCourses, setQuarterCourses] = useState<SavedCourse[]>([]);
-  const [semesterCourses, setSemesterCourses] = useState<SavedCourse[]>([]);
-  const user = getStoredUser();
+const [quarterCourses, setQuarterCourses] = useState<ConversionCourse[]>([]);
+const [semesterCourses, setSemesterCourses] = useState<ConversionCourse[]>([]);
+  const studentId = getStoredUser()?.student_id;
 
   const [selectedCourse, setSelectedCourse] = useState<ConversionCourse | null>(
     null,
@@ -49,118 +108,69 @@ export default function Comparison() {
 
   useEffect(() => {
     async function loadSavedCourses() {
-      if (!user) return;
+      if (!studentId) return;
 
-      const response = await fetch(
-        `${API_URL}/q2s-comparison/${user.student_id}`,
-      );
+      const response = await fetch(apiUrl(`/q2s-comparison/${studentId}`));
 
       const json = await response.json();
+
+      console.log("comparison response:", json);
+console.log("saved courses:", json.courses);
+console.log("quarter courses:", json.quarterCourses);
+console.log("semester courses:", json.semesterCourses);
 
       if (!response.ok) {
         console.error(json.error || "Failed to load saved courses.");
         return;
       }
 
-      const saved = json.courses.map((course: any) => ({
-        id: course.course_id,
-        code: course.course_code,
-        title: course.course_name,
-        units: course.units,
-        status: "Completed",
-        convertedCode: course.converted_course_code,
-        convertedTitle: course.converted_course_name,
-        convertedUnits: course.converted_units,
-      }));
+const completedQuarterIds = new Set(
+  (json.courses ?? []).map((course: any) => course.course_id),
+);
 
-      setQuarterCourses(saved);
-      setSemesterCourses(saved);
+const completedSemesterIds = new Set(
+  (json.courses ?? [])
+    .map((course: any) => course.converted_course_id)
+    .filter(Boolean),
+);
+
+const conversionByQuarterId = new Map(
+  (json.courses ?? []).map((course: any) => [course.course_id, course]),
+);
+
+const quarterSaved = (json.quarterCourses ?? []).map((course: any) => {
+  const conversion = conversionByQuarterId.get(course.course_id);
+
+  return {
+    id: course.course_id,
+    code: course.course_code,
+    title: course.course_name,
+    units: course.units,
+    status: completedQuarterIds.has(course.course_id)
+      ? "Completed"
+      : "Remaining",
+    convertedCode: conversion?.converted_course_code,
+    convertedTitle: conversion?.converted_course_name,
+    convertedUnits: conversion?.converted_units,
+  };
+});
+
+const semesterSaved = (json.semesterCourses ?? []).map((course: any) => ({
+  id: course.course_id,
+  code: course.course_code,
+  title: course.course_name,
+  units: course.units,
+  status: completedSemesterIds.has(course.course_id)
+    ? "Completed"
+    : "Remaining",
+}));
+
+setQuarterCourses(quarterSaved);
+setSemesterCourses(semesterSaved);
     }
 
     loadSavedCourses();
-  }, []);
-
-  function CourseListQuarter({ activeFilter }: { activeFilter: string }) {
-    const filteredCourses = quarterCourses.filter((course) => {
-      if (activeFilter === "All") return true;
-      return course.status === activeFilter;
-    });
-
-    return (
-      <div className="screen">
-        <div className="h-100 overflow-y-auto no-scrollbar p-4">
-          {filteredCourses.map((course) => (
-            <button
-              key={course.id}
-              onClick={() => setSelectedCourse(course)}
-              className="w-full text-left bg-white shadow p-5 hover:bg-gray-50 transition-colors"
-            >
-              {" "}
-              <div className="flex items-start">
-                <div>
-                  <h2 className="text-black! flex">{course.code}</h2>
-                  <span className="text-xl text-gray-500">{course.title}</span>
-                </div>
-                <div className="ml-auto flex items-center gap-2">
-                  <span className="text-sm px-3 py-1 rounded-full flex items-end">
-                    {course.units} units
-                  </span>
-                  <span
-                    className={`text-sm px-3 py-1 rounded-full ml-auto ${getStatusStyles(
-                      course.status,
-                    )}`}
-                  >
-                    {course.status}
-                  </span>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  function CourseListSemester({ activeFilter }: { activeFilter: string }) {
-    const filteredCourses = semesterCourses.filter((course) => {
-      if (activeFilter === "All") return true;
-      return course.status === activeFilter;
-    });
-
-    return (
-      <div className="screen">
-        <div className="h-100 overflow-y-auto no-scrollbar p-4">
-          {filteredCourses.map((course) => (
-            <button
-              key={course.id}
-              onClick={() => setSelectedCourse(course)}
-              className="w-full text-left bg-white shadow p-5 hover:bg-gray-50 transition-colors"
-            >
-              {" "}
-              <div className="flex items-start">
-                <div>
-                  <h2 className="text-black! flex">{course.code}</h2>
-                  <span className="text-xl text-gray-500">{course.title}</span>
-                </div>
-                <div className="ml-auto flex items-center gap-2">
-                  <span className="text-sm px-3 py-1 rounded-full flex items-end">
-                    {course.units} units
-                  </span>
-                  <span
-                    className={`text-sm px-3 py-1 rounded-full ml-auto ${getStatusStyles(
-                      course.status,
-                    )}`}
-                  >
-                    {course.status}
-                  </span>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-    );
-  }
+  }, [studentId]);
 
   const semesterUnitsDone = semesterCourses.reduce((total, course) => {
     if (course.status === "Completed") {
@@ -237,7 +247,6 @@ export default function Comparison() {
               ></div>
             </div>
           </div>
-
           <div className="grid grid-cols-2 gap-2 mb-4">
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="text-3xl font-semibold text-gray-900 leading-none mb-1">
@@ -258,7 +267,6 @@ export default function Comparison() {
               <div className="text-xs text-gray-400">quarters</div>
             </div>
           </div>
-
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">
               Courses
@@ -279,7 +287,11 @@ export default function Comparison() {
               ))}
             </div>
           </div>
-          <CourseListQuarter activeFilter={activeFilter} />
+          <CourseList
+            activeFilter={activeFilter}
+            courses={quarterCourses}
+            onCourseClick={setSelectedCourse}
+          />{" "}
         </div>
 
         <div className="w-full bg-white" style={{ width: "50%" }}>
@@ -370,7 +382,11 @@ export default function Comparison() {
                 </div>
               </div>
             </div>
-            <CourseListSemester activeFilter={activeFilter1} />
+            <CourseList
+              activeFilter={activeFilter1}
+              courses={semesterCourses}
+              onCourseClick={setSelectedCourse}
+            />
           </div>
         </div>
       </div>

@@ -23,7 +23,7 @@ router.get("/", async (req, res) => {
       FROM courses
       WHERE catalog_id = 1
     `;
-    res.status(200).json({courses});
+    res.status(200).json({ courses });
   } catch (err) {
     console.error("class-selector error:", err);
     res.status(500).json({ error: err.message });
@@ -51,7 +51,7 @@ router.get("/:student_id", async (req, res) => {
       ON student_courses.course_id = courses.course_id
       WHERE student_id = ${student_id}
     `;
-    return res.json({courses});
+    return res.json({ courses });
   } catch (error) {
     console.error("Get saved courses error:", error);
     return res.status(500).json({
@@ -67,19 +67,24 @@ router.post("/:student_id", async (req, res) => {
   const { courses } = req.body;
 
   try {
-    await sql`DELETE FROM student_courses WHERE student_id = ${student_id}`;
+    await sql`
+      DELETE FROM public.student_courses
+      WHERE student_id = ${student_id}
+    `;
 
-    if (courses.length > 0) {
-      const rows = courses.map((course) => ({
-        student_id,
-        course_id: course.course_id,
-      }));
-      await sql`INSERT INTO student_courses ${sql(rows)}`
+    for (const course of courses) {
+      await sql`
+        INSERT INTO public.student_courses
+          (student_id, course_id)
+        VALUES
+          (${student_id}, ${course.course_id})
+      `;
     }
 
     return res.json({ message: "Courses saved successfully." });
   } catch (error) {
     console.error("Save courses error:", error);
+
     return res.status(500).json({
       error: "Failed to save courses.",
       details: error.message,

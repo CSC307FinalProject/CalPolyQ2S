@@ -6,7 +6,6 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 const app = express();
-const PORT = 3000;
 
 app.use(cors());
 app.use(express.json());
@@ -17,34 +16,30 @@ export async function registerUser(req, res) {
 
   // Input validity check
   if (!email || !password) {
-    return res.status(400).send("Bad request: Invalid input");
+    return res.status(400).send({ error: "Bad request: Invalid input" });
   }
 
   try {
-
     // Find potential existing email already in DB
     const existing = await sql`SELECT 1 FROM students WHERE email = ${email}`;
 
     // Only register new account if email not in DB
     if (existing.length > 0) {
-      return res.status(409).send("Email already taken");
+      return res.status(409).send({ error: "Email already taken" });
     }
 
-    
     // Extract everything before @ in email
     const name = email.split("@")[0];
 
-
-    // Salt and hash the user's input with bcrypt 
+    // Salt and hash the user's input with bcrypt
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    
 
     // Password MUST be hashed here!!
 
     // Add to students table, get the values
     // use js destructuring to pull out first element of new user (student id)
-   const [newUser] = await sql`
+    const [newUser] = await sql`
       INSERT INTO students (name, email, password_hash) 
       VALUES (${name}, ${email}, ${hashedPassword})
       RETURNING student_id;
@@ -52,12 +47,14 @@ export async function registerUser(req, res) {
 
     // Generate and return access token
     const token = await generateAccessToken(email);
-    return res.status(201).send({ token, student_id:  newUser.student_id, email});
-
-  } 
-  catch (error) {
+    return res
+      .status(201)
+      .send({ token, student_id: newUser.student_id, email });
+  } catch (error) {
     console.error("Register error:", error);
-    return res.status(500).json({ error: "Registration failed.", details: error.message });
+    return res
+      .status(500)
+      .json({ error: "Registration failed.", details: error.message });
   }
 }
 
@@ -94,22 +91,20 @@ export async function loginUser(req, res) {
 
     // Generate and return access token
     const token = await generateAccessToken(email);
-    return res.status(200).json({ token, student_id: user.student_id, email: user.email });
-
-  } 
-  catch (error) {
+    return res
+      .status(200)
+      .json({ token, student_id: user.student_id, email: user.email });
+  } catch (error) {
     console.error("Login error details:", error);
-    
+
     return res.status(500).json({
       error: "Login failed due to server error.",
       details: error.message,
     });
-    
   }
 }
 
 // ----------------------------------------------------------------------
-
 
 function generateAccessToken(email) {
   return new Promise((resolve, reject) => {
@@ -129,9 +124,8 @@ function generateAccessToken(email) {
 }
 
 export function authenticateUser(req, res, next) {
-  
   const authHeader = req.headers["authorization"];
-  
+
   //Getting the 2nd part of the auth header (the token)
   const token = authHeader && authHeader.split(" ")[1];
 
@@ -139,19 +133,15 @@ export function authenticateUser(req, res, next) {
   if (!token) {
     console.log("No token received");
     res.status(401).end();
-  } 
-  else { // Otherwise, verify token
-    jwt.verify(
-      token,
-      process.env.TOKEN_SECRET,
-      (error, decoded) => {
-        if (decoded) {
-          next();
-        } else {
-          console.log("JWT error:", error);
-          res.status(401).end();
-        }
+  } else {
+    // Otherwise, verify token
+    jwt.verify(token, process.env.TOKEN_SECRET, (error, decoded) => {
+      if (decoded) {
+        next();
+      } else {
+        console.log("JWT error:", error);
+        res.status(401).end();
       }
-    );
+    });
   }
 }
