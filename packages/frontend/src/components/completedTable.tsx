@@ -18,7 +18,7 @@ function CompletedCourseItem({ course, onRemove }: CompletedCourseItemProps) {
     // "group" enables child group-hover selectors (X button color change)
     // Entire row is clickable and turns red on hover to signal removal
     <div
-      className="group flex items-center gap-3 px-3 py-2 border-l-2 border-emerald-400
+      className="group flex items-center gap-3 px-3 py-2 border-l-2 
                  hover:bg-red-50 transition-colors duration-150 cursor-pointer
                  animate-[course-enter_200ms_ease-out_both]"
       onClick={() => onRemove(course.course_id)}
@@ -68,11 +68,11 @@ export default function CompletedTable({
     <div className="w-full h-full border border-gray-200 rounded-xl p-3 flex flex-col justify-between gap-3">
       <div className="flex flex-col gap-3 flex-1 min-h-0">
         {/* Count badge shows how many courses are selected at a glance */}
-        <div className="text-xl font-bold text-black border-b border-gray-200 pb-2">
+        <div className="flex items-center justify-center text-xl font-bold text-black border-b border-gray-200 pb-2">
           Completed Classes
           {courses.length > 0 && (
-            <span className="ml-2 text-sm font-normal text-emerald-600">
-              ({courses.length})
+            <span className="ml-2 text-base font-bold text-calpoly-green">
+              [{courses.length}]
             </span>
           )}
         </div>
