@@ -2,7 +2,6 @@ import {
   LoaderCircle,
   Search,
   Plus,
-  Delete,
   Save,
   CircleCheckBig,
   CircleX,
@@ -28,14 +27,20 @@ interface ClassTableProps {
   courses: Course[];
   completed: Course[];
   onAddCourse: (course: Course) => void;
+  onRemoveCourse: (course_id: number) => void;
   onSaveCourses: (completed_courses: Course[]) => Promise<void>;
+  major?: string;
+  concentration?: string;
 }
 
 export default function ClassTable({
   courses,
   completed,
   onAddCourse,
+  onRemoveCourse,
   onSaveCourses,
+  major,
+  concentration,
 }: ClassTableProps) {
   // set up filters and query states
   const [searchQuery, setSearchQuery] = useState("");
@@ -78,6 +83,7 @@ export default function ClassTable({
         courses={visibleCourses}
         completed={completed}
         onAddCourse={onAddCourse}
+        onRemoveCourse={onRemoveCourse}
       />
     </div>
   );
@@ -234,9 +240,10 @@ interface TableBodyProps {
   courses: Course[];
   completed: Course[];
   onAddCourse: (course: Course) => void;
+  onRemoveCourse: (course_id: number) => void;
 }
 
-function TableBody({ courses, completed, onAddCourse }: TableBodyProps) {
+function TableBody({ courses, completed, onAddCourse, onRemoveCourse }: TableBodyProps) {
   // init an array that groups courses by tag in the defined display order
   const groups = TAG_DISPLAY_ORDER.reduce<{ tag: string; courses: Course[] }[]>(
     (acc, tag) => {
@@ -270,16 +277,25 @@ function TableBody({ courses, completed, onAddCourse }: TableBodyProps) {
             <hr className="flex-1 border-gray-200" />
           </div>
           <div className="divide-y divide-gray-100">
-            {tagCourses.map((course) => (
-              <CourseButton
-                key={course.course_id}
-                {...course}
-                isSelected={completed.some(
-                  (c) => c.course_id === course.course_id,
-                )}
-                onClick={() => onAddCourse(course)}
-              />
-            ))}
+            {tagCourses.map((course) => {
+              // Compute selection once to use in both the prop and the click handler
+              const isSelected = completed.some(
+                (c) => c.course_id === course.course_id,
+              );
+              return (
+                <CourseButton
+                  key={course.course_id}
+                  {...course}
+                  isSelected={isSelected}
+                  // Toggle: remove if already in completed list, add if not
+                  onClick={() =>
+                    isSelected
+                      ? onRemoveCourse(course.course_id)
+                      : onAddCourse(course)
+                  }
+                />
+              );
+            })}
           </div>
         </div>
       ))}
@@ -294,7 +310,9 @@ interface CourseButtonProps extends Course {
   isSelected: boolean;
 }
 
-// Used in both the course list (class-table) and the completed sidebar (completed-table)
+// Used in the course search list (ClassTable).
+// When selected: shows green checkmark at rest, cross-fades to red X on hover
+// to signal "click to remove". When not selected: shows gray plus icon.
 export function CourseButton({
   course_code,
   course_name,
@@ -304,11 +322,15 @@ export function CourseButton({
   return (
     <button
       onClick={onClick}
-      className={`w-full flex items-center gap-4 px-4 py-3 text-left transition-colors duration-150 cursor-pointer
+      // "group" enables child group-hover selectors for the icon cross-fade
+      // Selected: hover turns red to signal removal; unselected: neutral gray hover
+      className={`group w-full flex items-center gap-4 px-4 py-3 text-left transition-colors duration-150 cursor-pointer
         ${isSelected ? "hover:bg-red-50" : "hover:bg-gray-50"}`}
     >
+      {/* Course code turns emerald when selected — "completed" visual language */}
       <span
-        className={`w-20 shrink-0 text-sm font-mono font-semibold ${isSelected ? "text-black" : "text-gray-700"}`}
+        className={`w-20 shrink-0 text-sm font-mono font-semibold
+          ${isSelected ? "text-emerald-700" : "text-gray-700"}`}
       >
         {course_code}
       </span>
@@ -317,11 +339,28 @@ export function CourseButton({
       >
         {course_name}
       </span>
-      <span
-        className={`shrink-0 w-6 h-6 flex items-center justify-center rounded-full border transition-colors duration-150
-        ${isSelected ? "border-red-300 text-red-400" : "border-gray-300 text-gray-400"}`}
-      >
-        {isSelected ? <Delete size={12} /> : <Plus size={12} />}
+
+      {/* Icon container: both icons are absolute so they occupy the same space during cross-fade */}
+      <span className="shrink-0 w-6 h-6 flex items-center justify-center relative">
+        {isSelected ? (
+          <>
+            {/* Green check at rest — signals "already in your list" */}
+            <CircleCheckBig
+              size={16}
+              className="absolute text-emerald-500 transition-opacity duration-150 opacity-100 group-hover:opacity-0"
+            />
+            {/* Red X on hover — signals "click to remove" */}
+            <CircleX
+              size={16}
+              className="absolute text-red-400 transition-opacity duration-150 opacity-0 group-hover:opacity-100"
+            />
+          </>
+        ) : (
+          <Plus
+            size={16}
+            className="text-gray-400 transition-colors duration-150 group-hover:text-gray-600"
+          />
+        )}
       </span>
     </button>
   );
