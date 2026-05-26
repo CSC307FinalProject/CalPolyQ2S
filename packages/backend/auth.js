@@ -3,7 +3,7 @@ import sql from "./index.js";
 import cors from "cors";
 import express from "express";
 import bcrypt from "bcrypt";
-import { supabase } from "./supabaseClient.js";
+import jwt from "jsonwebtoken";
 
 const app = express();
 const PORT = 3000;

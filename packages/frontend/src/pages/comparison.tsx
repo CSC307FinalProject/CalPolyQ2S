@@ -14,6 +14,12 @@ type SavedCourse = {
   status: string;
 };
 
+type ConversionCourse = SavedCourse & {
+  convertedCode?: string;
+  convertedTitle?: string;
+  convertedUnits?: number;
+};
+
 const filters = ["All", "Completed", "Active", "Remaining"];
 
 const getStatusStyles = (status: string) => {
@@ -37,6 +43,10 @@ export default function Comparison() {
   const [semesterCourses, setSemesterCourses] = useState<SavedCourse[]>([]);
   const user = getStoredUser();
 
+  const [selectedCourse, setSelectedCourse] = useState<ConversionCourse | null>(
+    null,
+  );
+
   useEffect(() => {
     async function loadSavedCourses() {
       if (!user) return;
@@ -53,11 +63,14 @@ export default function Comparison() {
       }
 
       const saved = json.courses.map((course: any) => ({
-        id: course.id,
+        id: course.course_id,
         code: course.course_code,
         title: course.course_name,
         units: course.units,
         status: "Completed",
+        convertedCode: course.converted_course_code,
+        convertedTitle: course.converted_course_name,
+        convertedUnits: course.converted_units,
       }));
 
       setQuarterCourses(saved);
@@ -77,7 +90,12 @@ export default function Comparison() {
       <div className="screen">
         <div className="h-100 overflow-y-auto no-scrollbar p-4">
           {filteredCourses.map((course) => (
-            <div key={course.id} className="bg-white shadow p-5">
+            <button
+              key={course.id}
+              onClick={() => setSelectedCourse(course)}
+              className="w-full text-left bg-white shadow p-5 hover:bg-gray-50 transition-colors"
+            >
+              {" "}
               <div className="flex items-start">
                 <div>
                   <h2 className="text-black! flex">{course.code}</h2>
@@ -96,7 +114,7 @@ export default function Comparison() {
                   </span>
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -113,7 +131,12 @@ export default function Comparison() {
       <div className="screen">
         <div className="h-100 overflow-y-auto no-scrollbar p-4">
           {filteredCourses.map((course) => (
-            <div key={course.id} className="bg-white shadow p-5">
+            <button
+              key={course.id}
+              onClick={() => setSelectedCourse(course)}
+              className="w-full text-left bg-white shadow p-5 hover:bg-gray-50 transition-colors"
+            >
+              {" "}
               <div className="flex items-start">
                 <div>
                   <h2 className="text-black! flex">{course.code}</h2>
@@ -132,7 +155,7 @@ export default function Comparison() {
                   </span>
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       </div>
@@ -354,6 +377,71 @@ export default function Comparison() {
       <Link to="/class-selector" className="fixed bottom-0 left-0 m-2">
         <BackButton />
       </Link>
+      {selectedCourse && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+                  Class Conversion
+                </p>
+                <h2 className="mt-1 text-xl font-bold text-gray-900">
+                  {selectedCourse.code}
+                </h2>
+                <p className="text-sm text-gray-500">{selectedCourse.title}</p>
+              </div>
+
+              <button
+                onClick={() => setSelectedCourse(null)}
+                className="rounded-full px-3 py-1 text-sm text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-6 rounded-xl border border-gray-200 p-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+                Quarter Course
+              </p>
+              <div className="mt-2 flex justify-between gap-4">
+                <div>
+                  <p className="font-semibold text-gray-900">
+                    {selectedCourse.code}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {selectedCourse.title}
+                  </p>
+                </div>
+                <p className="text-sm text-gray-500">
+                  {selectedCourse.units} units
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-3 rounded-xl border border-calpoly-green/30 bg-green-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-green-700">
+                Semester Equivalent
+              </p>
+              <div className="mt-2 flex justify-between gap-4">
+                <div>
+                  <p className="font-semibold text-gray-900">
+                    {selectedCourse.convertedCode || "No conversion found"}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {selectedCourse.convertedTitle ||
+                      "This course may need advisor review."}
+                  </p>
+                </div>
+                <p className="text-sm text-gray-500">
+                  {selectedCourse.convertedUnits
+                    ? `${selectedCourse.convertedUnits} units`
+                    : ""}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
