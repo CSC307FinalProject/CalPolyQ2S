@@ -58,12 +58,21 @@ function CompletedCourseItem({ course, onRemove }: CompletedCourseItemProps) {
 interface CompletedTableProps {
   courses: Course[];
   onRemoveCourse: (course_id: number) => void;
+  onSaveCourses: () => Promise<void>;
 }
 
 export default function CompletedTable({
   courses,
   onRemoveCourse,
+  onSaveCourses,
 }: CompletedTableProps) {
+  const navigate = useNavigate();
+
+  async function handleContinue() {
+    await onSaveCourses();
+    navigate("/q2s-comparison");
+  }
+
   return (
     <div className="w-full h-full border border-gray-200 rounded-xl p-3 flex flex-col justify-between gap-3">
       <div className="flex flex-col gap-3 flex-1 min-h-0">
@@ -99,9 +108,10 @@ export default function CompletedTable({
         <Link to="/login">
           <BackButton />
         </Link>
-        <Link to="/q2s-comparison">
+
+        <button type="button" onClick={handleContinue}>
           <ContinueButton label="Translate Classes" />
-        </Link>
+        </button>
       </div>
     </div>
   );

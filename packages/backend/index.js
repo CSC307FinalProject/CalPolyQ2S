@@ -7,7 +7,7 @@ import classSelectorRouter from "./routes/class-selector.js";
 import comparisonRouter from "./routes/comparison.js";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 const sql = postgres(process.env.DATABASE_URL);
 const defaultAllowedOrigins = [
   "http://localhost:5173",
