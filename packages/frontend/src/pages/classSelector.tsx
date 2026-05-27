@@ -117,7 +117,7 @@ function ClassSelector() {
           </div>
         </div>
 
-        <div className="col-span-1 ml-5">
+        <div className="col-span-1 ml-5 flex flex-col min-h-0">
           <CompletedTable
             courses={completed}
             onRemoveCourse={handleRemoveCourse}
