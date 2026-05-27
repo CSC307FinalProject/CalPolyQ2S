@@ -68,7 +68,7 @@ router.get("/:student_id", async (req, res) => {
   WHERE sc.student_id = ${student_id}
 `;
 
-const quarterCourses = await sql`
+    const quarterCourses = await sql`
   SELECT
     course_id,
     subject || ' ' || course_number AS course_code,
@@ -78,7 +78,7 @@ const quarterCourses = await sql`
   WHERE catalog_id = 1
 `;
 
-const semesterCourses = await sql`
+    const semesterCourses = await sql`
   SELECT
     course_id,
     subject || ' ' || course_number AS course_code,
