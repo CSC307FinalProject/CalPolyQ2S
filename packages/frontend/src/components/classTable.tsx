@@ -200,15 +200,18 @@ function TableHeader({
         />
         {/* looping over filters to apply active filters and animations  */}
         {FILTER_LABELS.map((label) => {
-          const isActive =
-            activeFilter !== null && activeFilter === FILTER_TAG_MAP[label];
+          const isActive = activeFilter === FILTER_TAG_MAP[label];
           return (
             <li
               key={label}
               onMouseEnter={handleFilterHover}
               onClick={() => onFilterChange(label)}
-              className={`relative z-10 px-3 py-1 text-xs mix-blend-difference text-white font-semibold uppercase cursor-pointer rounded-full select-none transition-colors duration-150
-                ${isActive ? "underline" : ""}`}
+              className={`relative z-10 px-3 py-1 text-xs font-semibold uppercase cursor-pointer rounded-full select-none transition-colors duration-150
+                    ${
+                      isActive
+                        ? "bg-black text-white"
+                        : "mix-blend-difference text-white"
+                    }`}
             >
               {label}
             </li>
