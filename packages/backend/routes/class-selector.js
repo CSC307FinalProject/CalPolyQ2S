@@ -62,7 +62,7 @@ router.get("/:student_id", async (req, res) => {
       ON student_courses.course_id = courses.course_id
       WHERE student_id = ${student_id}
     `,
-    // fetch the major and concentration
+      // fetch the major and concentration
       sql`
       SELECT m.major_name, s.concentration
       FROM students s

@@ -11,7 +11,12 @@ interface SearchBarProps {
   onChange?: (value: string) => void;
 }
 
-function SearchBar({ placeholder, value = "", options, onChange }: SearchBarProps) {
+function SearchBar({
+  placeholder,
+  value = "",
+  options,
+  onChange,
+}: SearchBarProps) {
   const id = useId();
   const [prevValue, setPrevValue] = useState(value);
   const [inputValue, setInputValue] = useState(value);
@@ -25,7 +30,10 @@ function SearchBar({ placeholder, value = "", options, onChange }: SearchBarProp
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         setOpen(false);
       }
     }
@@ -33,9 +41,10 @@ function SearchBar({ placeholder, value = "", options, onChange }: SearchBarProp
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const filtered = options?.filter(
-    (o) => o != null && o.toLowerCase().includes(inputValue.toLowerCase())
-  ) ?? [];
+  const filtered =
+    options?.filter(
+      (o) => o != null && o.toLowerCase().includes(inputValue.toLowerCase()),
+    ) ?? [];
 
   function commit(option: string) {
     setInputValue(option);
@@ -86,7 +95,9 @@ function SearchBar({ placeholder, value = "", options, onChange }: SearchBarProp
             setInputValue(e.target.value);
             if (options) setOpen(true);
           }}
-          onFocus={() => { if (options) setOpen(true); }}
+          onFocus={() => {
+            if (options) setOpen(true);
+          }}
           onBlur={handleBlur}
           onKeyDown={handleKeyDown}
         />
