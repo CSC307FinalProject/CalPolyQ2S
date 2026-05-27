@@ -34,16 +34,16 @@ const getStatusStyles = (status: string) => {
   }
 };
 
-type SavedCourseResponse = {
-  course_id: number;
-  course_code: string;
-  course_name: string;
-  units: number;
-  converted_course_id?: number | null;
-  converted_course_code?: string | null;
-  converted_course_name?: string | null;
-  converted_units?: number | null;
-};
+// type SavedCourseResponse = {
+//   course_id: number;
+//   course_code: string;
+//   course_name: string;
+//   units: number;
+//   converted_course_id?: number | null;
+//   converted_course_code?: string | null;
+//   converted_course_name?: string | null;
+//   converted_units?: number | null;
+// };
 
 type CourseListProps = {
   activeFilter: string;
@@ -134,7 +134,7 @@ const completedSemesterIds = new Set(
     .filter(Boolean),
 );
 
-const conversionByQuarterId = new Map(
+const conversionByQuarterId = new Map<number, any>(
   (json.courses ?? []).map((course: any) => [course.course_id, course]),
 );
 
@@ -183,7 +183,7 @@ setSemesterCourses(semesterSaved);
 
   const semestersLeft = Math.ceil((120 - semesterUnitsDone) / 15);
 
-  const semestersLeftPercent = Math.min(((8 - semestersLeft) / 8) * 100, 100);
+  const semestersLeftPercent = Math.min(((9 - semestersLeft) / 8) * 100, 100);
 
   const quarterUnitsDone = quarterCourses.reduce((total, course) => {
     if (course.status === "Completed") {
