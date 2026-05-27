@@ -41,7 +41,7 @@ router.get("/:student_id", async (req, res) => {
 
     CASE
       WHEN q.course_number ~ '^[3-5]' THEN 'UPPER DIV'
-      WHEN q.subject LIKE 'GE%' THEN 'GE'
+      WHEN q.subject LIKE 'Gen Ed%' THEN 'GE'
       WHEN q.tech_elective_eligible THEN 'SUPPORT'
       ELSE 'LOWER DIV'
     END AS tag
