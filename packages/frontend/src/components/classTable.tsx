@@ -243,7 +243,12 @@ interface TableBodyProps {
   onRemoveCourse: (course_id: number) => void;
 }
 
-function TableBody({ courses, completed, onAddCourse, onRemoveCourse }: TableBodyProps) {
+function TableBody({
+  courses,
+  completed,
+  onAddCourse,
+  onRemoveCourse,
+}: TableBodyProps) {
   // init an array that groups courses by tag in the defined display order
   const groups = TAG_DISPLAY_ORDER.reduce<{ tag: string; courses: Course[] }[]>(
     (acc, tag) => {
