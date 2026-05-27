@@ -13,13 +13,15 @@ interface SearchBarProps {
 
 function SearchBar({ placeholder, value = "", options, onChange }: SearchBarProps) {
   const id = useId();
+  const [prevValue, setPrevValue] = useState(value);
   const [inputValue, setInputValue] = useState(value);
   const [open, setOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  if (prevValue !== value) {
+    setPrevValue(value);
     setInputValue(value);
-  }, [value]);
+  }
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
