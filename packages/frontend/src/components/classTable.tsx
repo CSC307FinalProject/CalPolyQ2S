@@ -39,8 +39,8 @@ export default function ClassTable({
   onAddCourse,
   onRemoveCourse,
   onSaveCourses,
-  major,
-  concentration,
+  //major,
+  //concentration,
 }: ClassTableProps) {
   // set up filters and query states
   const [searchQuery, setSearchQuery] = useState("");
