@@ -1,7 +1,7 @@
 import { X } from "lucide-react";
 import type { Course } from "../data/courses";
 import { ContinueButton, BackButton } from "./navButtons";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // ─── CompletedCourseItem ──────────────────────────────────────────────────────
 // Dedicated row component for the completed-courses sidebar.

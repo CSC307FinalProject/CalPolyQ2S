@@ -129,12 +129,12 @@ export default function Comparison() {
       }
 
       const completedQuarterIds = new Set(
-        (json.courses ?? []).map((course: any) => course.course_id),
+        (json.courses ?? []).map((course: ApiCourse) => course.course_id),
       );
 
       const completedSemesterIds = new Set(
         (json.courses ?? [])
-          .map((course: any) => course.converted_course_id)
+          .map((course: ApiCourse) => course.converted_course_id)
           .filter(Boolean),
       );
 

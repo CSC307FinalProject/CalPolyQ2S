@@ -51,7 +51,11 @@ function SearchBar({ placeholder, value = "", options, onChange }: SearchBarProp
     if (!options) return;
     if (e.key === "Enter") {
       e.preventDefault();
-      filtered.length > 0 ? commit(filtered[0]) : revert();
+      if (filtered.length > 0) {
+        commit(filtered[0]);
+      } else {
+        revert();
+      }
     } else if (e.key === "Escape") {
       revert();
     }
