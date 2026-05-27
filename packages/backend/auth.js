@@ -5,11 +5,6 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-const app = express();
-
-app.use(cors());
-app.use(express.json());
-
 // Registration
 export async function registerUser(req, res) {
   const { email, password } = req.body;
