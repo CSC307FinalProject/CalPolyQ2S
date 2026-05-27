@@ -34,16 +34,23 @@ const getStatusStyles = (status: string) => {
   }
 };
 
-// type SavedCourseResponse = {
-//   course_id: number;
-//   course_code: string;
-//   course_name: string;
-//   units: number;
-//   converted_course_id?: number | null;
-//   converted_course_code?: string | null;
-//   converted_course_name?: string | null;
-//   converted_units?: number | null;
-// };
+type ApiCourse = {
+  course_id: number;
+  course_code: string;
+  course_name: string;
+  units: number;
+  converted_course_id: number | null;
+  converted_course_code: string | null;
+  converted_course_name: string | null;
+  converted_units: number | null;
+};
+
+type CatalogCourse = {
+  course_id: number;
+  course_code: string;
+  course_name: string;
+  units: number;
+};
 
 type CourseListProps = {
   activeFilter: string;
@@ -98,8 +105,10 @@ export default function Comparison() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeFilter1, setActiveFilter1] = useState("All");
 
-const [quarterCourses, setQuarterCourses] = useState<ConversionCourse[]>([]);
-const [semesterCourses, setSemesterCourses] = useState<ConversionCourse[]>([]);
+  const [quarterCourses, setQuarterCourses] = useState<ConversionCourse[]>([]);
+  const [semesterCourses, setSemesterCourses] = useState<ConversionCourse[]>(
+    [],
+  );
   const studentId = getStoredUser()?.student_id;
 
   const [selectedCourse, setSelectedCourse] = useState<ConversionCourse | null>(
@@ -114,59 +123,61 @@ const [semesterCourses, setSemesterCourses] = useState<ConversionCourse[]>([]);
 
       const json = await response.json();
 
-      console.log("comparison response:", json);
-console.log("saved courses:", json.courses);
-console.log("quarter courses:", json.quarterCourses);
-console.log("semester courses:", json.semesterCourses);
-
       if (!response.ok) {
         console.error(json.error || "Failed to load saved courses.");
         return;
       }
 
-const completedQuarterIds = new Set(
-  (json.courses ?? []).map((course: any) => course.course_id),
-);
+      const completedQuarterIds = new Set(
+        (json.courses ?? []).map((course: any) => course.course_id),
+      );
 
-const completedSemesterIds = new Set(
-  (json.courses ?? [])
-    .map((course: any) => course.converted_course_id)
-    .filter(Boolean),
-);
+      const completedSemesterIds = new Set(
+        (json.courses ?? [])
+          .map((course: any) => course.converted_course_id)
+          .filter(Boolean),
+      );
 
-const conversionByQuarterId = new Map<number, any>(
-  (json.courses ?? []).map((course: any) => [course.course_id, course]),
-);
+      const conversionByQuarterId = new Map<number, ApiCourse>(
+        (json.courses ?? []).map((course: ApiCourse) => [
+          course.course_id,
+          course,
+        ]),
+      );
 
-const quarterSaved = (json.quarterCourses ?? []).map((course: any) => {
-  const conversion = conversionByQuarterId.get(course.course_id);
+      const quarterSaved = (json.quarterCourses ?? []).map(
+        (course: CatalogCourse) => {
+          const conversion = conversionByQuarterId.get(course.course_id);
 
-  return {
-    id: course.course_id,
-    code: course.course_code,
-    title: course.course_name,
-    units: course.units,
-    status: completedQuarterIds.has(course.course_id)
-      ? "Completed"
-      : "Remaining",
-    convertedCode: conversion?.converted_course_code,
-    convertedTitle: conversion?.converted_course_name,
-    convertedUnits: conversion?.converted_units,
-  };
-});
+          return {
+            id: course.course_id,
+            code: course.course_code,
+            title: course.course_name,
+            units: course.units,
+            status: completedQuarterIds.has(course.course_id)
+              ? "Completed"
+              : "Remaining",
+            convertedCode: conversion?.converted_course_code ?? undefined,
+            convertedTitle: conversion?.converted_course_name ?? undefined,
+            convertedUnits: conversion?.converted_units ?? undefined,
+          };
+        },
+      );
 
-const semesterSaved = (json.semesterCourses ?? []).map((course: any) => ({
-  id: course.course_id,
-  code: course.course_code,
-  title: course.course_name,
-  units: course.units,
-  status: completedSemesterIds.has(course.course_id)
-    ? "Completed"
-    : "Remaining",
-}));
+      const semesterSaved = (json.semesterCourses ?? []).map(
+        (course: CatalogCourse) => ({
+          id: course.course_id,
+          code: course.course_code,
+          title: course.course_name,
+          units: course.units,
+          status: completedSemesterIds.has(course.course_id)
+            ? "Completed"
+            : "Remaining",
+        }),
+      );
 
-setQuarterCourses(quarterSaved);
-setSemesterCourses(semesterSaved);
+      setQuarterCourses(quarterSaved);
+      setSemesterCourses(semesterSaved);
     }
 
     loadSavedCourses();
