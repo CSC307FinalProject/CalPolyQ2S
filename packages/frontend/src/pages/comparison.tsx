@@ -13,6 +13,12 @@ type SavedCourse = {
   status: string;
 };
 
+type ConversionCourse = SavedCourse & {
+  convertedCode?: string;
+  convertedTitle?: string;
+  convertedUnits?: number;
+};
+
 const filters = ["All", "Completed", "Active", "Remaining"];
 
 const getStatusStyles = (status: string) => {
@@ -29,18 +35,23 @@ const getStatusStyles = (status: string) => {
 };
 
 type SavedCourseResponse = {
-  id: number;
+  course_id: number;
   course_code: string;
   course_name: string;
   units: number;
+  converted_course_id?: number | null;
+  converted_course_code?: string | null;
+  converted_course_name?: string | null;
+  converted_units?: number | null;
 };
 
 type CourseListProps = {
   activeFilter: string;
-  courses: SavedCourse[];
+  courses: ConversionCourse[];
+  onCourseClick: (course: ConversionCourse) => void;
 };
 
-function CourseList({ activeFilter, courses }: CourseListProps) {
+function CourseList({ activeFilter, courses, onCourseClick }: CourseListProps) {
   const filteredCourses = courses.filter((course) => {
     if (activeFilter === "All") return true;
     return course.status === activeFilter;
@@ -50,16 +61,23 @@ function CourseList({ activeFilter, courses }: CourseListProps) {
     <div className="screen">
       <div className="h-100 overflow-y-auto no-scrollbar p-4">
         {filteredCourses.map((course) => (
-          <div key={course.id} className="bg-white shadow p-5">
+          <button
+            key={course.id}
+            type="button"
+            onClick={() => onCourseClick(course)}
+            className="w-full text-left bg-white shadow p-5 hover:bg-gray-50 transition-colors"
+          >
             <div className="flex items-start">
               <div>
                 <h2 className="text-black! flex">{course.code}</h2>
                 <span className="text-xl text-gray-500">{course.title}</span>
               </div>
+
               <div className="ml-auto flex items-center gap-2">
                 <span className="text-sm px-3 py-1 rounded-full flex items-end">
                   {course.units} units
                 </span>
+
                 <span
                   className={`text-sm px-3 py-1 rounded-full ml-auto ${getStatusStyles(
                     course.status,
@@ -69,7 +87,7 @@ function CourseList({ activeFilter, courses }: CourseListProps) {
                 </span>
               </div>
             </div>
-          </div>
+          </button>
         ))}
       </div>
     </div>
@@ -80,9 +98,13 @@ export default function Comparison() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeFilter1, setActiveFilter1] = useState("All");
 
-  const [quarterCourses, setQuarterCourses] = useState<SavedCourse[]>([]);
-  const [semesterCourses, setSemesterCourses] = useState<SavedCourse[]>([]);
+const [quarterCourses, setQuarterCourses] = useState<ConversionCourse[]>([]);
+const [semesterCourses, setSemesterCourses] = useState<ConversionCourse[]>([]);
   const studentId = getStoredUser()?.student_id;
+
+  const [selectedCourse, setSelectedCourse] = useState<ConversionCourse | null>(
+    null,
+  );
 
   useEffect(() => {
     async function loadSavedCourses() {
@@ -92,21 +114,59 @@ export default function Comparison() {
 
       const json = await response.json();
 
+      console.log("comparison response:", json);
+console.log("saved courses:", json.courses);
+console.log("quarter courses:", json.quarterCourses);
+console.log("semester courses:", json.semesterCourses);
+
       if (!response.ok) {
         console.error(json.error || "Failed to load saved courses.");
         return;
       }
 
-      const saved = (json.courses ?? []).map((course: SavedCourseResponse) => ({
-        id: course.id,
-        code: course.course_code,
-        title: course.course_name,
-        units: course.units,
-        status: "Completed",
-      }));
+const completedQuarterIds = new Set(
+  (json.courses ?? []).map((course: any) => course.course_id),
+);
 
-      setQuarterCourses(saved);
-      setSemesterCourses(saved);
+const completedSemesterIds = new Set(
+  (json.courses ?? [])
+    .map((course: any) => course.converted_course_id)
+    .filter(Boolean),
+);
+
+const conversionByQuarterId = new Map(
+  (json.courses ?? []).map((course: any) => [course.course_id, course]),
+);
+
+const quarterSaved = (json.quarterCourses ?? []).map((course: any) => {
+  const conversion = conversionByQuarterId.get(course.course_id);
+
+  return {
+    id: course.course_id,
+    code: course.course_code,
+    title: course.course_name,
+    units: course.units,
+    status: completedQuarterIds.has(course.course_id)
+      ? "Completed"
+      : "Remaining",
+    convertedCode: conversion?.converted_course_code,
+    convertedTitle: conversion?.converted_course_name,
+    convertedUnits: conversion?.converted_units,
+  };
+});
+
+const semesterSaved = (json.semesterCourses ?? []).map((course: any) => ({
+  id: course.course_id,
+  code: course.course_code,
+  title: course.course_name,
+  units: course.units,
+  status: completedSemesterIds.has(course.course_id)
+    ? "Completed"
+    : "Remaining",
+}));
+
+setQuarterCourses(quarterSaved);
+setSemesterCourses(semesterSaved);
     }
 
     loadSavedCourses();
@@ -187,7 +247,6 @@ export default function Comparison() {
               ></div>
             </div>
           </div>
-
           <div className="grid grid-cols-2 gap-2 mb-4">
             <div className="bg-gray-50 rounded-lg p-4">
               <div className="text-3xl font-semibold text-gray-900 leading-none mb-1">
@@ -208,7 +267,6 @@ export default function Comparison() {
               <div className="text-xs text-gray-400">quarters</div>
             </div>
           </div>
-
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-semibold uppercase tracking-widest text-gray-400">
               Courses
@@ -229,7 +287,11 @@ export default function Comparison() {
               ))}
             </div>
           </div>
-          <CourseList activeFilter={activeFilter} courses={quarterCourses} />
+          <CourseList
+            activeFilter={activeFilter}
+            courses={quarterCourses}
+            onCourseClick={setSelectedCourse}
+          />{" "}
         </div>
 
         <div className="w-full bg-white" style={{ width: "50%" }}>
@@ -323,6 +385,7 @@ export default function Comparison() {
             <CourseList
               activeFilter={activeFilter1}
               courses={semesterCourses}
+              onCourseClick={setSelectedCourse}
             />
           </div>
         </div>
@@ -330,6 +393,71 @@ export default function Comparison() {
       <Link to="/class-selector" className="fixed bottom-0 left-0 m-2">
         <BackButton />
       </Link>
+      {selectedCourse && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+                  Class Conversion
+                </p>
+                <h2 className="mt-1 text-xl font-bold text-gray-900">
+                  {selectedCourse.code}
+                </h2>
+                <p className="text-sm text-gray-500">{selectedCourse.title}</p>
+              </div>
+
+              <button
+                onClick={() => setSelectedCourse(null)}
+                className="rounded-full px-3 py-1 text-sm text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="mt-6 rounded-xl border border-gray-200 p-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+                Quarter Course
+              </p>
+              <div className="mt-2 flex justify-between gap-4">
+                <div>
+                  <p className="font-semibold text-gray-900">
+                    {selectedCourse.code}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {selectedCourse.title}
+                  </p>
+                </div>
+                <p className="text-sm text-gray-500">
+                  {selectedCourse.units} units
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-3 rounded-xl border border-calpoly-green/30 bg-green-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-green-700">
+                Semester Equivalent
+              </p>
+              <div className="mt-2 flex justify-between gap-4">
+                <div>
+                  <p className="font-semibold text-gray-900">
+                    {selectedCourse.convertedCode || "No conversion found"}
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    {selectedCourse.convertedTitle ||
+                      "This course may need advisor review."}
+                  </p>
+                </div>
+                <p className="text-sm text-gray-500">
+                  {selectedCourse.convertedUnits
+                    ? `${selectedCourse.convertedUnits} units`
+                    : ""}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

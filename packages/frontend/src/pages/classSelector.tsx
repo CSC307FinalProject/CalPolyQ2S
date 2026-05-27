@@ -71,6 +71,7 @@ function ClassSelector() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ courses: completed_courses }),
       });
+      console.log("Saving completed courses:", completed_courses);
       if (!res.ok) throw new Error(`Save failed: ${res.status}`);
     } catch (err) {
       console.log(err);
@@ -97,7 +98,7 @@ function ClassSelector() {
               courses={courses}
               completed={completed}
               onAddCourse={handleAddCourse}
-              onSaveCourses={handleSave}
+              onSaveCourses={() => handleSave(completed)}
             />
           </div>
         </div>
@@ -106,6 +107,7 @@ function ClassSelector() {
           <CompletedTable
             courses={completed}
             onRemoveCourse={handleRemoveCourse}
+            onSaveCourses={() => handleSave(completed)}
           />
         </div>
       </main>

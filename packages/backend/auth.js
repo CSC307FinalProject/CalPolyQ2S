@@ -16,7 +16,7 @@ export async function registerUser(req, res) {
 
   // Input validity check
   if (!email || !password) {
-    return res.status(400).send("Bad request: Invalid input");
+    return res.status(400).send({ error: "Bad request: Invalid input" });
   }
 
   try {
@@ -25,7 +25,7 @@ export async function registerUser(req, res) {
 
     // Only register new account if email not in DB
     if (existing.length > 0) {
-      return res.status(409).send("Email already taken");
+      return res.status(409).send({ error: "Email already taken" });
     }
 
     // Extract everything before @ in email

@@ -32,6 +32,7 @@ export default function RegisterForm() {
 
   const handleSubmit: FormSubmitHandler = async (event) => {
     event.preventDefault();
+    console.log("Register submit clicked");
 
     try {
       const response = await fetch(apiUrl("/register"), {
@@ -43,22 +44,27 @@ export default function RegisterForm() {
         }),
       });
 
-      if (response.status === 201) {
-        const payload = await response.json();
-        const userObj = JSON.stringify({
-          token: payload.token,
-          student_id: payload.student_id,
-          email: payload.email,
-        });
+      const payload = await response.json();
 
-        if (formData.staySignedIn) {
-          localStorage.setItem("user", userObj);
-        } else {
-          sessionStorage.setItem("user", userObj);
-        }
-
-        navigate("/class-selector");
+      if (!response.ok) {
+        console.error(payload.error || "Registration failed.");
+        return;
       }
+
+      const userObj = JSON.stringify({
+        student_id: payload.student_id,
+        email: payload.email,
+      });
+
+      if (formData.staySignedIn) {
+        localStorage.setItem("token", payload.token);
+        localStorage.setItem("user", userObj);
+      } else {
+        sessionStorage.setItem("token", payload.token);
+        sessionStorage.setItem("user", userObj);
+      }
+
+      navigate("/class-selector");
     } catch (error) {
       console.error("Register error:", error);
     }
@@ -87,6 +93,7 @@ export default function RegisterForm() {
           <input
             name="password"
             minLength={8}
+            required
             type={showPassword ? "text" : "password"}
             placeholder="Enter your password"
             value={formData.password}
