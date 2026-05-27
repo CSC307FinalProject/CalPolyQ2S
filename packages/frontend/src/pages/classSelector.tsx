@@ -2,7 +2,7 @@ import Navbar from "../components/navbar";
 import { SearchBar } from "../components/search";
 import ClassTable from "../components/classTable";
 import CompletedTable from "../components/completedTable";
-import type { Course } from "../data/courses";
+import type { Course, Major } from "../data/courses";
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { getStoredUser } from "../components/authStorage";
@@ -13,6 +13,8 @@ function ClassSelector() {
   const studentId = user?.student_id;
   const [completed, setCompleted] = useState<Course[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
+  const [majors, setMajors] = useState<Major[]>([]);
+  const [major, setMajor] = useState<string>("");
 
   // set the courses
   useEffect(() => {
@@ -27,7 +29,10 @@ function ClassSelector() {
         }
         return [];
       })
-      .then((data) => setCourses(data?.courses ?? []))
+      .then((data) => {
+        setCourses(data?.courses ?? []);
+        setMajors(data?.majors ?? []);
+      })
       .catch((err) => console.log(err));
   }, [studentId]);
 
@@ -43,7 +48,10 @@ function ClassSelector() {
         }
         return [];
       })
-      .then((data) => setCompleted(data?.courses ?? []))
+      .then((data) => {
+        setCompleted(data?.courses ?? []);
+        setMajor(data?.user?.major_name ?? "");
+      })
       .catch((err) => console.log(err));
   }, [studentId]);
 
@@ -69,7 +77,7 @@ function ClassSelector() {
       const res = await fetch(apiUrl(`/class-selector/${studentId}`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ courses: completed_courses }),
+        body: JSON.stringify({ courses: completed_courses, major }),
       });
       console.log("Saving completed courses:", completed_courses);
       if (!res.ok) throw new Error(`Save failed: ${res.status}`);
@@ -87,7 +95,12 @@ function ClassSelector() {
             Search for your catalog
           </div>
           <div className="flex items-center gap-4 mb-20">
-            <SearchBar placeholder="Major..." />
+            <SearchBar
+              placeholder="Major..."
+              value={major}
+              options={majors.map((m) => m.major_name)}
+              onChange={setMajor}
+            />
             <SearchBar placeholder="Concentration (Optional)..." />
           </div>
           <div className="w-full text-left text-2xl text-black font-bold">
@@ -98,7 +111,8 @@ function ClassSelector() {
               courses={courses}
               completed={completed}
               onAddCourse={handleAddCourse}
-              onSaveCourses={() => handleSave(completed)}
+              onRemoveCourse={handleRemoveCourse}
+              onSaveCourses={handleSave}
             />
           </div>
         </div>
