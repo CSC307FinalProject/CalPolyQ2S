@@ -5,6 +5,7 @@ import express from "express";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
+import { readFileSync } from "fs";
 
 const app = express();
 const PORT = 3000;
@@ -32,7 +33,7 @@ export async function sendEmail(email) {
       from: `"Cal Poly Q2S" <${process.env.SMTP_USER}>`,
       to: "hayk.chaloyan@gmail.com", // list of recipients
       subject: "Verify your Cal Poly Q2S Account", // subject line
-      html: "<b>Hello world?</b>", // HTML body
+      html: readFileSync(new URL("./components/email-body.html", import.meta.url), "utf-8")
     });
 
     console.log("Message sent: %s", info.messageId);
