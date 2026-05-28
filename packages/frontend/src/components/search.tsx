@@ -108,7 +108,7 @@ function SearchBar({
           <Search size={16} strokeWidth={2} aria-hidden="true" />
         </div>
         {options && open && filtered.length > 0 && (
-          <ul className="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-md">
+          <ul className="absolute z-15 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-md">
             {filtered.map((option) => (
               <li
                 key={option}
