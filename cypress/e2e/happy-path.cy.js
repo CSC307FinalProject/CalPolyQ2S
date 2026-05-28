@@ -69,6 +69,7 @@ function stubApi() {
       return;
     }
 
+    req.alias = "loadCatalog";
     req.reply({
       statusCode: 200,
       body: {
@@ -82,7 +83,7 @@ function stubApi() {
         courses,
       },
     });
-  }).as("loadCatalog");
+  });
 
   cy.intercept("GET", "**/class-selector/42", {
     statusCode: 200,
