@@ -109,9 +109,7 @@ export default function CompletedTable({
           <BackButton />
         </Link>
 
-        <button type="button" onClick={handleContinue}>
-          <ContinueButton label="Translate Classes" />
-        </button>
+        <ContinueButton label="Translate Classes" onClick={handleContinue} />
       </div>
     </div>
   );

@@ -8,7 +8,7 @@ router.get("/", async (req, res) => {
   try {
     // get all the courses, and use alias for better naming conventions
     // use case when to aggregate data during sql query for table (tag)
-    const [courses, majors] = await Promise.all([
+    const [courses, majors, concentrations] = await Promise.all([
       sql`
       SELECT 
         course_id,
@@ -27,9 +27,13 @@ router.get("/", async (req, res) => {
       SELECT *
       FROM majors;
     `,
+      sql` 
+      SELECT *
+      FROM concentrations;
+    `,
     ]);
 
-    res.status(200).json({ courses, majors });
+    res.status(200).json({ courses, majors, concentrations });
   } catch (err) {
     console.error("class-selector error:", err);
     res.status(500).json({ error: err.message });
@@ -63,9 +67,10 @@ router.get("/:student_id", async (req, res) => {
     `,
       // fetch the major and concentration
       sql`
-      SELECT m.major_name, s.concentration
+      SELECT m.major_name, c.concentration_name
       FROM students s
       LEFT JOIN majors m ON s.major_id = m.major_id
+      LEFT JOIN concentrations c ON s.concentration_id = c.concentration_id
       WHERE s.student_id = ${student_id}`,
     ]);
 
@@ -84,7 +89,7 @@ router.get("/:student_id", async (req, res) => {
 // save the data
 router.post("/:student_id", async (req, res) => {
   const { student_id } = req.params;
-  const { courses, major } = req.body;
+  const { courses, major, concentration } = req.body;
 
   try {
     await sql`
@@ -105,6 +110,14 @@ router.post("/:student_id", async (req, res) => {
       await sql`
         UPDATE students
         SET major_id = (SELECT major_id FROM majors WHERE major_name = ${major} LIMIT 1)
+        WHERE student_id = ${student_id}
+      `;
+    }
+
+    if (concentration) {
+      await sql`
+        UPDATE students
+        SET concentration_id = (SELECT concentration_id FROM concentrations WHERE concentration_name = ${concentration} LIMIT 1)
         WHERE student_id = ${student_id}
       `;
     }

@@ -2,7 +2,7 @@ import Navbar from "../components/navbar";
 import { SearchBar } from "../components/search";
 import ClassTable from "../components/classTable";
 import CompletedTable from "../components/completedTable";
-import type { Course, Major } from "../data/courses";
+import type { Course, Major, Concentrations } from "../data/courses";
 import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { getStoredUser } from "../components/authStorage";
@@ -16,6 +16,8 @@ function ClassSelector() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [majors, setMajors] = useState<Major[]>([]);
   const [major, setMajor] = useState<string>("");
+  const [concentrations, setConcentrations] = useState<Concentrations[]>([]);
+  const [concentration, setConcentration] = useState<string>("");
   const [courseType, setCourseType] = useState<string>("Q");
 
   // set the courses
@@ -34,6 +36,7 @@ function ClassSelector() {
       .then((data) => {
         setCourses(data?.courses ?? []);
         setMajors(data?.majors ?? []);
+        setConcentrations(data?.concentrations ?? []);
       })
       .catch((err) => console.log(err));
   }, [studentId]);
@@ -53,6 +56,7 @@ function ClassSelector() {
       .then((data) => {
         setCompleted(data?.courses ?? []);
         setMajor(data?.user?.major_name ?? "");
+        setConcentration(data?.user?.concentration_name ?? "");
       })
       .catch((err) => console.log(err));
   }, [studentId]);
@@ -85,7 +89,11 @@ function ClassSelector() {
       const res = await fetch(apiUrl(`/class-selector/${studentId}`), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ courses: completed_courses, major }),
+        body: JSON.stringify({
+          courses: completed_courses,
+          major,
+          concentration,
+        }),
       });
       console.log("Saving completed courses:", completed_courses);
       if (!res.ok) throw new Error(`Save failed: ${res.status}`);
@@ -93,6 +101,18 @@ function ClassSelector() {
       console.log(err);
     }
   }
+
+  // Look up the major_id for whatever major name is currently selected
+  const selectedMajorId = majors.find((m) => m.major_name === major)?.major_id;
+  // When the major changes, reset concentration so stale data doesn't persist
+  useEffect(() => {
+    setConcentration("");
+  }, [major]);
+
+  // filter only concentrations associated with that major
+  const filteredConcentrations = selectedMajorId
+    ? concentrations.filter((c) => c.major_id === selectedMajorId)
+    : [];
 
   return (
     <div className="h-screen bg-white overflow-hidden flex flex-col">
@@ -109,7 +129,13 @@ function ClassSelector() {
               options={majors.map((m) => m.major_name)}
               onChange={setMajor}
             />
-            <SearchBar placeholder="Concentration (Optional)..." />
+            <SearchBar
+              placeholder="Concentration (Optional)..."
+              value={concentration}
+              options={filteredConcentrations.map((c) => c.concentration_name)}
+              onChange={setConcentration}
+              disabled={filteredConcentrations.length === 0}
+            />
           </div>
           <div className="flex justify-between w-full text-left text-2xl text-black font-bold">
             Major - Search for courses

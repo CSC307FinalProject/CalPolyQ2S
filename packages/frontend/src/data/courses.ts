@@ -61,3 +61,9 @@ export interface Course {
   catalog_id: number;
   tag: string;
 }
+
+export interface Concentrations {
+  concentration_id: number;
+  major_id: number;
+  concentration_name: string;
+}
