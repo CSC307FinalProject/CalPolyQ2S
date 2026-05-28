@@ -16,6 +16,7 @@ function ClassSelector() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [majors, setMajors] = useState<Major[]>([]);
   const [major, setMajor] = useState<string>("");
+  const [courseType, setCourseType] = useState<string>("Q");
 
   // set the courses
   useEffect(() => {
@@ -71,6 +72,13 @@ function ClassSelector() {
     setCompleted(completed.filter((c) => c.course_id !== course_id));
   }
 
+  const filteredCourses = courses.filter((course) => {
+    if (courseType === "Q") return course.catalog_id === 1
+    if (courseType === "S") return course.catalog_id === 2
+    return true
+  })
+
+
   // function to handle saves
   async function handleSave(completed_courses: Course[]) {
     // try to send data to route -- on failure print error
@@ -106,12 +114,12 @@ function ClassSelector() {
           </div>
           <div className="flex justify-between w-full text-left text-2xl text-black font-bold">
             Major - Search for courses
-            <Q2SFilter />
+            <Q2SFilter value={courseType} onChange={setCourseType} />
           </div>
 
           <div className="mt-4 flex-1 min-h-0 h-full pb-6">
             <ClassTable
-              courses={courses}
+              courses={filteredCourses}
               completed={completed}
               onAddCourse={handleAddCourse}
               onRemoveCourse={handleRemoveCourse}

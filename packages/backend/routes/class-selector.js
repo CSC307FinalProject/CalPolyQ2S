@@ -14,6 +14,7 @@ router.get("/", async (req, res) => {
         course_id,
         subject || ' ' || course_number AS "course_code",
         class_name AS course_name,
+        catalog_id,
         CASE
           WHEN course_number ~ '^[3-5]' THEN 'UPPER DIV'
           WHEN subject LIKE 'Gen Ed%' THEN 'GE'
@@ -21,7 +22,6 @@ router.get("/", async (req, res) => {
           ELSE 'LOWER DIV'
         END AS tag
       FROM courses
-      WHERE catalog_id = 1
     `,
       sql`
       SELECT *
