@@ -1,18 +1,21 @@
 const courses = [
   {
     course_id: 101,
+    catalog_id: 1,
     course_code: "CSC 101",
     course_name: "Fundamentals of Computer Science",
     tag: "LOWER DIV",
   },
   {
     course_id: 202,
+    catalog_id: 1,
     course_code: "CSC 202",
     course_name: "Data Structures",
     tag: "LOWER DIV",
   },
   {
     course_id: 349,
+    catalog_id: 1,
     course_code: "CSC 349",
     course_name: "Algorithms",
     tag: "UPPER DIV",
