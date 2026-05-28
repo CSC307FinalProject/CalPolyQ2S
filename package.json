@@ -18,7 +18,8 @@
     "dev": "concurrently \"npm run dev:frontend\" \"npm run dev:backend\"",
     "build": "npm run build --workspace frontend",
     "start": "node express-backend",
-    "test": "npm test --workspace backend"
+    "test": "npm test --workspace backend",
+    "cy:run": "cypress run"
   },
   "workspaces": [
     "packages/*"
@@ -29,8 +30,10 @@
     }
   },
   "devDependencies": {
+    "cypress": "^15.16.0",
     "supabase": "^2.98.2",
-    "vite": "^8.0.9"
+    "vite": "^8.0.9",
+    "wait-on": "^9.0.10"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.3",
