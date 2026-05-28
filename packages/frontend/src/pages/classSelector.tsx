@@ -73,11 +73,10 @@ function ClassSelector() {
   }
 
   const filteredCourses = courses.filter((course) => {
-    if (courseType === "Q") return course.catalog_id === 1
-    if (courseType === "S") return course.catalog_id === 2
-    return true
-  })
-
+    if (courseType === "Q") return course.catalog_id === 1;
+    if (courseType === "S") return course.catalog_id === 2;
+    return true;
+  });
 
   // function to handle saves
   async function handleSave(completed_courses: Course[]) {
