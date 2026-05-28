@@ -38,3 +38,8 @@ jobs:
 
       - name: Run tests
         run: npm test
+
+      - name: Run Cypress E2E
+        env:
+          CYPRESS_BASE_URL: https://orange-bay-0a230d710.7.azurestaticapps.net
+        run: npx wait-on https://orange-bay-0a230d710.7.azurestaticapps.net && npm run cy:run
