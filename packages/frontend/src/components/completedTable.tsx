@@ -74,7 +74,7 @@ export default function CompletedTable({
   }
 
   return (
-    <div className="w-full h-full border border-gray-200 rounded-xl p-3 flex flex-col justify-between gap-3">
+    <div className="w-full h-full border border-gray-200 rounded-xl p-3 flex flex-col min-h-0 justify-between gap-3">
       <div className="flex flex-col gap-3 flex-1 min-h-0">
         {/* Count badge shows how many courses are selected at a glance */}
         <div className="flex items-center justify-center text-xl font-bold text-black border-b border-gray-200 pb-2">

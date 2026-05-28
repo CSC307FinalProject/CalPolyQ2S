@@ -16,7 +16,6 @@ router.get("/", async (req, res) => {
         class_name AS course_name,
         CASE
           WHEN course_number ~ '^[3-5]' THEN 'UPPER DIV'
-          WHEN subject LIKE 'MATH%' THEN 'MATH'
           WHEN subject LIKE 'Gen Ed%' THEN 'GE'
           WHEN tech_elective_eligible THEN 'SUPPORT'
           ELSE 'LOWER DIV'

@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { getStoredUser } from "../components/authStorage";
 import { apiUrl } from "../lib/api";
+import Q2SFilter from "../components/q2sFilter";
 
 function ClassSelector() {
   const user = getStoredUser();
@@ -103,9 +104,11 @@ function ClassSelector() {
             />
             <SearchBar placeholder="Concentration (Optional)..." />
           </div>
-          <div className="w-full text-left text-2xl text-black font-bold">
+          <div className="flex justify-between w-full text-left text-2xl text-black font-bold">
             Major - Search for courses
+            <Q2SFilter />
           </div>
+
           <div className="mt-4 flex-1 min-h-0 h-full pb-6">
             <ClassTable
               courses={courses}
@@ -117,7 +120,7 @@ function ClassSelector() {
           </div>
         </div>
 
-        <div className="col-span-1 ml-5">
+        <div className="col-span-1 ml-5 flex flex-col min-h-0">
           <CompletedTable
             courses={completed}
             onRemoveCourse={handleRemoveCourse}
