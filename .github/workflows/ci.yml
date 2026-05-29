@@ -27,11 +27,19 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Run lint
-        run: npm run lint
+      - name: Run ESLint (frontend)
+        run: npm run -w frontend lint
+
+      - name: Run Prettier check
+        run: npx prettier --check .
 
       - name: Build project
         run: npm run build
 
       - name: Run tests
         run: npm test
+
+      - name: Run Cypress E2E
+        env:
+          CYPRESS_BASE_URL: https://orange-bay-0a230d710.7.azurestaticapps.net
+        run: npx wait-on https://orange-bay-0a230d710.7.azurestaticapps.net && npm run cy:run

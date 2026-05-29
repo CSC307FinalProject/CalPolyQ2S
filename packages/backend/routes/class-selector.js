@@ -8,37 +8,47 @@ router.get("/", async (req, res) => {
   try {
     // get all the courses, and use alias for better naming conventions
     // use case when to aggregate data during sql query for table (tag)
-    const courses = await sql`
+    const [courses, majors] = await Promise.all([
+      sql`
       SELECT 
         course_id,
         subject || ' ' || course_number AS "course_code",
         class_name AS course_name,
+        catalog_id,
         CASE
           WHEN course_number ~ '^[3-5]' THEN 'UPPER DIV'
-          WHEN subject LIKE 'MATH%' THEN 'MATH'
-          WHEN subject LIKE 'GE%' THEN 'GE'
+          WHEN subject LIKE 'Gen Ed%' THEN 'GE'
           WHEN tech_elective_eligible THEN 'SUPPORT'
           ELSE 'LOWER DIV'
         END AS tag
       FROM courses
-      WHERE catalog_id = 1
-    `;
-    res.status(200).json({ courses });
+    `,
+      sql`
+      SELECT *
+      FROM majors;
+    `,
+    ]);
+
+    res.status(200).json({ courses, majors });
   } catch (err) {
     console.error("class-selector error:", err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// get the saved classes from the student ID
+// get the saved classes and user metadata from the student ID
 router.get("/:student_id", async (req, res) => {
   const { student_id } = req.params;
 
+  // send sql statements in parallel to fetch user saved courses and
+  // student major and concentration
   try {
-    const courses = await sql`
+    const [courses, users] = await Promise.all([
+      // fetch the saved courses
+      sql`
       SELECT 
         courses.course_id,
-        courses.subject || ' ' || courses.course_number AS "course_code",
+        courses.subject || ' ' || courses.course_number AS course_code,
         courses.class_name AS course_name,
         CASE
           WHEN courses.course_number ~ '^[3-5]' THEN 'UPPER DIV'
@@ -50,12 +60,22 @@ router.get("/:student_id", async (req, res) => {
       JOIN courses
       ON student_courses.course_id = courses.course_id
       WHERE student_id = ${student_id}
-    `;
-    return res.json({ courses });
+    `,
+      // fetch the major and concentration
+      sql`
+      SELECT m.major_name, s.concentration
+      FROM students s
+      LEFT JOIN majors m ON s.major_id = m.major_id
+      WHERE s.student_id = ${student_id}`,
+    ]);
+
+    return res.json({ courses, user: users[0] });
   } catch (error) {
-    console.error("Get saved courses error:", error);
+    console.error("Get saved courses and / or user error:", error);
+
+    // return failed attempt
     return res.status(500).json({
-      error: "Failed to load saved courses.",
+      error: "Failed to load saved courses and / or user data.",
       details: error.message,
     });
   }
@@ -64,7 +84,7 @@ router.get("/:student_id", async (req, res) => {
 // save the data
 router.post("/:student_id", async (req, res) => {
   const { student_id } = req.params;
-  const { courses } = req.body;
+  const { courses, major } = req.body;
 
   try {
     await sql`
@@ -78,6 +98,14 @@ router.post("/:student_id", async (req, res) => {
           (student_id, course_id)
         VALUES
           (${student_id}, ${course.course_id})
+      `;
+    }
+
+    if (major) {
+      await sql`
+        UPDATE students
+        SET major_id = (SELECT major_id FROM majors WHERE major_name = ${major} LIMIT 1)
+        WHERE student_id = ${student_id}
       `;
     }
 
