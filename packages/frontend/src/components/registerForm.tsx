@@ -1,7 +1,7 @@
 import { useState, type ChangeEvent, type ComponentProps } from "react";
 import { Eye, EyeOff, Circle, CircleCheckBig } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { apiUrl } from "../lib/api";
+import { API_URL } from "../lib/api";
 
 interface FormData {
   email: string;

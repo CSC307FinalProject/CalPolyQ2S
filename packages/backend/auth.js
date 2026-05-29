@@ -7,12 +7,6 @@ import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import { readFileSync } from "fs";
 
-const app = express();
-const PORT = 3000;
-
-app.use(cors());
-app.use(express.json());
-
 
 // Create a transporter using SMTP
 const transporter = nodemailer.createTransport({
