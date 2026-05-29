@@ -70,7 +70,7 @@ router.get("/:student_id", async (req, res) => {
   const { student_id } = req.params;
 
   try {
-    const takenQuarterCourses = await sql `
+    const takenQuarterCourses = await sql`
     -- Get all the quarter courses the student has taken or has credit for from classes take on semesters
     with
       mapping_group_counts as (
@@ -109,7 +109,8 @@ router.get("/:student_id", async (req, res) => {
       and c.course_id = sc.course_id
     where sc.student_id = ${student_id}
     `;
-    const neededQuarterCourses = await sql; `
+    const neededQuarterCourses = await sql;
+    `
     with
   taken_quarter_courses as (
     -- Get all the quarter courses the student has taken or has credit for from classes take on semesters
@@ -268,7 +269,8 @@ router.get("/:student_id", async (req, res) => {
     ug.group_id
     `;
 
-    const takenSemesterCourses = await sql; `
+    const takenSemesterCourses = await sql;
+    `
     -- Get all the quarter courses the student has taken or has credit for from classes take on semesters
 with
   mapping_group_counts as (
@@ -307,7 +309,8 @@ from
   and c.course_id = sc.course_id
 where sc.student_id = ${student_id}
 `;
-    const neededSemesterCourses = await sql; `
+    const neededSemesterCourses = await sql;
+    `
     with
   taken_quarter_courses as (
     -- Get all the quarter courses the student has taken or has credit for from classes take on semesters
