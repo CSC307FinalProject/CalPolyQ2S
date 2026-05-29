@@ -1,6 +1,6 @@
 import { useState, type ChangeEvent, type ComponentProps } from "react";
 import { Eye, EyeOff, Circle, CircleCheckBig } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { API_URL } from "../lib/api";
 
 interface FormData {
@@ -11,9 +11,7 @@ interface FormData {
 
 type FormSubmitHandler = NonNullable<ComponentProps<"form">["onSubmit"]>;
 
-export default function RegisterForm() {
-  const navigate = useNavigate();
-
+export default function RegisterForm({ onRegistered }: { onRegistered: (email: string) => void }) {
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
@@ -42,10 +40,7 @@ export default function RegisterForm() {
     })
       .then((response) => {
         if (response.status === 201) {
-          response.json().then((payload) => {
-            localStorage.setItem("token", payload.token);
-            navigate("/class-selector");
-          });
+          onRegistered(formData.email);
         } else if (response.status === 409) {
           setEmailError("An account with this email already exists.");
         }
