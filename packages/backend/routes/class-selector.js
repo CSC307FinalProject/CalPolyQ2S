@@ -89,10 +89,14 @@ router.get("/:student_id", async (req, res) => {
 // use to send concentration courses to the class selector:
 router.get("/:student_id/courses", async (req, res) => {
   const { student_id } = req.params;
-  const { major, concentration } = req.query;
+  let { major, concentration } = req.query;
 
   if (!major) {
     return res.status(400).json({ error: "major is required" });
+  }
+
+  if (!concentration) {
+    concentration = null;
   }
 
   try {

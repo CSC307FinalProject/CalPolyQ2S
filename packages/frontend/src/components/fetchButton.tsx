@@ -7,7 +7,7 @@ interface FetchButtonProps {
 export default function FetchButton({ fetchClasses }: FetchButtonProps) {
   return (
     <button
-      className="inline-flex items-center justify-center relative text-xs font-medium rounded-full h-9 p-1 ps-5 pe-11 group transition-all duration-700 ease-in-out hover:ps-11 w-fit overflow-hidden cursor-pointer bg-black text-white focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
+      className="inline-flex items-center justify-center relative text-xs font-medium rounded-full h-9 p-1 ps-6 pe-10 group transition-all duration-700 ease-in-out hover:ps-10 w-fit overflow-hidden cursor-pointer bg-black text-white focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50"
       onClick={fetchClasses}
     >
       <span className="relative z-10 block overflow-hidden h-4">
