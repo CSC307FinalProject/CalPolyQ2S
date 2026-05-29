@@ -13,11 +13,19 @@ function ClassSelector() {
   const user = getStoredUser();
   const studentId = user?.student_id;
   const [completed, setCompleted] = useState<Course[]>([]);
+
+  // all courses
   const [courses, setCourses] = useState<Course[]>([]);
+
+  // major related queries
   const [majors, setMajors] = useState<Major[]>([]);
   const [major, setMajor] = useState<string>("");
+
+  // for concentrations for the user
   const [concentrations, setConcentrations] = useState<Concentrations[]>([]);
   const [concentration, setConcentration] = useState<string>("");
+
+  // for filtering based on term
   const [courseType, setCourseType] = useState<string>("Q");
 
   // set the courses

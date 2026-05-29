@@ -86,6 +86,9 @@ router.get("/:student_id", async (req, res) => {
   }
 });
 
+// use to send concentration courses to the class selector:
+router.get("/:student_id/requirements", async (req, res) => {});
+
 // save the data
 router.post("/:student_id", async (req, res) => {
   const { student_id } = req.params;
