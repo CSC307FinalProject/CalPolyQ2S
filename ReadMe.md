@@ -1,3 +1,8 @@
+## Deployed Application Website
+
+Website URL - https://orange-bay-0a230d710.7.azurestaticapps.net/
+
+
 ## Contributing
 
 This section of the ReadMe describes our coding standards, specifically the style of code.
