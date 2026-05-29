@@ -1,6 +1,15 @@
-export function ContinueButton({ label }: { label?: string }) {
+export function ContinueButton({
+  label,
+  onClick,
+}: {
+  label?: string;
+  onClick?: () => void;
+}) {
   return (
-    <button className="group relative overflow-hidden inline-flex items-center justify-center bg-black text-white border-none rounded-xl px-4 h-11 text-sm font-medium cursor-pointer not-focus-visible transition-transform active:scale-95">
+    <button
+      onClick={onClick}
+      className="group relative overflow-hidden inline-flex items-center justify-center bg-black text-white border-none rounded-xl px-4 h-11 text-sm font-medium cursor-pointer not-focus-visible transition-transform active:scale-95"
+    >
       <span className="mr-8 transition-opacity duration-400 group-hover:opacity-0 whitespace-nowrap">
         {label}
       </span>

@@ -8,7 +8,7 @@ router.get("/", async (req, res) => {
   try {
     // get all the courses, and use alias for better naming conventions
     // use case when to aggregate data during sql query for table (tag)
-    const [courses, majors] = await Promise.all([
+    const [courses, majors, concentrations] = await Promise.all([
       sql`
       SELECT 
         course_id,
@@ -27,9 +27,13 @@ router.get("/", async (req, res) => {
       SELECT *
       FROM majors;
     `,
+      sql` 
+      SELECT *
+      FROM concentrations;
+    `,
     ]);
 
-    res.status(200).json({ courses, majors });
+    res.status(200).json({ courses, majors, concentrations });
   } catch (err) {
     console.error("class-selector error:", err);
     res.status(500).json({ error: err.message });
@@ -63,13 +67,14 @@ router.get("/:student_id", async (req, res) => {
     `,
       // fetch the major and concentration
       sql`
-      SELECT m.major_name, s.concentration
+      SELECT m.major_name, c.concentration_name
       FROM students s
       LEFT JOIN majors m ON s.major_id = m.major_id
+      LEFT JOIN concentrations c ON s.concentration_id = c.concentration_id
       WHERE s.student_id = ${student_id}`,
     ]);
 
-    return res.json({ courses, user: users[0] });
+    return res.status(200).json({ courses, user: users[0] });
   } catch (error) {
     console.error("Get saved courses and / or user error:", error);
 
@@ -81,10 +86,56 @@ router.get("/:student_id", async (req, res) => {
   }
 });
 
+// use to send concentration courses to the class selector:
+router.get("/:student_id/courses", async (req, res) => {
+  const { student_id } = req.params;
+  let { major, concentration } = req.query;
+
+  if (!major) {
+    return res.status(400).json({ error: "major is required" });
+  }
+
+  if (!concentration) {
+    concentration = null;
+  }
+
+  try {
+    // get all the major required courses for the user
+    const majorCourses = await sql`
+    SELECT DISTINCT 
+    c.course_id,
+    c.subject || ' ' || c.course_number AS "course_code",
+    c.class_name AS course_name,
+    c.catalog_id,
+    CASE
+      WHEN course_number ~ '^[3-5]' THEN 'UPPER DIV'
+      WHEN subject LIKE 'Gen Ed%' THEN 'GE'
+      WHEN tech_elective_eligible THEN 'SUPPORT'
+      ELSE 'LOWER DIV'
+    END AS tag
+    FROM courses c
+    JOIN requirement_group_courses rgc ON c.course_id = rgc.course_id
+    JOIN requirement_groups rg ON rgc.group_id = rg.group_id
+    JOIN students s ON s.major_id = rg.major_id
+    LEFT JOIN concentrations con ON con.concentration_id = s.concentration_id
+    WHERE s.student_id =${student_id}
+    AND rg.major_id = ${major}
+    AND (rg.concentration_id IS NULL OR rg.concentration_id = ${concentration})
+    `;
+    return res.status(200).json({ majorCourses });
+  } catch (error) {
+    // throw an error
+    return res.status(500).json({
+      error: "Error in querying major specific data",
+      details: error.message,
+    });
+  }
+});
+
 // save the data
 router.post("/:student_id", async (req, res) => {
   const { student_id } = req.params;
-  const { courses, major } = req.body;
+  const { courses, major, concentration } = req.body;
 
   try {
     await sql`
@@ -109,7 +160,15 @@ router.post("/:student_id", async (req, res) => {
       `;
     }
 
-    return res.json({ message: "Courses saved successfully." });
+    if (concentration) {
+      await sql`
+        UPDATE students
+        SET concentration_id = (SELECT concentration_id FROM concentrations WHERE concentration_name = ${concentration} LIMIT 1)
+        WHERE student_id = ${student_id}
+      `;
+    }
+
+    return res.status(200).json({ message: "Courses saved successfully." });
   } catch (error) {
     console.error("Save courses error:", error);
 
