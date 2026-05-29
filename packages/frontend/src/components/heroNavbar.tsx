@@ -1,7 +1,11 @@
-import { Link } from "react-router-dom"
+import { Link } from "react-router-dom";
 import { getStoredUser, logout } from "./authStorage";
 
-export default function HomepageNavbar() {
+type HomepageNavbarProps = {
+  onLearnMore?: () => void;
+};
+
+export default function HomepageNavbar({ onLearnMore }: HomepageNavbarProps) {
   const user = getStoredUser();
 
   return (
@@ -11,14 +15,23 @@ export default function HomepageNavbar() {
       </span>
 
       <div className="flex items-center gap-8">
-        <button className="relative  cursor-pointer text-xs text-gray-300 hover:text-white transition-colors duration-200 group">
+        <button
+          type="button"
+          onClick={onLearnMore}
+          className="relative  cursor-pointer text-xs text-gray-300 hover:text-white transition-colors duration-200 group"
+        >
           Learn More
           <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full" />
         </button>
-        <button className="relative cursor-pointer text-xs text-gray-300 hover:text-white transition-colors duration-200 group">
+        <a
+          href="https://mail.google.com/mail/?view=cm&fs=1&to=cusebast@calpoly.edu,camden.mann0105@gmail.com,hayk.chaloyan@gmail.com,jbruzgul@calpoly.edu,yosemitebone@gmail.com&su=Cal%20Poly%20Q2S%20Question"
+          target="_blank"
+          rel="noreferrer"
+          className="relative cursor-pointer text-xs text-gray-300 hover:text-white transition-colors duration-200 group"
+        >
           Contact Us
           <span className="absolute -bottom-0.5 left-0 w-0 h-px bg-white transition-all duration-300 group-hover:w-full" />
-        </button>
+        </a>
       </div>
 
       <div className="flex items-center gap-3">

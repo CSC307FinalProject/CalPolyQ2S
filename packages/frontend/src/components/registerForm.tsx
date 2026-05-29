@@ -1,8 +1,7 @@
-import { useState, type ChangeEvent, type ComponentProps } from 'react';
-import { Eye, EyeOff, Circle, CircleCheckBig } from 'lucide-react';
+import { useState, type ChangeEvent, type ComponentProps } from "react";
+import { Eye, EyeOff, Circle, CircleCheckBig } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-
-const API_URL = import.meta.env.VITE_API_URL;
+import { apiUrl } from "../lib/api";
 
 interface FormData {
   email: string;
@@ -13,7 +12,6 @@ interface FormData {
 type FormSubmitHandler = NonNullable<ComponentProps<"form">["onSubmit"]>;
 
 export default function RegisterForm() {
-
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<FormData>({
@@ -33,7 +31,7 @@ export default function RegisterForm() {
     });
   };
 
-  const handleSubmit: FormSubmitHandler = (event) => {
+  const handleSubmit: FormSubmitHandler = async (event) => {
     event.preventDefault();
     setEmailError("");
 
@@ -54,7 +52,6 @@ export default function RegisterForm() {
       })
       .catch(() => {});
   };
-  
 
   return (
     <form className="gap-4 mt-4 w-full text-left" onSubmit={handleSubmit}>
@@ -82,6 +79,7 @@ export default function RegisterForm() {
           <input
             name="password"
             minLength={8}
+            required
             type={showPassword ? "text" : "password"}
             placeholder="Enter your password"
             value={formData.password}
