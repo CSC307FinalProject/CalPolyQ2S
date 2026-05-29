@@ -259,7 +259,7 @@ export function authenticateUser(req, res, next) {
     res.status(401).end();
   } else {
     // Otherwise, verify token
-    jwt.verify(token, process.env.TOKEN_SECRET, (error, decoded) => {
+    jwt.verify(token, process.env.TOKEN_SECRET, async (error, decoded) => {
       if (decoded) {
         // Check email is verified before allowing access to protected routes
         const [student] = await sql`
@@ -267,6 +267,9 @@ export function authenticateUser(req, res, next) {
         `;
 
         if (!student || !student.email_verified) {
+          return res.status(403).json({ error: "Email not verified." });
+        }
+
         next();
       } else {
         console.log("JWT error:", error);
