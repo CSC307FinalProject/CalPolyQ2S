@@ -105,6 +105,12 @@ function ClassSelector() {
       .catch((err) => console.log(err));
   }, [studentId]);
 
+  useEffect(() => {
+    if (major && majors.length > 0) {
+      fetchCourses();
+    }
+  }, [major, majors]);
+
   if (!user) return <Navigate to="/login" replace />;
 
   function handleAddCourse(course: Course) {
