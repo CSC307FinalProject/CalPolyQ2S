@@ -114,6 +114,7 @@ CREATE TABLE IF NOT EXISTS "public"."students" (
     "year" integer,
     "major_id" integer NOT NULL,
     "concentration" character varying(50),
+    "email_verified" boolean DEFAULT false NOT NULL,
     "created_at" timestamp with time zone DEFAULT "now"() NOT NULL
 );
 
