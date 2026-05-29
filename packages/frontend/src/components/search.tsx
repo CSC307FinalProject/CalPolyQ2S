@@ -85,7 +85,7 @@ function SearchBar({
   }
 
   return (
-    <div className="space-y-2 min-w-75" ref={containerRef}>
+    <div className="space-y-2 min-w-48" ref={containerRef}>
       <div className="relative">
         <Input
           id={id}

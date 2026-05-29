@@ -74,7 +74,7 @@ router.get("/:student_id", async (req, res) => {
       WHERE s.student_id = ${student_id}`,
     ]);
 
-    return res.json({ courses, user: users[0] });
+    return res.status(200).json({ courses, user: users[0] });
   } catch (error) {
     console.error("Get saved courses and / or user error:", error);
 
@@ -87,7 +87,46 @@ router.get("/:student_id", async (req, res) => {
 });
 
 // use to send concentration courses to the class selector:
-router.get("/:student_id/requirements", async (req, res) => {});
+router.get("/:student_id/courses", async (req, res) => {
+  const { student_id } = req.params;
+  const { major, concentration } = req.query;
+
+  if (!major) {
+    return res.status(400).json({ error: "major is required" });
+  }
+
+  try {
+    // get all the major required courses for the user
+    const majorCourses = await sql`
+    SELECT DISTINCT 
+    c.course_id,
+    c.subject || ' ' || c.course_number AS "course_code",
+    c.class_name AS course_name,
+    c.catalog_id,
+    CASE
+      WHEN course_number ~ '^[3-5]' THEN 'UPPER DIV'
+      WHEN subject LIKE 'Gen Ed%' THEN 'GE'
+      WHEN tech_elective_eligible THEN 'SUPPORT'
+      ELSE 'LOWER DIV'
+    END AS tag
+    FROM courses c
+    JOIN requirement_group_courses rgc ON c.course_id = rgc.course_id
+    JOIN requirement_groups rg ON rgc.group_id = rg.group_id
+    JOIN students s ON s.major_id = rg.major_id
+    LEFT JOIN concentrations con ON con.concentration_id = s.concentration_id
+    WHERE s.student_id =${student_id}
+    AND rg.major_id = ${major}
+    AND (rg.concentration_id IS NULL OR rg.concentration_id = ${concentration})
+    `;
+    return res.status(200).json({ majorCourses });
+  } catch (error) {
+    // throw an error
+    return res.status(500).json({
+      error: "Error in querying major specific data",
+      details: error.message,
+    });
+  }
+});
 
 // save the data
 router.post("/:student_id", async (req, res) => {
@@ -125,7 +164,7 @@ router.post("/:student_id", async (req, res) => {
       `;
     }
 
-    return res.json({ message: "Courses saved successfully." });
+    return res.status(200).json({ message: "Courses saved successfully." });
   } catch (error) {
     console.error("Save courses error:", error);
 

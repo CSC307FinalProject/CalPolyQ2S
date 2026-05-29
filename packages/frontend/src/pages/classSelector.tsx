@@ -8,6 +8,7 @@ import { Navigate } from "react-router-dom";
 import { getStoredUser } from "../components/authStorage";
 import { apiUrl } from "../lib/api";
 import Q2SFilter from "../components/q2sFilter";
+import FetchButton from "../components/fetchButton";
 
 function ClassSelector() {
   const user = getStoredUser();
@@ -27,6 +28,41 @@ function ClassSelector() {
 
   // for filtering based on term
   const [courseType, setCourseType] = useState<string>("Q");
+
+  // find courses for major and concentration
+  async function fetchCourses() {
+    if (!major) return;
+    console.log("No Major Selected!");
+
+    // find the id associated with selected major
+    const selectedMajorId = majors.find(
+      (m) => m.major_name === major,
+    )?.major_id;
+
+    // build param for query
+    const params = new URLSearchParams({ major: String(selectedMajorId) });
+
+    // if a concentration exists find id and incude in params
+    if (concentration) {
+      const selectedConcentrationId = concentrations.find(
+        (m) => m.concentration_name === concentration,
+      )?.concentration_id;
+
+      // include concentration in params
+      params.set("concentration", String(selectedConcentrationId));
+    }
+
+    // call api for data
+    fetch(apiUrl(`/class-selector/${studentId}/courses?${params}`))
+      .then((res) => {
+        if (res.ok) {
+          console.log("Successfully queried required classes from the db");
+          return res.json();
+        }
+        return [];
+      })
+      .then((data) => setCourses(data?.majorCourses ?? []));
+  }
 
   // set the courses
   useEffect(() => {
@@ -125,12 +161,12 @@ function ClassSelector() {
   return (
     <div className="h-screen bg-white overflow-hidden flex flex-col">
       <Navbar />
-      <main className="flex-1 min-h-0 p-5 w-full grid grid-cols-3">
+      <main className="flex-1 min-h-0 p-5 w-full grid grid-cols-3 gap-5">
         <div className="col-span-2 flex flex-col min-h-0">
-          <div className="p-2 text-left text-5xl text-black font-bold mb-10">
+          <div className="text-left text-5xl text-black font-bold mb-10">
             Search for your catalog
           </div>
-          <div className="flex items-center gap-4 mb-20">
+          <div className="flex items-center gap-4 mb-15">
             <SearchBar
               placeholder="Major..."
               value={major}
@@ -144,13 +180,15 @@ function ClassSelector() {
               onChange={setConcentration}
               disabled={filteredConcentrations.length === 0}
             />
+            <FetchButton fetchClasses={fetchCourses} />
           </div>
-          <div className="flex justify-between w-full text-left text-2xl text-black font-bold">
+
+          <div className="flex items-center justify-between w-full text-left text-2xl text-black font-bold">
             Major - Search for courses
             <Q2SFilter value={courseType} onChange={setCourseType} />
           </div>
 
-          <div className="mt-4 flex-1 min-h-0 h-full pb-6">
+          <div className="mt-4 flex-1 min-h-0 h-full">
             <ClassTable
               courses={filteredCourses}
               completed={completed}
@@ -161,7 +199,7 @@ function ClassSelector() {
           </div>
         </div>
 
-        <div className="col-span-1 ml-5 flex flex-col min-h-0">
+        <div className="col-span-1 flex flex-col min-h-0">
           <CompletedTable
             courses={completed}
             onRemoveCourse={handleRemoveCourse}
