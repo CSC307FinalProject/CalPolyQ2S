@@ -3,7 +3,7 @@ import { SearchBar } from "../components/search";
 import ClassTable from "../components/classTable";
 import CompletedTable from "../components/completedTable";
 import type { Course, Major, Concentrations } from "../data/courses";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { getStoredUser } from "../components/authStorage";
 import { apiUrl } from "../lib/api";
@@ -29,30 +29,24 @@ function ClassSelector() {
   // for filtering based on term
   const [courseType, setCourseType] = useState<string>("Q");
 
-  // find courses for major and concentration
-  async function fetchCourses() {
+  const fetchCourses = useCallback(async () => {
     if (!major) return;
     console.log("No Major Selected!");
 
-    // find the id associated with selected major
     const selectedMajorId = majors.find(
       (m) => m.major_name === major,
     )?.major_id;
 
-    // build param for query
     const params = new URLSearchParams({ major: String(selectedMajorId) });
 
-    // if a concentration exists find id and incude in params
     if (concentration) {
       const selectedConcentrationId = concentrations.find(
         (m) => m.concentration_name === concentration,
       )?.concentration_id;
 
-      // include concentration in params
       params.set("concentration", String(selectedConcentrationId));
     }
 
-    // call api for data
     fetch(apiUrl(`/class-selector/${studentId}/courses?${params}`))
       .then((res) => {
         if (res.ok) {
@@ -62,7 +56,7 @@ function ClassSelector() {
         return [];
       })
       .then((data) => setCourses(data?.majorCourses ?? []));
-  }
+  }, [major, majors, concentration, concentrations, studentId]);
 
   // set the courses
   useEffect(() => {
@@ -109,9 +103,14 @@ function ClassSelector() {
     if (major && majors.length > 0) {
       fetchCourses();
     }
-  }, [major, majors]);
+  }, [major, majors, fetchCourses]);
 
   if (!user) return <Navigate to="/login" replace />;
+
+  function handleMajorChange(newMajor: string) {
+    setMajor(newMajor);
+    setConcentration("");
+  }
 
   function handleAddCourse(course: Course) {
     const isalreadyadded = completed.find(
@@ -154,10 +153,6 @@ function ClassSelector() {
 
   // Look up the major_id for whatever major name is currently selected
   const selectedMajorId = majors.find((m) => m.major_name === major)?.major_id;
-  // When the major changes, reset concentration so stale data doesn't persist
-  useEffect(() => {
-    setConcentration("");
-  }, [major]);
 
   // filter only concentrations associated with that major
   const filteredConcentrations = selectedMajorId
@@ -177,7 +172,7 @@ function ClassSelector() {
               placeholder="Major..."
               value={major}
               options={majors.map((m) => m.major_name)}
-              onChange={setMajor}
+              onChange={handleMajorChange}
             />
             <SearchBar
               placeholder="Concentration (Optional)..."
