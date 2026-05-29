@@ -6,6 +6,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import { readFileSync } from "fs";
+import crypto from "crypto";
 
 
 // Create a transporter using SMTP
@@ -19,20 +20,25 @@ const transporter = nodemailer.createTransport({
 
 
 // Send Email
-
-// Replace "hayk.chaloyan@gmail.com" with email once done
-export async function sendEmail(email) {
+export async function sendEmail(email, token) {
   try {
+    
+    // Generate verification link variable from base url and generated token
+    const verificationLink = `${process.env.VERIFICATION_LINK_BASE_URL}/verify-email?token=${token}`;
+    
+    // Add verification link into html email body
+    const emailHtml = readFileSync(new URL("./components/email-body.html", import.meta.url), "utf-8")
+      .replace("{{VERIFICATION_LINK}}", verificationLink);
+
     const info = await transporter.sendMail({
       from: `"Cal Poly Q2S" <${process.env.SMTP_USER}>`,
-      to: "hayk.chaloyan@gmail.com", // list of recipients
-      subject: "Verify your Cal Poly Q2S Account", // subject line
-      html: readFileSync(new URL("./components/email-body.html", import.meta.url), "utf-8")
+      to: email,
+      subject: "Verify your Cal Poly Q2S Account",
+      html: emailHtml
     });
 
     console.log("Message sent: %s", info.messageId);
-    // Preview URL is only available when using an Ethereal test account
-    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
+
   } catch (err) {
     console.error("Error while sending mail:", err);
   }
@@ -69,15 +75,19 @@ export async function registerUser(req, res) {
     // Add to students table, get the values
     // use js destructuring to pull out first element of new user (student id)
     const [newUser] = await sql`
-      INSERT INTO students (name, email, password_hash) 
+      INSERT INTO students (name, email, password_hash)
       VALUES (${name}, ${email}, ${hashedPassword})
       RETURNING student_id;
     `;
 
-    // Generate and return access token
-    const token = await generateAccessToken(email);
-    await sendEmail(email)
-    return res.status(201).send({ token, student_id:  newUser.student_id, email});
+    // Generate a JWT token with 24 hour expiry and send it through email
+    const verificationToken = jwt.sign(
+      { email, type: "email_verification" },
+      process.env.TOKEN_SECRET,
+      { expiresIn: "24h" }
+    );
+    sendEmail(email, verificationToken);
+    return res.status(201).json({ student_id: newUser.student_id, email });
 
   } 
   catch (error) {
@@ -97,7 +107,7 @@ export async function loginUser(req, res) {
   // Match email from login form to email in DB
   try {
     const users = await sql`
-      SELECT student_id, email, password_hash
+      SELECT student_id, email, password_hash, email_verified
       FROM public.students
       WHERE email = ${email}
     `;
@@ -119,6 +129,11 @@ export async function loginUser(req, res) {
       return res.status(401).json({ error: "Invalid email or password." });
     }
 
+    // Block login if email not verified
+    if (!user.email_verified) {
+      return res.status(403).json({ error: "Email not verified. Please check your inbox." });
+    }
+
     // Generate and return access token
     const token = await generateAccessToken(email);
     return res
@@ -131,6 +146,85 @@ export async function loginUser(req, res) {
       error: "Login failed due to server error.",
       details: error.message,
     });
+  }
+}
+
+// Verify Email
+export async function verifyEmail(req, res) {
+  const { token } = req.query;
+
+  if (!token) {
+    return res.status(400).json({ error: "Missing token." });
+  }
+
+  try {
+    // Verify the JWT and check it's a verification token
+    const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
+    if (decoded.type !== "email_verification") {
+      return res.status(400).json({ error: "Invalid token." });
+    }
+
+    const [student] = await sql`
+      SELECT student_id, email_verified FROM students WHERE email = ${decoded.email}
+    `;
+
+    if (!student) {
+      return res.status(400).json({ error: "Account not found." });
+    }
+
+    if (student.email_verified) {
+      return res.status(200).json({ message: "Email already verified." });
+    }
+
+    await sql`
+      UPDATE students SET email_verified = true WHERE email = ${decoded.email}
+    `;
+
+    return res.status(200).json({ message: "Email verified successfully." });
+
+  } catch (error) {
+    // jwt.verify throws if expired or invalid
+    if (error.name === "TokenExpiredError") {
+      return res.status(400).json({ error: "Token expired. Please request a new verification email." });
+    }
+    console.error("Verify email error:", error);
+    return res.status(400).json({ error: "Invalid token." });
+  }
+}
+
+// Resend Verification Email
+export async function resendVerification(req, res) {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: "Missing email." });
+  }
+
+  try {
+    const [student] = await sql`
+      SELECT student_id, email_verified FROM students WHERE email = ${email}
+    `;
+
+    if (!student) {
+      return res.status(404).json({ error: "Account not found." });
+    }
+
+    if (student.email_verified) {
+      return res.status(400).json({ error: "Email already verified." });
+    }
+
+    const verificationToken = jwt.sign(
+      { email, type: "email_verification" },
+      process.env.TOKEN_SECRET,
+      { expiresIn: "24h" }
+    );
+
+    sendEmail(email, verificationToken);
+    return res.status(200).json({ message: "Verification email resent." });
+
+  } catch (error) {
+    console.error("Resend verification error:", error);
+    return res.status(500).json({ error: "Failed to resend verification.", details: error.message });
   }
 }
 
@@ -167,6 +261,12 @@ export function authenticateUser(req, res, next) {
     // Otherwise, verify token
     jwt.verify(token, process.env.TOKEN_SECRET, (error, decoded) => {
       if (decoded) {
+        // Check email is verified before allowing access to protected routes
+        const [student] = await sql`
+          SELECT email_verified FROM students WHERE email = ${decoded.email}
+        `;
+
+        if (!student || !student.email_verified) {
         next();
       } else {
         console.log("JWT error:", error);

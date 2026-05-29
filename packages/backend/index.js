@@ -2,7 +2,7 @@ import "dotenv/config";
 import cors from "cors";
 import express from "express";
 import postgres from "postgres";
-import { authenticateUser, loginUser, registerUser } from "./auth.js";
+import { authenticateUser, loginUser, registerUser, verifyEmail, resendVerification } from "./auth.js";
 import classSelectorRouter from "./routes/class-selector.js";
 import comparisonRouter from "./routes/comparison.js";
 
@@ -52,6 +52,8 @@ app.get("/health", (req, res) => {
 
 app.post("/login", loginUser);
 app.post("/register", registerUser);
+app.get("/verify-email", verifyEmail);
+app.post("/resend-verification", resendVerification);
 
 app.post("/users", authenticateUser, async (req, res) => {
   const { email } = req.body;
