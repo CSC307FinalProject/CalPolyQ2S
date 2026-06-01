@@ -176,7 +176,6 @@ export default function Comparison() {
       const quarterSaved = (json.quarterCourses ?? []).map(
         (course: CatalogCourse) => {
           const conversions = conversionByQuarterId.get(course.course_id) ?? [];
-          const first = conversions[0];
 
           return {
             id: course.course_id,
