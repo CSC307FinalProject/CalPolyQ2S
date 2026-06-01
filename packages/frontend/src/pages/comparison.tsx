@@ -17,6 +17,7 @@ type ConversionCourse = SavedCourse & {
   convertedCode?: string;
   convertedTitle?: string;
   convertedUnits?: number;
+  requirementArea: string;
 };
 
 const filters = ["All", "Completed", "Active", "Remaining"];
@@ -50,6 +51,7 @@ type CatalogCourse = {
   course_code: string;
   course_name: string;
   units: number;
+  requirement_area: string;
 };
 
 type CourseListProps = {
@@ -58,44 +60,112 @@ type CourseListProps = {
   onCourseClick: (course: ConversionCourse) => void;
 };
 
+function groupCourses(courses: ConversionCourse[]) {
+  const groups = new Map<string, ConversionCourse[]>();
+
+  for (const course of courses) {
+    const key = course.requirementArea || "Other";
+    groups.set(key, [...(groups.get(key) ?? []), course]);
+  }
+
+  return Array.from(groups.entries()).map(([requirementArea, courses]) => ({
+    requirementArea,
+    courses,
+    completed: courses.some((course) => course.status === "Completed"),
+  }));
+}
+
 function CourseList({ activeFilter, courses, onCourseClick }: CourseListProps) {
+  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
+
   const filteredCourses = courses.filter((course) => {
     if (activeFilter === "All") return true;
     return course.status === activeFilter;
   });
 
+  const groups = groupCourses(filteredCourses);
+
   return (
     <div className="screen">
-      <div className="h-100 overflow-y-auto no-scrollbar p-4">
-        {filteredCourses.map((course) => (
-          <button
-            key={course.id}
-            type="button"
-            onClick={() => onCourseClick(course)}
-            className="w-full text-left bg-white shadow p-5 hover:bg-gray-50 transition-colors"
-          >
-            <div className="flex items-start">
-              <div>
-                <h2 className="text-black! flex">{course.code}</h2>
-                <span className="text-xl text-gray-500">{course.title}</span>
-              </div>
+      <div className="h-100 overflow-y-auto no-scrollbar p-4 space-y-3">
+        {groups.map((group) => {
+          const isOpen = openGroups[group.requirementArea] ?? true;
 
-              <div className="ml-auto flex items-center gap-2">
-                <span className="text-sm px-3 py-1 rounded-full flex items-end">
-                  {course.units} units
-                </span>
+          return (
+            <div
+              key={group.requirementArea}
+              className="rounded-xl border border-gray-200 bg-white shadow"
+            >
+              <button
+                type="button"
+                onClick={() =>
+                  setOpenGroups((prev) => ({
+                    ...prev,
+                    [group.requirementArea]: !isOpen,
+                  }))
+                }
+                className="w-full flex items-center justify-between p-4 text-left"
+              >
+                <div>
+                  <div className="flex items-center gap-2">
+                    <p className="text-sm font-semibold text-black">
+                      {group.requirementArea}
+                    </p>
 
-                <span
-                  className={`text-sm px-3 py-1 rounded-full ml-auto ${getStatusStyles(
-                    course.status,
-                  )}`}
-                >
-                  {course.status}
-                </span>
-              </div>
+                    <span
+                      className={`text-xs px-2 py-1 rounded-full ${
+                        group.completed
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-500"
+                      }`}
+                    >
+                      {group.completed ? "Completed" : "Remaining"}
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-400">
+                    {group.courses.length} class option(s)
+                  </p>
+                </div>
+              </button>
+
+              {isOpen && (
+                <div className="divide-y divide-gray-100 border-t border-gray-100">
+                  {group.courses.map((course) => (
+                    <button
+                      key={course.id}
+                      type="button"
+                      onClick={() => onCourseClick(course)}
+                      className="w-full text-left p-4 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-start">
+                        <div>
+                          <h2 className="text-black flex">{course.code}</h2>
+                          <span className="text-sm text-gray-500">
+                            {course.title}
+                          </span>
+                        </div>
+
+                        <div className="ml-auto flex items-center gap-2">
+                          <span className="text-sm px-3 py-1 rounded-full">
+                            {course.units} units
+                          </span>
+
+                          <span
+                            className={`text-sm px-3 py-1 rounded-full ${getStatusStyles(
+                              course.status,
+                            )}`}
+                          >
+                            {course.status}
+                          </span>
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-          </button>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
@@ -136,7 +206,6 @@ export default function Comparison() {
       if (!studentId) return;
 
       const response = await fetch(apiUrl(`/q2s-comparison/${studentId}`));
-
       const json = await response.json();
 
       if (!response.ok) {
@@ -169,6 +238,7 @@ export default function Comparison() {
 
         const existing =
           conversionBySemesterId.get(course.converted_course_id) ?? [];
+
         existing.push(course);
         conversionBySemesterId.set(course.converted_course_id, existing);
       });
@@ -176,7 +246,6 @@ export default function Comparison() {
       const quarterSaved = (json.quarterCourses ?? []).map(
         (course: CatalogCourse) => {
           const conversions = conversionByQuarterId.get(course.course_id) ?? [];
-          const first = conversions[0];
 
           return {
             id: course.course_id,
@@ -186,6 +255,7 @@ export default function Comparison() {
             status: completedQuarterIds.has(course.course_id)
               ? "Completed"
               : "Remaining",
+            requirementArea: course.requirement_area ?? "Other",
             convertedCode: conversions
               .map((c) => c.converted_course_code)
               .filter(Boolean)
@@ -216,6 +286,7 @@ export default function Comparison() {
             status: completedSemesterIds.has(course.course_id)
               ? "Completed"
               : "Remaining",
+            requirementArea: course.requirement_area ?? "Other",
             convertedCode: first?.course_code,
             convertedTitle: first?.course_name,
             convertedUnits: first?.units,

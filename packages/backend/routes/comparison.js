@@ -103,24 +103,34 @@ router.get("/:student_id", async (req, res) => {
   WHERE sc.student_id = ${student_id}
 `;
 
-    const quarterCourses = await sql`
+const quarterCourses = await sql`
   SELECT
-    course_id,
-    subject || ' ' || course_number AS course_code,
-    class_name AS course_name,
-    units
-  FROM public.courses
-  WHERE catalog_id = 1
+    c.course_id,
+    c.subject || ' ' || c.course_number AS course_code,
+    c.class_name AS course_name,
+    c.units,
+    COALESCE(rg.group_name, 'Other') AS requirement_area
+  FROM public.courses c
+  LEFT JOIN public.requirement_group_courses rgc
+    ON rgc.course_id = c.course_id
+  LEFT JOIN public.requirement_groups rg
+    ON rg.group_id = rgc.group_id
+  WHERE c.catalog_id = 1
 `;
 
-    const semesterCourses = await sql`
+const semesterCourses = await sql`
   SELECT
-    course_id,
-    subject || ' ' || course_number AS course_code,
-    class_name AS course_name,
-    units
-  FROM public.courses
-  WHERE catalog_id = 2
+    c.course_id,
+    c.subject || ' ' || c.course_number AS course_code,
+    c.class_name AS course_name,
+    c.units,
+    COALESCE(rg.group_name, 'Other') AS requirement_area
+  FROM public.courses c
+  LEFT JOIN public.requirement_group_courses rgc
+    ON rgc.course_id = c.course_id
+  LEFT JOIN public.requirement_groups rg
+    ON rg.group_id = rgc.group_id
+  WHERE c.catalog_id = 2
 `;
 
     return res.json({ courses, quarterCourses, semesterCourses });
