@@ -72,34 +72,30 @@ router.get("/:student_id", async (req, res) => {
   try {
     const courses = await sql`
   SELECT 
-    q.course_id,
-    q.subject || ' ' || q.course_number AS course_code,
-    q.class_name AS course_name,
-    q.units,
+    saved.course_id,
+    saved.catalog_id,
+    saved.subject || ' ' || saved.course_number AS course_code,
+    saved.class_name AS course_name,
+    saved.units,
 
-    s.course_id AS converted_course_id,
-    s.subject || ' ' || s.course_number AS converted_course_code,
-    s.class_name AS converted_course_name,
-    s.units AS converted_units,
+    other.course_id AS converted_course_id,
+    other.catalog_id AS converted_catalog_id,
+    other.subject || ' ' || other.course_number AS converted_course_code,
+    other.class_name AS converted_course_name,
+    other.units AS converted_units,
 
-    q_item.mapping_id
+    item.mapping_id
 
   FROM public.student_courses sc
-
-  JOIN public.courses q
-    ON sc.course_id = q.course_id
-
-  LEFT JOIN public.course_mapping_item q_item
-    ON q_item.course_id = q.course_id
-    AND q_item.is_substitute = true
-
-  LEFT JOIN public.course_mapping_item s_item
-    ON s_item.mapping_id = q_item.mapping_id
-    AND s_item.is_substitute = false
-
-  LEFT JOIN public.courses s
-    ON s.course_id = s_item.course_id
-
+  JOIN public.courses saved
+    ON sc.course_id = saved.course_id
+  LEFT JOIN public.course_mapping_item item
+    ON item.course_id = saved.course_id
+  LEFT JOIN public.course_mapping_item other_item
+    ON other_item.mapping_id = item.mapping_id
+    AND other_item.is_substitute <> item.is_substitute
+  LEFT JOIN public.courses other
+    ON other.course_id = other_item.course_id
   WHERE sc.student_id = ${student_id}
 `;
 

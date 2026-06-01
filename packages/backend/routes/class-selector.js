@@ -40,40 +40,42 @@ router.get("/", async (req, res) => {
 router.get("/:student_id", async (req, res) => {
   const { student_id } = req.params;
 
-  // send sql statements in parallel to fetch user saved courses and
-  // student major and concentration
   try {
     const [courses, users] = await Promise.all([
-      // fetch the saved courses
       sql`
-      SELECT 
-        courses.course_id,
-        courses.subject || ' ' || courses.course_number AS course_code,
-        courses.class_name AS course_name,
-        CASE
-          WHEN courses.course_number ~ '^[3-5]' THEN 'UPPER DIV'
-          WHEN courses.subject LIKE 'GE%' THEN 'GE'
-          WHEN courses.tech_elective_eligible THEN 'SUPPORT'
-          ELSE 'LOWER DIV'
-        END AS tag
-      FROM student_courses
-      JOIN courses
-      ON student_courses.course_id = courses.course_id
-      WHERE student_id = ${student_id}
-    `,
-      // fetch the major and concentration
+        SELECT 
+          courses.course_id,
+          courses.subject || ' ' || courses.course_number AS course_code,
+          courses.class_name AS course_name,
+          courses.catalog_id,
+          courses.units,
+          CASE
+            WHEN courses.course_number ~ '^[3-5]' THEN 'UPPER DIV'
+            WHEN courses.subject LIKE 'GE%' THEN 'GE'
+            WHEN courses.tech_elective_eligible THEN 'SUPPORT'
+            ELSE 'LOWER DIV'
+          END AS tag
+        FROM student_courses
+        JOIN courses
+          ON student_courses.course_id = courses.course_id
+        WHERE student_courses.student_id = ${student_id}
+      `,
+
       sql`
-      SELECT m.major_name, s.concentration
-      FROM students s
-      LEFT JOIN majors m ON s.major_id = m.major_id
-      WHERE s.student_id = ${student_id}`,
+        SELECT 
+          m.major_name,
+          s.concentration_id
+        FROM students s
+        LEFT JOIN majors m 
+          ON s.major_id = m.major_id
+        WHERE s.student_id = ${student_id}
+      `,
     ]);
 
     return res.json({ courses, user: users[0] });
   } catch (error) {
     console.error("Get saved courses and / or user error:", error);
 
-    // return failed attempt
     return res.status(500).json({
       error: "Failed to load saved courses and / or user data.",
       details: error.message,
