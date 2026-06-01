@@ -129,6 +129,8 @@ export default function Comparison() {
 
   const [neededQuarterCourses, setNeededQuarterCourses] = useState<Requirement[]>([]);
   const [neededSemesterCourses, setNeededSemesterCourses] = useState<Requirement[]>([]);
+  const [takenQuarterCourses, setTakenQuarterCourses] = useState<Course[]>([]);
+  const [takenSemesterCourses, setTakenSemesterCourses] = useState<Course[]>([]);
   const [quarterCourses, setQuarterCourses] = useState<ConversionCourse[]>([]);
   const [semesterCourses, setSemesterCourses] = useState<ConversionCourse[]>([]);
   const studentId = getStoredUser()?.student_id;
@@ -197,8 +199,10 @@ export default function Comparison() {
       //       : "Remaining",
       //   }),
       // );
-      setNeededQuarterCourses(json.neededQuarterCourses)
-      setNeededSemesterCourses(json.neededSemesterCourses)
+      setNeededQuarterCourses(json.neededQuarterCourses);
+      setNeededSemesterCourses(json.neededSemesterCourses);
+      setTakenQuarterCourses(json.takenQuarterCourses);
+      setTakenSemesterCourses(json.takenSemesterCourses); 
 
       // setQuarterCourses(quarterSaved);
       // setSemesterCourses(semesterSaved);
