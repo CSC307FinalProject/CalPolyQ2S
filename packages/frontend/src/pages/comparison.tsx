@@ -186,9 +186,9 @@ export default function Comparison() {
     null,
   );
 
-function handleCourseClick(course: ConversionCourse) {
-  setSelectedCourse(course);
-}
+  function handleCourseClick(course: ConversionCourse) {
+    setSelectedCourse(course);
+  }
 
   useEffect(() => {
     async function loadSavedCourses() {
@@ -537,7 +537,9 @@ function handleCourseClick(course: ConversionCourse) {
 
             <div className="mt-6 rounded-xl border border-gray-200 p-4">
               <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-                {selectedCourse.catalogType === "quarter" ? "Quarter Course" : "Semester Course"}
+                {selectedCourse.catalogType === "quarter"
+                  ? "Quarter Course"
+                  : "Semester Course"}
               </p>
               <div className="mt-2 flex justify-between gap-4">
                 <div>
@@ -557,8 +559,8 @@ function handleCourseClick(course: ConversionCourse) {
             <div className="mt-3 rounded-xl border border-calpoly-green/30 bg-green-50 p-4">
               <p className="text-xs font-semibold uppercase tracking-widest text-green-700">
                 {selectedCourse.catalogType === "quarter"
-  ? "Semester Equivalent"
-  : "Quarter Equivalent"}
+                  ? "Semester Equivalent"
+                  : "Quarter Equivalent"}
               </p>
               <div className="mt-2 flex justify-between gap-4">
                 <div>
