@@ -56,16 +56,16 @@ const getStatusStyles = (status: string) => {
   }
 };
 
-type ApiCourse = {
-  course_id: number;
-  course_code: string;
-  course_name: string;
-  units: number;
-  converted_course_id: number | null;
-  converted_course_code: string | null;
-  converted_course_name: string | null;
-  converted_units: number | null;
-};
+// type ApiCourse = {
+//   course_id: number;
+//   course_code: string;
+//   course_name: string;
+//   units: number;
+//   converted_course_id: number | null;
+//   converted_course_code: string | null;
+//   converted_course_name: string | null;
+//   converted_units: number | null;
+// };
 
 type CatalogCourse = {
   course_id: number;
@@ -127,10 +127,10 @@ export default function Comparison() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeFilter1, setActiveFilter1] = useState("All");
 
+  const [neededQuarterCourses, setNeededQuarterCourses] = useState<Requirement[]>([]);
+  const [neededSemesterCourses, setNeededSemesterCourses] = useState<Requirement[]>([]);
   const [quarterCourses, setQuarterCourses] = useState<ConversionCourse[]>([]);
-  const [semesterCourses, setSemesterCourses] = useState<ConversionCourse[]>(
-    [],
-  );
+  const [semesterCourses, setSemesterCourses] = useState<ConversionCourse[]>([]);
   const studentId = getStoredUser()?.student_id;
 
   const [selectedCourse, setSelectedCourse] = useState<ConversionCourse | null>(
@@ -140,7 +140,7 @@ export default function Comparison() {
   useEffect(() => {
     async function loadSavedCourses() {
       if (!studentId) return;
-
+      console.log("Loading saved courses")
       const response = await fetch(apiUrl(`/q2s-comparison/${studentId}`));
 
       const json = await response.json();
@@ -150,56 +150,58 @@ export default function Comparison() {
         return;
       }
 
-      const completedQuarterIds = new Set(
-        (json.courses ?? []).map((course: ApiCourse) => course.course_id),
-      );
+      // const completedQuarterIds = new Set(
+      //   (json.courses ?? []).map((course: ApiCourse) => course.course_id),
+      // );
 
-      const completedSemesterIds = new Set(
-        (json.courses ?? [])
-          .map((course: ApiCourse) => course.converted_course_id)
-          .filter(Boolean),
-      );
+      // const completedSemesterIds = new Set(
+      //   (json.courses ?? [])
+      //     .map((course: ApiCourse) => course.converted_course_id)
+      //     .filter(Boolean),
+      // );
 
-      const conversionByQuarterId = new Map<number, ApiCourse>(
-        (json.courses ?? []).map((course: ApiCourse) => [
-          course.course_id,
-          course,
-        ]),
-      );
+      // const conversionByQuarterId = new Map<number, ApiCourse>(
+      //   (json.courses ?? []).map((course: ApiCourse) => [
+      //     course.course_id,
+      //     course,
+      //   ]),
+      // );
 
-      const quarterSaved = (json.quarterCourses ?? []).map(
-        (course: CatalogCourse) => {
-          const conversion = conversionByQuarterId.get(course.course_id);
+      // const quarterSaved = (json.quarterCourses ?? []).map(
+      //   (course: CatalogCourse) => {
+      //     const conversion = conversionByQuarterId.get(course.course_id);
 
-          return {
-            id: course.course_id,
-            code: course.course_code,
-            title: course.course_name,
-            units: course.units,
-            status: completedQuarterIds.has(course.course_id)
-              ? "Completed"
-              : "Remaining",
-            convertedCode: conversion?.converted_course_code ?? undefined,
-            convertedTitle: conversion?.converted_course_name ?? undefined,
-            convertedUnits: conversion?.converted_units ?? undefined,
-          };
-        },
-      );
+      //     return {
+      //       id: course.course_id,
+      //       code: course.course_code,
+      //       title: course.course_name,
+      //       units: course.units,
+      //       status: completedQuarterIds.has(course.course_id)
+      //         ? "Completed"
+      //         : "Remaining",
+      //       convertedCode: conversion?.converted_course_code ?? undefined,
+      //       convertedTitle: conversion?.converted_course_name ?? undefined,
+      //       convertedUnits: conversion?.converted_units ?? undefined,
+      //     };
+      //   },
+      // );
 
-      const semesterSaved = (json.semesterCourses ?? []).map(
-        (course: CatalogCourse) => ({
-          id: course.course_id,
-          code: course.course_code,
-          title: course.course_name,
-          units: course.units,
-          status: completedSemesterIds.has(course.course_id)
-            ? "Completed"
-            : "Remaining",
-        }),
-      );
+      // const semesterSaved = (json.semesterCourses ?? []).map(
+      //   (course: CatalogCourse) => ({
+      //     id: course.course_id,
+      //     code: course.course_code,
+      //     title: course.course_name,
+      //     units: course.units,
+      //     status: completedSemesterIds.has(course.course_id)
+      //       ? "Completed"
+      //       : "Remaining",
+      //   }),
+      // );
+      setNeededQuarterCourses(json.neededQuarterCourses)
+      setNeededSemesterCourses(json.neededSemesterCourses)
 
-      setQuarterCourses(quarterSaved);
-      setSemesterCourses(semesterSaved);
+      // setQuarterCourses(quarterSaved);
+      // setSemesterCourses(semesterSaved);
     }
 
     loadSavedCourses();
