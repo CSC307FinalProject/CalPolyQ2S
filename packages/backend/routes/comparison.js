@@ -171,7 +171,7 @@ router.get("/:student_id", async (req, res) => {
     case
       when groups.requirement_type = 'all_courses' then (
         select
-          string_agg(concat(c.subject, ' ', c.course_number, ' - ', c.class_name), ' AND ')
+          string_agg(cast(c.course_id as varchar(10)), ' AND ')
         from
           requirement_group_courses as rgc
           join courses c on rgc.course_id = c.course_id 
@@ -181,7 +181,7 @@ router.get("/:student_id", async (req, res) => {
       )
       when groups.requirement_type = 'choose_courses' then (
         select
-          string_agg(concat(c.subject, ' ', c.course_number, ' - ', c.class_name), ' OR ')
+          string_agg(cast(c.course_id as varchar(10)), ' OR ')
         from
           requirement_group_courses as rgc
           join courses c on rgc.course_id = c.course_id
@@ -193,7 +193,7 @@ router.get("/:student_id", async (req, res) => {
           string_agg(option.option_text, ' OR ')
         from
           (select
-            concat('(', string_agg(concat(c.subject, ' ', c.course_number, ' - ', c.class_name), ' AND '), ')') as option_text
+            concat('(', string_agg(cast(c.course_id as varchar(10)), ' AND '), ')') as option_text
           from
             requirement_group_courses as rgc
             join courses c on rgc.course_id = c.course_id
@@ -204,7 +204,7 @@ router.get("/:student_id", async (req, res) => {
       )
       when groups.requirement_type = 'min_units' then (
         select
-          concat('Take ', cast((groups.min_units - coalesce(sum(case when tqc.course_id is not null then taken_c.units else 0 end), 0)) as varchar(10)), ' units from: ', string_agg(concat(c.subject, ' ', c.course_number, ' - ', c.class_name), ', ') )
+          concat('Take ', cast((groups.min_units - coalesce(sum(case when tqc.course_id is not null then taken_c.units else 0 end), 0)) as varchar(10)), ' units from: ', string_agg(cast(c.course_id as varchar(10)), ', ') )
         from
           requirement_group_courses as rgc
           left join taken_quarter_courses tqc on rgc.course_id = tqc.course_id
@@ -262,7 +262,7 @@ from
 where sc.student_id = ${student_id}
 `;
     const neededSemesterCourses = await sql; `
-    with
+    wwith
   taken_quarter_courses as (
     -- Get all the quarter courses the student has taken or has credit for from classes take on semesters
     with
@@ -369,7 +369,7 @@ where sc.student_id = ${student_id}
     case
       when groups.requirement_type = 'all_courses' then (
         select
-          string_agg(concat(c.subject, ' ', c.course_number, ' - ', c.class_name), ' AND ')
+          string_agg(cast(c.course_id as varchar(10)), ' AND ')
         from
           requirement_group_courses as rgc
           join courses c on rgc.course_id = c.course_id 
@@ -379,7 +379,7 @@ where sc.student_id = ${student_id}
       )
       when groups.requirement_type = 'choose_courses' then (
         select
-          string_agg(concat(c.subject, ' ', c.course_number, ' - ', c.class_name), ' OR ')
+          string_agg(cast(c.course_id as varchar(10)), ' OR ')
         from
           requirement_group_courses as rgc
           join courses c on rgc.course_id = c.course_id
@@ -391,7 +391,7 @@ where sc.student_id = ${student_id}
           string_agg(option.option_text, ' OR ')
         from
           (select
-            concat('(', string_agg(concat(c.subject, ' ', c.course_number, ' - ', c.class_name), ' AND '), ')') as option_text
+            concat('(', string_agg(cast(c.course_id as varchar(10)), ' AND '), ')') as option_text
           from
             requirement_group_courses as rgc
             join courses c on rgc.course_id = c.course_id
@@ -402,7 +402,7 @@ where sc.student_id = ${student_id}
       )
       when groups.requirement_type = 'min_units' then (
         select
-          concat('Take ', cast((groups.min_units - coalesce(sum(case when tqc.course_id is not null then taken_c.units else 0 end), 0)) as varchar(10)), ' units from: ', string_agg(concat(c.subject, ' ', c.course_number, ' - ', c.class_name), ', ') )
+          concat('Take ', cast((groups.min_units - coalesce(sum(case when tqc.course_id is not null then taken_c.units else 0 end), 0)) as varchar(10)), ' units from: ', string_agg(cast(c.course_id as varchar(10)), ', ') )
         from
           requirement_group_courses as rgc
           left join taken_quarter_courses tqc on rgc.course_id = tqc.course_id
@@ -419,6 +419,10 @@ where sc.student_id = ${student_id}
   order by
     ug.group_id
     `;
+    
+
+return res.json({takenQuarterCourses, takenSemesterCourses, neededQuarterCourses, neededSemesterCourses});
+
     const courses = await sql`
   SELECT 
     q.course_id,
