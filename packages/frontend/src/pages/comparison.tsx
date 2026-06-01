@@ -18,6 +18,7 @@ type ConversionCourse = SavedCourse & {
   convertedTitle?: string;
   convertedUnits?: number;
   requirementArea: string;
+  catalogType: "quarter" | "semester";
 };
 
 const filters = ["All", "Completed", "Active", "Remaining"];
@@ -185,21 +186,9 @@ export default function Comparison() {
     null,
   );
 
-  async function handleCourseClick(course: ConversionCourse) {
-    const response = await fetch(
-      apiUrl(`/q2s-comparison/conversion-popup/${course.id}`),
-    );
-
-    const json = await response.json();
-
-    setSelectedCourse({
-      ...course,
-      convertedTitle:
-        json.conversions?.[0]?.substitute_classes || course.convertedTitle,
-      convertedCode:
-        json.conversions?.[0]?.substituted_out_classes || course.convertedCode,
-    });
-  }
+function handleCourseClick(course: ConversionCourse) {
+  setSelectedCourse(course);
+}
 
   useEffect(() => {
     async function loadSavedCourses() {
@@ -256,6 +245,7 @@ export default function Comparison() {
               ? "Completed"
               : "Remaining",
             requirementArea: course.requirement_area ?? "Other",
+            catalogType: "quarter",
             convertedCode: conversions
               .map((c) => c.converted_course_code)
               .filter(Boolean)
@@ -287,6 +277,7 @@ export default function Comparison() {
               ? "Completed"
               : "Remaining",
             requirementArea: course.requirement_area ?? "Other",
+            catalogType: "semester",
             convertedCode: first?.course_code,
             convertedTitle: first?.course_name,
             convertedUnits: first?.units,
@@ -546,7 +537,7 @@ export default function Comparison() {
 
             <div className="mt-6 rounded-xl border border-gray-200 p-4">
               <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-                Quarter Course
+                {selectedCourse.catalogType === "quarter" ? "Quarter Course" : "Semester Course"}
               </p>
               <div className="mt-2 flex justify-between gap-4">
                 <div>
@@ -565,7 +556,9 @@ export default function Comparison() {
 
             <div className="mt-3 rounded-xl border border-calpoly-green/30 bg-green-50 p-4">
               <p className="text-xs font-semibold uppercase tracking-widest text-green-700">
-                Semester Equivalent
+                {selectedCourse.catalogType === "quarter"
+  ? "Semester Equivalent"
+  : "Quarter Equivalent"}
               </p>
               <div className="mt-2 flex justify-between gap-4">
                 <div>
