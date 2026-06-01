@@ -8,7 +8,6 @@ import { Navigate } from "react-router-dom";
 import { getStoredUser } from "../components/authStorage";
 import { apiUrl } from "../lib/api";
 import Q2SFilter from "../components/q2sFilter";
-import FetchButton from "../components/fetchButton";
 
 function ClassSelector() {
   const user = getStoredUser();
@@ -181,7 +180,6 @@ function ClassSelector() {
               onChange={setConcentration}
               disabled={filteredConcentrations.length === 0}
             />
-            <FetchButton fetchClasses={fetchCourses} />
           </div>
 
           <div className="flex items-center justify-between w-full text-left text-2xl text-black font-bold">
@@ -205,6 +203,7 @@ function ClassSelector() {
             courses={completed}
             onRemoveCourse={handleRemoveCourse}
             onSaveCourses={() => handleSave(completed)}
+            onRemoveAllCourse={() => setCompleted([])}
           />
         </div>
       </main>

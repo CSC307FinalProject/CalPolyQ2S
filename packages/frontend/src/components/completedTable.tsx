@@ -1,4 +1,4 @@
-import { X } from "lucide-react";
+import { X, Trash2 } from "lucide-react";
 import type { Course } from "../data/courses";
 import { ContinueButton, BackButton } from "./navButtons";
 import { Link, useNavigate } from "react-router-dom";
@@ -59,12 +59,14 @@ interface CompletedTableProps {
   courses: Course[];
   onRemoveCourse: (course_id: number) => void;
   onSaveCourses: () => Promise<void>;
+  onRemoveAllCourse: () => void;
 }
 
 export default function CompletedTable({
   courses,
   onRemoveCourse,
   onSaveCourses,
+  onRemoveAllCourse,
 }: CompletedTableProps) {
   const navigate = useNavigate();
 
@@ -77,13 +79,19 @@ export default function CompletedTable({
     <div className="w-full h-full border border-gray-200 rounded-xl p-3 flex flex-col min-h-0 justify-between gap-3">
       <div className="flex flex-col gap-3 flex-1 min-h-0">
         {/* Count badge shows how many courses are selected at a glance */}
-        <div className="flex items-center justify-center text-xl font-bold text-black border-b border-gray-200 pb-2">
+        <div className="relative flex items-center justify-center px-10 text-xl font-bold text-black border-b border-gray-200 pb-2">
           Completed Classes
           {courses.length > 0 && (
             <span className="ml-2 text-base font-bold text-calpoly-green">
               [{courses.length}]
             </span>
           )}
+          <div
+            className="absolute right-0 top-1/2 -translate-y-1/2 hover:text-red-400 cursor-pointer p-2"
+            onClick={onRemoveAllCourse}
+          >
+            <Trash2 />
+          </div>
         </div>
 
         {/* Scrollable vertical list — divide-y creates subtle separators between rows */}
