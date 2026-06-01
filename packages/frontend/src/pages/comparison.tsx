@@ -5,6 +5,28 @@ import { BackButton } from "../components/navButtons";
 import { Link } from "react-router-dom";
 import { apiUrl } from "../lib/api";
 
+type Course = {
+  id: number;
+  title: string;
+  code: string;
+}
+type OrRequirement = {
+  requirements: Requirement[];
+}
+type AndRequirement = {
+  requirements: Requirement[];
+}
+type UnitRequirement = {
+  units: number;
+  requirements: Requirement[];
+}
+type Requirement =
+Course
+| OrRequirement
+| AndRequirement
+| UnitRequirement
+
+
 type SavedCourse = {
   id: number;
   title: string;
