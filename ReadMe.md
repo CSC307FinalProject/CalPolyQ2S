@@ -1,6 +1,23 @@
+## Project Summary
+
+This is the CalPolyQ2S tool. The upcoming quarter to semester and catalog switch is creating a lot of confusion for students at Cal Poly, and we wanted to help clear the confusion. Students have the right to pick the catalog that suits them best, and we want to help them make an informed decision. The original scope of this project was all majors, but with time limitations, was narrowed down to just Computer Science. Some core features include: 
+- Two Factor User Authentication 
+- Class search by major and concentration
+- Save courses by user into our database
+- Class comparison page (main feature)
+  - Completed and remaining courses for both catalogs
+  - Units remaining
+  - Terms remaining
+
 ## Deployed Application Website
 
 Website URL - https://orange-bay-0a230d710.7.azurestaticapps.net/
+
+We are bummed that due to deploying on Azure using a student account, we cannot use a custom domain.
+
+## UI Prototypes
+
+https://www.figma.com/design/51lOIbYsvbNh3ut76eCnOM/Goal-Diggers?node-id=0-1&p=f (Last Updated May 1, 2026)
 
 ## Contributing
 
