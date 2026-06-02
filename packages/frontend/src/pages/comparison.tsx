@@ -101,13 +101,12 @@ export function RequirementList({ activeFilter, requirements, onCourseClick }: R
 
 function RequirementVisualizer({root, onCourseClick}: {root: CatalogRequirement; onCourseClick: (course: Course) => void}) {
   return (<div>
-    <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full tracking-wide transition-opacity group-hover:opacity-90 ${getStatusStyles(root.completion)}`}>
-      {root.completion || "Remaining"}
-    </span>
+    <CompletionTag completion = {root.completion}></CompletionTag>
     <RequirementNodeVisualizer node={root.requirement} onCourseClick={onCourseClick}></RequirementNodeVisualizer>
   </div>)
 
 }
+
 
 function RequirementNodeVisualizer({ node, onCourseClick }: { node: Requirement; onCourseClick: (course: Course) => void }) {
   switch (node.type) {
@@ -132,9 +131,7 @@ function RequirementNodeVisualizer({ node, onCourseClick }: { node: Requirement;
             <span className="font-normal text-slate-600">
               {node.units} units
             </span>
-            <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full tracking-wide transition-opacity group-hover:opacity-90 ${getStatusStyles(node.completion)}`}>
-              {node.completion || "Remaining"}
-            </span>
+            <CompletionTag completion={node.completion}></CompletionTag>
           </div>
         </div>
       );
@@ -186,6 +183,14 @@ function RequirementNodeVisualizer({ node, onCourseClick }: { node: Requirement;
     default:
       return null;
   }
+}
+
+function CompletionTag({completion}:{completion: Completion}) {
+  return (
+    <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full tracking-wide transition-opacity group-hover:opacity-90 ${getStatusStyles(completion)}`}>
+      {completion || "Remaining"}
+    </span>
+  )
 }
 
 
