@@ -304,25 +304,11 @@ export default function Comparison() {
         </div>
     )
   }
-  return (
-    <div className="bg-white ">
-      <Navbar />
-      <div className="bg-white flex items-stretch">
-        {/* Quarter Panel */}
-        <CatalogPanel header="Quarter Catalog (2022-2026)" termType="quarter" 
-        unitsCompleted={quarterUnitsDone} unitsNeeded={180} termsLeft={quartersLeft} 
-        isRecommended={true} requirements={quarterRequirements} activeFilter={() => quarterActiveFilter}
-        setActiveFilter={setQuarterActiveFilter}></CatalogPanel>
-        {/* Semester panel */}
-        <CatalogPanel header="Semester Catalog (2026-2028)" termType="semester" 
-        unitsCompleted={semesterUnitsDone} unitsNeeded={120} termsLeft={semestersLeft} 
-        isRecommended={true} requirements={semesterRequirements} activeFilter={() => semesterActiveFilter}
-        setActiveFilter={setSemesterActiveFilter}></CatalogPanel>
-      </div>
-      <Link to="/class-selector" className="fixed bottom-0 left-0 m-2">
-        <BackButton />
-      </Link>
-      {selectedCourse && (
+  type CourseConversionPopupProps = {
+    selectedCourse: Course;
+  }
+  function CourseConversionPopup({selectedCourse} : CourseConversionPopupProps) {
+      return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
           <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
             <div className="flex items-start justify-between gap-4">
@@ -387,7 +373,27 @@ export default function Comparison() {
             </div>
           </div>
         </div>
-      )}
+      )
+  }
+  return (
+    <div className="bg-white ">
+      <Navbar />
+      <div className="bg-white flex items-stretch">
+        {/* Quarter Panel */}
+        <CatalogPanel header="Quarter Catalog (2022-2026)" termType="quarter" 
+        unitsCompleted={quarterUnitsDone} unitsNeeded={180} termsLeft={quartersLeft} 
+        isRecommended={true} requirements={quarterRequirements} activeFilter={() => quarterActiveFilter}
+        setActiveFilter={setQuarterActiveFilter}></CatalogPanel>
+        {/* Semester panel */}
+        <CatalogPanel header="Semester Catalog (2026-2028)" termType="semester" 
+        unitsCompleted={semesterUnitsDone} unitsNeeded={120} termsLeft={semestersLeft} 
+        isRecommended={true} requirements={semesterRequirements} activeFilter={() => semesterActiveFilter}
+        setActiveFilter={setSemesterActiveFilter}></CatalogPanel>
+      </div>
+      <Link to="/class-selector" className="fixed bottom-0 left-0 m-2">
+        <BackButton />
+      </Link>
+      {selectedCourse && (<CourseConversionPopup selectedCourse={selectedCourse}></CourseConversionPopup>)}
     </div>
   );
 }
