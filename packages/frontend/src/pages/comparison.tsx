@@ -69,8 +69,10 @@ type CatalogRequirement = {
   completion: Completion;
   requirement: Requirement
 }
-
-
+type CourseMapping = {
+  substitutedCourses: Course[];
+  substitutedOutCourses: Course[] 
+}
 
 
 const getStatusStyles = (status: Completion) => {
@@ -202,6 +204,7 @@ export default function Comparison() {
 
   const [quarterRequirements, setQuarterRequirements] = useState<CatalogRequirement[]>([]);
   const [semesterRequirements, setSemesterRequirements] = useState<CatalogRequirement[]>([]);
+  const [courseMappings, setCourseMappings] = useState<CourseMapping>();
 
   const studentId = getStoredUser()?.student_id;
 
@@ -223,6 +226,7 @@ export default function Comparison() {
       console.log("Received: ", JSON.stringify(json))
       setQuarterRequirements(json.quarterRequirements);
       setSemesterRequirements(json.semesterRequirements);
+      setCourseMappings(json.courseMappings)
 
     }
 

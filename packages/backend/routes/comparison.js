@@ -297,6 +297,26 @@ from
   courses as c
 `
 }
+async function queryCourseMappings() {
+  result = await sql `
+  select course_mappings.mapping_id, 
+    string_agg(distinct cast(c1.course_id as varchar(10)), ' ') as substitute_classes,
+    string_agg(distinct cast(c2.course_id as varchar(10)), ' ') as substituted_out_classes
+  from course_mappings
+    join course_mapping_item as target_item on target_item.mapping_id = course_mappings.mapping_id
+    join course_mapping_item as item1 on item1.mapping_id = course_mappings.mapping_id
+    join courses as c1 on c1.course_id = item1.course_id
+    join course_mapping_item as item2 on item2.mapping_id = course_mappings.mapping_id
+    join courses as c2 on c2.course_id = item2.course_id
+  where item1.is_substitute = true
+    and item2.is_substitute = false
+  group by course_mappings.mapping_id
+`
+  return result.map((row) => {
+    substituteCourses: row.substitute_classes.split(' ');
+    substitutedOutCourses: row.substituted_out_classes.split(' ');
+  })
+}
 
 // TODO REFACTOR THIS TO GET CLASSES NEEDED TO GRAD
 // TODO AKA REQUIREMENT_GROUP_COURSES FOR THAT CATALOG AND MAJOR
@@ -322,13 +342,13 @@ router.get("/:student_id", async (req, res) => {
   const courseMap = new Map(courses.map((course) => [course.course_id, course]))
 
   try {
-    const requirements = await queryNeededClasses(student_id, courseMap)
-    const quarterRequirements = requirements.filter((req) => req.catalog == 1)
-    const semesterRequirements = requirements.filter((req) => req.catalog == 2)
-    console.log("Quarter Requirements: " + JSON.stringify(quarterRequirements[0]))
-        
+    const requirements = await queryNeededClasses(student_id, courseMap);
+    const quarterRequirements = requirements.filter((req) => req.catalog == 1);
+    const semesterRequirements = requirements.filter((req) => req.catalog == 2);
+    console.log("Quarter Requirements: " + JSON.stringify(quarterRequirements[0]));
+    const courseMappings = queryCourseMappings();
 
-return res.json({quarterRequirements, semesterRequirements});
+    return res.json({quarterRequirements, semesterRequirements, courseMappings});
   } catch (error) {
     console.error("Get comparison courses error:", error);
 
