@@ -1,22 +1,35 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, Fragment } from "react";
 import Navbar from "../components/navbar";
 import { getStoredUser } from "../components/authStorage";
 import { BackButton } from "../components/navButtons";
 import { Link } from "react-router-dom";
 import { apiUrl } from "../lib/api";
 
+type Completion =
+  "Completed"
+  | 'Remaining'
+
 type Course = {
+  type: 'course';
   id: number;
   title: string;
   code: string;
+  units: number;
+  completion: Completion;
 }
 type OrRequirement = {
+  type: 'or';
+  completion: Completion;
   requirements: Requirement[];
 }
 type AndRequirement = {
+  type: 'and';
+  completion: Completion;
   requirements: Requirement[];
 }
 type UnitRequirement = {
+  type: 'units'
+  completion: Completion;
   units: number;
   requirements: Requirement[];
 }
@@ -26,29 +39,14 @@ Course
 | AndRequirement
 | UnitRequirement
 
-
-type SavedCourse = {
-  id: number;
-  title: string;
-  code: string;
-  units: number;
-  status: string;
-};
-
-type ConversionCourse = SavedCourse & {
-  convertedCode?: string;
-  convertedTitle?: string;
-  convertedUnits?: number;
-};
-
 const filters = ["All", "Completed", "Active", "Remaining"];
 
-const getStatusStyles = (status: string) => {
+const getStatusStyles = (status: Completion) => {
   switch (status) {
     case "Completed":
       return "bg-green-100 text-green-600";
-    case "Active":
-      return "bg-yellow-100 text-yellow-600";
+    // case "Active":
+    //   return "bg-yellow-100 text-yellow-600";
     case "Remaining":
       return "bg-gray-100 text-gray-500";
     default:
@@ -56,93 +54,235 @@ const getStatusStyles = (status: string) => {
   }
 };
 
-// type ApiCourse = {
-//   course_id: number;
-//   course_code: string;
-//   course_name: string;
-//   units: number;
-//   converted_course_id: number | null;
-//   converted_course_code: string | null;
-//   converted_course_name: string | null;
-//   converted_units: number | null;
-// };
-
-type CatalogCourse = {
-  course_id: number;
-  course_code: string;
-  course_name: string;
-  units: number;
-};
-
-type CourseListProps = {
+type RequirementListProps = {
   activeFilter: string;
-  courses: ConversionCourse[];
-  onCourseClick: (course: ConversionCourse) => void;
+  requirements: Requirement[];
+  onCourseClick: (course: Course) => void;
 };
-
-function CourseList({ activeFilter, courses, onCourseClick }: CourseListProps) {
-  const filteredCourses = courses.filter((course) => {
-    if (activeFilter === "All") return true;
-    return course.status === activeFilter;
-  });
-
+export function RequirementList({ activeFilter, requirements, onCourseClick }: RequirementListProps) {
+  
   return (
-    <div className="screen">
-      <div className="h-100 overflow-y-auto no-scrollbar p-4">
-        {filteredCourses.map((course) => (
-          <button
-            key={course.id}
-            type="button"
-            onClick={() => onCourseClick(course)}
-            className="w-full text-left bg-white shadow p-5 hover:bg-gray-50 transition-colors"
-          >
-            <div className="flex items-start">
-              <div>
-                <h2 className="text-black! flex">{course.code}</h2>
-                <span className="text-xl text-gray-500">{course.title}</span>
-              </div>
-
-              <div className="ml-auto flex items-center gap-2">
-                <span className="text-sm px-3 py-1 rounded-full flex items-end">
-                  {course.units} units
-                </span>
-
-                <span
-                  className={`text-sm px-3 py-1 rounded-full ml-auto ${getStatusStyles(
-                    course.status,
-                  )}`}
-                >
-                  {course.status}
-                </span>
-              </div>
-            </div>
-          </button>
+    <div className="w-full space-y-6 mt-6">
+      <h3 className="text-xl font-semibold text-slate-800 tracking-tight">
+        Degree Requirements ({activeFilter})
+      </h3>
+      
+      <div className="space-y-4">
+        {requirements.map((req, index) => (
+          <div key={index} className="p-5 bg-white border border-slate-100 rounded-xl shadow-sm">
+            <RequirementNodeVisualizer node={req} onCourseClick={onCourseClick} />
+          </div>
         ))}
       </div>
     </div>
   );
 }
 
+// --- Recursive Visualizer Component ---
+function RequirementNodeVisualizer({ node, onCourseClick }: { node: Requirement; onCourseClick: (course: Course) => void }) {
+  switch (node.type) {
+    case 'course':
+      return (
+        <button
+          onClick={() => onCourseClick(node)}
+          className="flex items-center justify-between w-full p-4 text-left transition-all border border-slate-200 rounded-lg bg-slate-50 hover:bg-emerald-50/50 hover:border-emerald-300 group"
+        >
+          <div>
+            <span className="inline-block px-2 py-0.5 text-xs font-bold font-mono tracking-wide uppercase bg-slate-200 text-slate-700 rounded mr-2 group-hover:bg-emerald-200 group-hover:text-emerald-800 transition-colors">
+              {node.code}
+            </span>
+            <span className="font-medium text-slate-700 group-hover:text-emerald-900">{node.title}</span>
+          </div>
+          <span className="text-sm font-semibold text-slate-500 bg-white border px-2 py-1 rounded-md group-hover:border-emerald-200">
+            {node.units} units
+          </span>
+        </button>
+      );
+
+    case 'and':
+      return (
+        <div className="space-y-3">
+          {node.requirements.map((subReq, i) => (
+            <RequirementNodeVisualizer key={i} node={subReq} onCourseClick={onCourseClick} />
+          ))}
+        </div>
+      );
+
+    case 'or':
+      return (
+        <div className="p-4 border-l-4 border-amber-400 bg-amber-50/30 rounded-r-lg space-y-3">
+          <div className="text-xs font-bold text-amber-700 uppercase tracking-wider mb-1">
+            Choose One Option:
+          </div>
+          {node.requirements.map((subReq, i) => (
+            <Fragment key={i}>
+              <RequirementNodeVisualizer node={subReq} onCourseClick={onCourseClick} />
+              {i < node.requirements.length - 1 && (
+                <div className="relative flex py-1 items-center">
+                  <div className="flex-grow border-t border-slate-200"></div>
+                  <span className="flex-shrink mx-4 text-xs font-bold text-slate-400 uppercase tracking-widest bg-slate-50 px-2 rounded">OR</span>
+                  <div className="flex-grow border-t border-slate-200"></div>
+                </div>
+              )}
+            </Fragment>
+          ))}
+        </div>
+      );
+
+    case 'units':
+      return (
+        <div className="p-4 border-l-4 border-indigo-500 bg-indigo-50/20 rounded-r-lg space-y-3">
+          <div className="text-sm font-semibold text-indigo-900 mb-2">
+            Complete <span className="font-bold underline text-indigo-600">{node.units} units</span> from the following:
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {node.requirements.map((subReq, i) => (
+              <RequirementNodeVisualizer key={i} node={subReq} onCourseClick={onCourseClick} />
+            ))}
+          </div>
+        </div>
+      );
+
+    default:
+      return null;
+  }
+}
+
+// function RequirementList({ requirements: requirements, onCourseClick }: RequirementListProps) {
+//   // If there's no data or it's null, render nothing
+//   if (!requirements) return null;
+
+//   // --- CASE 1: INDIVIDUAL COURSE CARD ---
+//   if (requirements.type === 'course') {
+//     const course = requirements;
+//     return (
+//       <button
+//         onClick={() => onCourseClick && onCourseClick(course.id)}
+//         className="flex items-center justify-between w-full p-4 mb-2 text-left transition bg-white border border-gray-200 rounded-lg shadow-sm hover:border-blue-500 hover:shadow"
+//       >
+//         <div>
+//           <span className="font-bold text-blue-600 mr-3">{course.code}</span>
+//           <span className="text-gray-700 font-medium">{course.title}</span>
+//         </div>
+//         <div className="text-sm font-semibold text-gray-500 bg-gray-100 px-2.5 py-1 rounded">
+//           {course.units} units
+//         </div>
+//       </button>
+//     );
+//   }
+
+//   // --- CASE 2: "AND" GROUPING ---
+//   if (requirements.type === 'and') {
+//     return (
+//       <div className="flex flex-col gap-1 w-full">
+//         {requirements.requirements.map((subReq, index) => (
+//           <RequirementList 
+//             key={`and-${index}`} 
+//             requirements={subReq} 
+//             onCourseClick={onCourseClick} 
+//           />
+//         ))}
+//       </div>
+//     );
+//   }
+
+//   // --- CASE 3: "OR" GROUPING ---
+//   if (requirements.type === 'or') {
+//     return (
+//       <div className="w-full my-3 p-4 border-l-4 border-amber-400 bg-amber-50/30 rounded-r-lg">
+//         <div className="text-xs font-bold text-amber-700 uppercase tracking-wider mb-2">
+//           Choose One Option Below:
+//         </div>
+//         <div className="flex flex-col gap-2">
+//           {requirements.requirements.map((subReq, index) => (
+//             <RequirementList 
+//               key={`or-${index}`} 
+//               requirements={subReq} 
+//               onCourseClick={onCourseClick} 
+//             />
+//           ))}
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   // --- CASE 4: "UNITS" GROUPING ---
+//   if (requirements.type === 'units') {
+//     return (
+//       <div className="w-full my-3 p-4 border-l-4 border-indigo-500 bg-indigo-50/20 rounded-r-lg">
+//         <div className="text-xs font-bold text-indigo-700 uppercase tracking-wider mb-2">
+//           Complete {requirements.units_required} units from:
+//         </div>
+//         <div className="flex flex-col gap-2">
+//           {requirements.requirements.map((subReq, index) => (
+//             <RequirementList 
+//               key={`units-${index}`} 
+//               requirements={subReq} 
+//               onCourseClick={onCourseClick} 
+//             />
+//           ))}
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return null;
+
+
+//   // return (
+//   //   <div className="screen">
+//   //     <div className="h-100 overflow-y-auto no-scrollbar p-4">
+//   //       {requirements.map((course) => (
+//   //         <button
+//   //           key={course.id}
+//   //           type="button"
+//   //           onClick={() => onCourseClick(course)}
+//   //           className="w-full text-left bg-white shadow p-5 hover:bg-gray-50 transition-colors"
+//   //         >
+//   //           <div className="flex items-start">
+//   //             <div>
+//   //               <h2 className="text-black! flex">{course.code}</h2>
+//   //               <span className="text-xl text-gray-500">{course.title}</span>
+//   //             </div>
+
+//   //             <div className="ml-auto flex items-center gap-2">
+//   //               <span className="text-sm px-3 py-1 rounded-full flex items-end">
+//   //                 {course.units} units
+//   //               </span>
+
+//   //               <span
+//   //                 className={`text-sm px-3 py-1 rounded-full ml-auto ${getStatusStyles(
+//   //                   "remaining",// course.status,
+//   //                 )}`}
+//   //               >
+//   //                 remaining
+//   //                 {/* {course.status} */}
+//   //               </span>
+//   //             </div>
+//   //           </div>
+//   //         </button>
+//   //       ))}
+//   //     </div>
+//   //   </div>
+//   // );
+// }
+
 export default function Comparison() {
   const [activeFilter, setActiveFilter] = useState("All");
   const [activeFilter1, setActiveFilter1] = useState("All");
 
-  const [neededQuarterCourses, setNeededQuarterCourses] = useState<Requirement[]>([]);
-  const [neededSemesterCourses, setNeededSemesterCourses] = useState<Requirement[]>([]);
-  const [takenQuarterCourses, setTakenQuarterCourses] = useState<Course[]>([]);
-  const [takenSemesterCourses, setTakenSemesterCourses] = useState<Course[]>([]);
-  const [quarterCourses, setQuarterCourses] = useState<ConversionCourse[]>([]);
-  const [semesterCourses, setSemesterCourses] = useState<ConversionCourse[]>([]);
+  const [quarterRequirements, setQuarterRequirements] = useState<Requirement[]>([]);
+  const [semesterRequirements, setSemesterRequirements] = useState<Requirement[]>([]);
+
   const studentId = getStoredUser()?.student_id;
 
-  const [selectedCourse, setSelectedCourse] = useState<ConversionCourse | null>(
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(
     null,
   );
 
   useEffect(() => {
     async function loadSavedCourses() {
       if (!studentId) return;
-      console.log("Loading saved courses")
       const response = await fetch(apiUrl(`/q2s-comparison/${studentId}`));
 
       const json = await response.json();
@@ -151,72 +291,21 @@ export default function Comparison() {
         console.error(json.error || "Failed to load saved courses.");
         return;
       }
+      setQuarterRequirements(json.quarterRequirements);
+      setSemesterRequirements(json.semesterRequirements);
 
-      // const completedQuarterIds = new Set(
-      //   (json.courses ?? []).map((course: ApiCourse) => course.course_id),
-      // );
-
-      // const completedSemesterIds = new Set(
-      //   (json.courses ?? [])
-      //     .map((course: ApiCourse) => course.converted_course_id)
-      //     .filter(Boolean),
-      // );
-
-      // const conversionByQuarterId = new Map<number, ApiCourse>(
-      //   (json.courses ?? []).map((course: ApiCourse) => [
-      //     course.course_id,
-      //     course,
-      //   ]),
-      // );
-
-      // const quarterSaved = (json.quarterCourses ?? []).map(
-      //   (course: CatalogCourse) => {
-      //     const conversion = conversionByQuarterId.get(course.course_id);
-
-      //     return {
-      //       id: course.course_id,
-      //       code: course.course_code,
-      //       title: course.course_name,
-      //       units: course.units,
-      //       status: completedQuarterIds.has(course.course_id)
-      //         ? "Completed"
-      //         : "Remaining",
-      //       convertedCode: conversion?.converted_course_code ?? undefined,
-      //       convertedTitle: conversion?.converted_course_name ?? undefined,
-      //       convertedUnits: conversion?.converted_units ?? undefined,
-      //     };
-      //   },
-      // );
-
-      // const semesterSaved = (json.semesterCourses ?? []).map(
-      //   (course: CatalogCourse) => ({
-      //     id: course.course_id,
-      //     code: course.course_code,
-      //     title: course.course_name,
-      //     units: course.units,
-      //     status: completedSemesterIds.has(course.course_id)
-      //       ? "Completed"
-      //       : "Remaining",
-      //   }),
-      // );
-      setNeededQuarterCourses(json.neededQuarterCourses);
-      setNeededSemesterCourses(json.neededSemesterCourses);
-      setTakenQuarterCourses(json.takenQuarterCourses);
-      setTakenSemesterCourses(json.takenSemesterCourses); 
-
-      // setQuarterCourses(quarterSaved);
-      // setSemesterCourses(semesterSaved);
     }
 
     loadSavedCourses();
   }, [studentId]);
 
-  const semesterUnitsDone = semesterCourses.reduce((total, course) => {
-    if (course.status === "Completed") {
-      return total + course.units;
-    }
-    return total;
-  }, 0);
+  const semesterUnitsDone = 0
+  // semesterCourses.reduce((total, course) => {
+  //   if (course.status === "Completed") {
+  //     return total + course.units;
+  //   }
+  //   return total;
+  // }, 0);
 
   const semesterPercent = Math.min((semesterUnitsDone / 120) * 100, 100);
 
@@ -224,12 +313,13 @@ export default function Comparison() {
 
   const semestersLeftPercent = Math.min(((9 - semestersLeft) / 8) * 100, 100);
 
-  const quarterUnitsDone = quarterCourses.reduce((total, course) => {
-    if (course.status === "Completed") {
-      return total + course.units;
-    }
-    return total;
-  }, 0);
+  const quarterUnitsDone = 0
+  // quarterCourses.reduce((total, course) => {
+  //   if (course.status === "Completed") {
+  //     return total + course.units;
+  //   }
+  //   return total;
+  // }, 0);
 
   const quarterPercent = Math.min((quarterUnitsDone / 180) * 100, 100);
 
@@ -326,9 +416,9 @@ export default function Comparison() {
               ))}
             </div>
           </div>
-          <CourseList
+          <RequirementList
             activeFilter={activeFilter}
-            courses={quarterCourses}
+            requirements={quarterRequirements}
             onCourseClick={setSelectedCourse}
           />{" "}
         </div>
@@ -421,9 +511,9 @@ export default function Comparison() {
                 </div>
               </div>
             </div>
-            <CourseList
+            <RequirementList
               activeFilter={activeFilter1}
-              courses={semesterCourses}
+              requirements={semesterRequirements}
               onCourseClick={setSelectedCourse}
             />
           </div>
@@ -478,7 +568,8 @@ export default function Comparison() {
                 Semester Equivalent
               </p>
               <div className="mt-2 flex justify-between gap-4">
-                <div>
+                TODO: Rework conversion data
+                {/* <div>
                   <p className="font-semibold text-gray-900">
                     {selectedCourse.convertedCode || "No conversion found"}
                   </p>
@@ -491,7 +582,7 @@ export default function Comparison() {
                   {selectedCourse.convertedUnits
                     ? `${selectedCourse.convertedUnits} units`
                     : ""}
-                </p>
+                </p> */}
               </div>
             </div>
           </div>

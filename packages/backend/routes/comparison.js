@@ -70,7 +70,9 @@ function parseRequirementString(expression, catalogMap) {
       type: 'course',
       id: courseId,
       title: match ? match.course_name : 'Unknown Course',
-      code: match ? match.course_code : "Unknown Code"
+      code: match ? match.course_code : "Unknown Code",
+      units: match ? match.units : "Unknown Units",
+      completion: match ? match.completion : "Unknown Completion"
     };
   }
 
@@ -78,7 +80,8 @@ function parseRequirementString(expression, catalogMap) {
 }
 
 async function queryNeededClasses(student_id, catalog_id, courseMap) {
-  const result = await sql `with
+  const result = await sql `
+  with
   taken_quarter_courses as (
     -- Get all the quarter courses the student has taken or has credit for from classes take on semesters
     with
@@ -102,23 +105,23 @@ async function queryNeededClasses(student_id, catalog_id, courseMap) {
       join course_mappings as m on m.mapping_id = m_counts.mapping_id
       and m.substitute_classes_needed = m_counts.substitute_classes -- if the student has taken all the classes in the mapping group, include it.
       join course_mapping_item item on item.mapping_id = m.mapping_id
-      join courses as c on c.catalog_id = ${catalog_id}
-      and c.course_id = item.course_id
+      join courses as c on c.course_id = item.course_id
       -- include all classes that have been taken, or the student has taken all the classes on other catalog needed for credit
     union
     select
       c.course_id
     from
       student_courses as sc
-      join courses as c on c.catalog_id = ${catalog_id}
-      and c.course_id = sc.course_id
+      join courses as c on c.course_id = sc.course_id
     where
       sc.student_id = ${student_id}
   ),
+
   option_group_completion as (
     --Calculate whether each option group is satisfied
     select
       groups.group_id,
+      groups.catalog_id,
       gc.option_group,
       groups.group_name,
       groups.requirement_type,
@@ -143,10 +146,9 @@ async function queryNeededClasses(student_id, catalog_id, courseMap) {
       join requirement_groups as groups on groups.group_id = gc.group_id
       left join taken_quarter_courses as tcs on tcs.course_id = gc.course_id
       left join courses on courses.course_id = tcs.course_id
-    where
-      groups.catalog_id = ${catalog_id}
     group by
       groups.group_id,
+      groups.catalog_id,
       gc.option_group,
       groups.group_name,
       groups.requirement_type,
@@ -159,6 +161,7 @@ async function queryNeededClasses(student_id, catalog_id, courseMap) {
       ogc.group_id,
       ogc.group_name,
       ogc.units,
+      ogc.catalog_id,
       case
         when (sum(ogc.is_option_complete) >= 1) then 1
         else 0
@@ -167,21 +170,17 @@ async function queryNeededClasses(student_id, catalog_id, courseMap) {
       option_group_completion as ogc
     group by
       ogc.group_id,
+      ogc.catalog_id,
       ogc.group_name,
       ogc.required_count,
       ogc.units
-  ),
-  uncompleted_groups as (
-    select
-      *
-    from
-      group_completion ug
-    where
-      ug.completion = 0
   )
   select
-    ug.group_id,
-    ug.group_name,
+    gc.group_id,
+    gc.catalog_id,
+    gc.group_name,
+    case when gc.completion = 1 then 'Completed'
+    else 'Remaining' end,
     case
       when groups.requirement_type = 'all_courses' then (
         select
@@ -190,8 +189,7 @@ async function queryNeededClasses(student_id, catalog_id, courseMap) {
           requirement_group_courses as rgc
           join courses c on rgc.course_id = c.course_id 
         where
-          rgc.group_id = ug.group_id
-          and not (c.course_id = any (select * from taken_quarter_courses))
+          rgc.group_id = gc.group_id
       )
       when groups.requirement_type = 'choose_courses' then (
         select
@@ -200,7 +198,7 @@ async function queryNeededClasses(student_id, catalog_id, courseMap) {
           requirement_group_courses as rgc
           join courses c on rgc.course_id = c.course_id
         where
-          rgc.group_id = ug.group_id
+          rgc.group_id = gc.group_id
       )
       when groups.requirement_type = 'choose_options' then (
         select
@@ -213,8 +211,7 @@ async function queryNeededClasses(student_id, catalog_id, courseMap) {
             requirement_group_courses as rgc
             join courses c on rgc.course_id = c.course_id
           where
-            rgc.group_id = ug.group_id
-            and not (c.course_id = any (select * from taken_quarter_courses))
+            rgc.group_id = gc.group_id
           group by rgc.option_group) as option
       )
       when groups.requirement_type = 'min_units' then (
@@ -226,19 +223,20 @@ async function queryNeededClasses(student_id, catalog_id, courseMap) {
           left join courses taken_c on taken_c.course_id = tqc.course_id
           left join courses c on rgc.course_id = c.course_id and tqc.course_id is null
         where
-          rgc.group_id = ug.group_id
+          rgc.group_id = gc.group_id
       )
       else 'error: requirement type not recognized'
     end as courses_needed
   from
-    uncompleted_groups ug
-    join requirement_groups groups on ug.group_id = groups.group_id
+    group_completion gc
+    join requirement_groups groups on gc.group_id = groups.group_id
   order by
-    ug.group_id`
+    gc.group_id
+  `
   return result.map((requirement) => parseRequirementString(requirement.courses_needed, courseMap))
 
 }
-async function queryTakenClasses(student_id, catalog_id) {
+async function queryTakenClasses(student_id) {
   return await sql `
   -- Get all the quarter courses the student has taken or has credit for from classes take on semesters
 with
@@ -254,29 +252,45 @@ with
       sc.student_id = ${student_id}
     group by
       item1.mapping_id
+  ),
+  taken_courses as (
+    select distinct
+      c.course_id
+    from
+      mapping_group_counts as m_counts
+      join course_mappings as m on m.mapping_id = m_counts.mapping_id
+      and m.substitute_classes_needed = m_counts.substitute_classes -- if the student has taken all the classes in the mapping group, include it.
+      join course_mapping_item item on item.mapping_id = m.mapping_id
+      join courses as c on c.course_id = item.course_id
+      -- include all classes that have been taken, or the student has taken all the classes on other catalog needed for credit
+    union
+    select
+      c.course_id
+    from
+      student_courses as sc
+      join courses as c on c.course_id = sc.course_id
+    where
+      sc.student_id = ${student_id}
   )
-select distinct
+select
   c.course_id,
   (c.subject || ' ' || c.course_number) as course_code,
-  c.class_name as course_name
+  c.class_name as course_name,
+  c.units,
+  case
+    when (
+      c.course_id in (
+        select
+          course_id
+        from
+          taken_courses
+      )
+    ) then 'Completed'
+    else 'Remaining'
+  end as completion
 from
-  mapping_group_counts as m_counts
-  join course_mappings as m on m.mapping_id = m_counts.mapping_id
-  and m.substitute_classes_needed = m_counts.substitute_classes -- if the student has taken all the classes in the mapping group, include it.
-  join course_mapping_item item on item.mapping_id = m.mapping_id
-  join courses as c on c.catalog_id = ${catalog_id}
-  and c.course_id = item.course_id
-  -- include all classes that have been taken, or the student has taken all the classes on other catalog needed for credit
-union
-select
-c.course_id,
-  (c.subject || ' ' || c.course_number) as course_code,
-  c.class_name as course_name
-from
-  student_courses as sc 
-  join courses as c on c.catalog_id = ${catalog_id}
-  and c.course_id = sc.course_id
-where sc.student_id = ${student_id}`
+  courses as c
+`
 }
 
 // TODO REFACTOR THIS TO GET CLASSES NEEDED TO GRAD
@@ -298,26 +312,17 @@ router.get("/", async (req, res) => {
 // get the completed classes from the student ID
 router.get("/:student_id", async (req, res) => {
   const { student_id } = req.params;
-  const courses = await sql`
-  SELECT
-    course_id,
-    subject || ' ' || course_number AS course_code,
-    class_name AS course_name,
-    units
-  FROM public.courses
-`;
+  const courses = await queryTakenClasses(student_id);
 // convert the courses to a map from course_id to other course info
   const courseMap = new Map(courses.map((course) => [course.course_id, course]))
 
   try {
-    const takenQuarterCourses = await queryTakenClasses(student_id, QUARTER_CATALOG_ID)
-    const takenSemesterCourses = await queryTakenClasses(student_id, SEMESTER_CATALOG_ID)
-    const neededQuarterCourses = await queryNeededClasses(student_id, QUARTER_CATALOG_ID, courseMap)
-    const neededSemesterCourses = await queryNeededClasses(student_id, SEMESTER_CATALOG_ID, courseMap)
-    console.log("Needed quarter classes: " + JSON.stringify(neededQuarterCourses[0]))
+    const quarterRequirements = await queryNeededClasses(student_id, QUARTER_CATALOG_ID, courseMap)
+    const semesterRequirements = await queryNeededClasses(student_id, SEMESTER_CATALOG_ID, courseMap)
+    console.log("Quarter Requirements: " + JSON.stringify(quarterRequirements[0]))
         
 
-return res.json({takenQuarterCourses, takenSemesterCourses, neededQuarterCourses, neededSemesterCourses});
+return res.json({quarterRequirements, semesterRequirements});
 
     const courses = await sql`
   SELECT 
