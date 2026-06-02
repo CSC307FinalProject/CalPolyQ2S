@@ -86,7 +86,7 @@ export async function registerUser(req, res) {
       process.env.TOKEN_SECRET,
       { expiresIn: "24h" }
     );
-    sendEmail(email, verificationToken);
+    await sendEmail(email, verificationToken);
     return res.status(201).json({ student_id: newUser.student_id, email });
 
   } 
@@ -219,7 +219,7 @@ export async function resendVerification(req, res) {
       { expiresIn: "24h" }
     );
 
-    sendEmail(email, verificationToken);
+    await sendEmail(email, verificationToken);
     return res.status(200).json({ message: "Verification email resent." });
 
   } catch (error) {
