@@ -5,9 +5,10 @@ const router = express.Router();
 const QUARTER_CATALOG_ID = 1;
 const SEMESTER_CATALOG_ID = 2;
 
-// Takes in a requirement string ("502 AND 503") and a map from course_id to course info and returns
+// Takes in a requirement (contains for example "502 AND 503") and a map from course_id to course info and returns
 // a recursive tree representing the requirements
-function parseRequirementString(expression, catalogMap) {
+function parseRequirementString(requirement, catalogMap) {
+  const expression = requirement.courses_needed
   if (!expression || typeof expression !== 'string') {
     console.warn(`Invalid expression received:`, expression);
     return null; // Or return { type: 'none', requirements: [] };
@@ -76,7 +77,10 @@ function parseRequirementString(expression, catalogMap) {
     };
   }
 
-  return parse();
+  return {
+    completion: requirement.completion,
+    requirement: parse(),
+  }
 }
 
 async function queryNeededClasses(student_id, catalog_id, courseMap) {
@@ -180,7 +184,7 @@ async function queryNeededClasses(student_id, catalog_id, courseMap) {
     gc.catalog_id,
     gc.group_name,
     case when gc.completion = 1 then 'Completed'
-    else 'Remaining' end,
+    else 'Remaining' end as completion,
     case
       when groups.requirement_type = 'all_courses' then (
         select
@@ -233,7 +237,7 @@ async function queryNeededClasses(student_id, catalog_id, courseMap) {
   order by
     gc.group_id
   `
-  return result.map((requirement) => parseRequirementString(requirement.courses_needed, courseMap))
+  return result.map((requirement) => parseRequirementString(requirement, courseMap))
 
 }
 async function queryTakenClasses(student_id) {

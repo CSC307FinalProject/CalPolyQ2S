@@ -4,11 +4,36 @@ import { getStoredUser } from "../components/authStorage";
 import { BackButton } from "../components/navButtons";
 import { Link } from "react-router-dom";
 import { apiUrl } from "../lib/api";
+import { Filter } from "lucide-react";
+
 
 type Completion =
   "Completed"
   | 'Remaining'
   | 'All'
+const allPredicate : CompletionPredicate = ((_: Completion) => true);
+const completedPredicate : CompletionPredicate = ((completion: Completion) => completion === "Completed");
+const remainingPredicate : CompletionPredicate = ((completion: Completion) => completion === "Remaining");
+type CompletionPredicate = (completion: Completion) => boolean;
+type Filter = {
+  predicate: CompletionPredicate,
+  str: Completion
+}
+const filters : Filter[] =
+[
+  {
+    predicate: allPredicate,
+    str: "All"
+  },
+  {
+    predicate: completedPredicate,
+    str: "Completed"
+  },
+  {
+    predicate: remainingPredicate,
+    str: "Remaining"
+  },
+]
 
 type Course = {
   type: 'course';
@@ -39,8 +64,12 @@ Course
 | OrRequirement
 | AndRequirement
 | UnitRequirement
+type CatalogRequirement = {
+  completion: Completion;
+  requirement: Requirement
+}
 
-const filters = ["All", "Completed", "Active", "Remaining"];
+
 
 const getStatusStyles = (status: Completion) => {
   switch (status) {
@@ -54,20 +83,30 @@ const getStatusStyles = (status: Completion) => {
 };
 
 type RequirementListProps = {
-  activeFilter: string;
-  requirements: Requirement[];
+  activeFilter: Filter;
+  requirements: CatalogRequirement[];
   onCourseClick: (course: Course) => void;
 };
 export function RequirementList({ activeFilter, requirements, onCourseClick }: RequirementListProps) {
   return (
     <div className="w-full flex-1 min-h-0 overflow-y-auto pr-2">
       <div className="space-y-4">
-        {requirements.map((req, index) => (
-          <RequirementNodeVisualizer key={index} node={req} onCourseClick={onCourseClick} />
+        {requirements.filter((req) => activeFilter.predicate(req.completion)).map((req, index) => (
+          <RequirementVisualizer key={index} root={req} onCourseClick={onCourseClick} />
         ))}
       </div>
     </div>
   );
+}
+
+function RequirementVisualizer({root, onCourseClick}: {root: CatalogRequirement; onCourseClick: (course: Course) => void}) {
+  return (<div>
+    <span className={`inline-block px-3 py-1 text-xs font-medium rounded-full tracking-wide transition-opacity group-hover:opacity-90 ${getStatusStyles(root.completion)}`}>
+      {root.completion || "Remaining"}
+    </span>
+    <RequirementNodeVisualizer node={root.requirement} onCourseClick={onCourseClick}></RequirementNodeVisualizer>
+  </div>)
+
 }
 
 function RequirementNodeVisualizer({ node, onCourseClick }: { node: Requirement; onCourseClick: (course: Course) => void }) {
@@ -151,11 +190,11 @@ function RequirementNodeVisualizer({ node, onCourseClick }: { node: Requirement;
 
 
 export default function Comparison() {
-  const [quarterActiveFilter, setQuarterActiveFilter] = useState("All");
-  const [semesterActiveFilter, setSemesterActiveFilter] = useState("All");
+  const [quarterActiveFilter, setQuarterActiveFilter] = useState(filters[0]); // [0] is the "All" filter
+  const [semesterActiveFilter, setSemesterActiveFilter] = useState(filters[0]);
 
-  const [quarterRequirements, setQuarterRequirements] = useState<Requirement[]>([]);
-  const [semesterRequirements, setSemesterRequirements] = useState<Requirement[]>([]);
+  const [quarterRequirements, setQuarterRequirements] = useState<CatalogRequirement[]>([]);
+  const [semesterRequirements, setSemesterRequirements] = useState<CatalogRequirement[]>([]);
 
   const studentId = getStoredUser()?.student_id;
 
@@ -174,6 +213,7 @@ export default function Comparison() {
         console.error(json.error || "Failed to load saved courses.");
         return;
       }
+      console.log("Received: ", JSON.stringify(json))
       setQuarterRequirements(json.quarterRequirements);
       setSemesterRequirements(json.semesterRequirements);
 
@@ -207,9 +247,9 @@ export default function Comparison() {
     unitsNeeded: number,
     termsLeft: number,
     isRecommended: boolean,
-    requirements: Requirement[],
-    activeFilter: () => string,
-    setActiveFilter: React.Dispatch<React.SetStateAction<string>>
+    requirements: CatalogRequirement[],
+    activeFilter: Filter,
+    setActiveFilter: React.Dispatch<React.SetStateAction<Filter>>
   }
   function CatalogPanel({header, termType, unitsCompleted, unitsNeeded, termsLeft, isRecommended, requirements, activeFilter, setActiveFilter} : CatalogPanelProps) {
     return (
@@ -283,21 +323,21 @@ export default function Comparison() {
             <div className="flex gap-1">
               {filters.map((filter) => (
                 <button
-                  key={filter}
+                  key={filter.str}
                   onClick={() => setActiveFilter(filter)}
                   className={` cursor-pointer text-xs px-3 py-1 rounded-full border transition-colors ${
-                    activeFilter() === filter
+                    activeFilter === filter
                       ? "bg-gray-900 text-white border-gray-900"
                       : "bg-white text-gray-500 border-gray-300 hover:bg-gray-50"
                   }`}
                 >
-                  {filter}
+                  {filter.str}
                 </button>
               ))}
             </div>
           </div>
           <RequirementList
-            activeFilter={activeFilter()}
+            activeFilter={activeFilter}
             requirements={requirements}
             onCourseClick={setSelectedCourse}
           />{" "}
@@ -382,12 +422,12 @@ export default function Comparison() {
         {/* Quarter Panel */}
         <CatalogPanel header="Quarter Catalog (2022-2026)" termType="quarter" 
         unitsCompleted={quarterUnitsDone} unitsNeeded={180} termsLeft={quartersLeft} 
-        isRecommended={true} requirements={quarterRequirements} activeFilter={() => quarterActiveFilter}
+        isRecommended={true} requirements={quarterRequirements} activeFilter={quarterActiveFilter}
         setActiveFilter={setQuarterActiveFilter}></CatalogPanel>
         {/* Semester panel */}
         <CatalogPanel header="Semester Catalog (2026-2028)" termType="semester" 
         unitsCompleted={semesterUnitsDone} unitsNeeded={120} termsLeft={semestersLeft} 
-        isRecommended={true} requirements={semesterRequirements} activeFilter={() => semesterActiveFilter}
+        isRecommended={true} requirements={semesterRequirements} activeFilter={semesterActiveFilter}
         setActiveFilter={setSemesterActiveFilter}></CatalogPanel>
       </div>
       <Link to="/class-selector" className="fixed bottom-0 left-0 m-2">
