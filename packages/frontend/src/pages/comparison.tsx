@@ -65,9 +65,11 @@ Course
 | AndRequirement
 | UnitRequirement
 type CatalogRequirement = {
+  name: String;
   completion: Completion;
   requirement: Requirement
 }
+
 
 
 
@@ -101,6 +103,7 @@ export function RequirementList({ activeFilter, requirements, onCourseClick }: R
 
 function RequirementVisualizer({root, onCourseClick}: {root: CatalogRequirement; onCourseClick: (course: Course) => void}) {
   return (<div>
+    {root.name}
     <CompletionTag completion = {root.completion}></CompletionTag>
     <RequirementNodeVisualizer node={root.requirement} onCourseClick={onCourseClick}></RequirementNodeVisualizer>
   </div>)
@@ -192,7 +195,6 @@ function CompletionTag({completion}:{completion: Completion}) {
     </span>
   )
 }
-
 
 export default function Comparison() {
   const [quarterActiveFilter, setQuarterActiveFilter] = useState(filters[0]); // [0] is the "All" filter

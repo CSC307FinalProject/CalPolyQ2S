@@ -64,7 +64,6 @@ function parseRequirementString(requirement, catalogMap) {
     if (isNaN(courseId)) {
       throw new Error(`Unexpected token in prefix expression: ${token} in ${tokens} from ${expression}`);
     }
-
     const match = catalogMap.get(courseId);
 
     return {
@@ -78,12 +77,14 @@ function parseRequirementString(requirement, catalogMap) {
   }
 
   return {
+    catalog: requirement.catalog_id,
+    name: requirement.name,
     completion: requirement.completion,
     requirement: parse(),
   }
 }
 
-async function queryNeededClasses(student_id, catalog_id, courseMap) {
+async function queryNeededClasses(student_id, courseMap) {
   const result = await sql `
   with
   taken_quarter_courses as (
@@ -182,7 +183,7 @@ async function queryNeededClasses(student_id, catalog_id, courseMap) {
   select
     gc.group_id,
     gc.catalog_id,
-    gc.group_name,
+    gc.group_name as name,
     case when gc.completion = 1 then 'Completed'
     else 'Remaining' end as completion,
     case
@@ -321,78 +322,13 @@ router.get("/:student_id", async (req, res) => {
   const courseMap = new Map(courses.map((course) => [course.course_id, course]))
 
   try {
-    const quarterRequirements = await queryNeededClasses(student_id, QUARTER_CATALOG_ID, courseMap)
-    const semesterRequirements = await queryNeededClasses(student_id, SEMESTER_CATALOG_ID, courseMap)
+    const requirements = await queryNeededClasses(student_id, courseMap)
+    const quarterRequirements = requirements.filter((req) => req.catalog == 1)
+    const semesterRequirements = requirements.filter((req) => req.catalog == 2)
     console.log("Quarter Requirements: " + JSON.stringify(quarterRequirements[0]))
         
 
 return res.json({quarterRequirements, semesterRequirements});
-
-    const courses = await sql`
-  SELECT 
-    q.course_id,
-    q.subject || ' ' || q.course_number AS course_code,
-    q.class_name AS course_name,
-    q.units,
-
-    s.course_id AS converted_course_id,
-    s.subject || ' ' || s.course_number AS converted_course_code,
-    s.class_name AS converted_course_name,
-    s.units AS converted_units,
-
-    cm.mapping_id,
-    cm.major_id,
-
-    CASE
-      WHEN q.course_number ~ '^[3-5]' THEN 'UPPER DIV'
-      WHEN q.subject LIKE 'Gen Ed%' THEN 'GE'
-      WHEN q.tech_elective_eligible THEN 'SUPPORT'
-      ELSE 'LOWER DIV'
-    END AS tag
-
-  FROM public.student_courses sc
-
-  JOIN public.courses q
-    ON sc.course_id = q.course_id
-
-  LEFT JOIN public.course_mapping_item old_item
-    ON old_item.course_id = sc.course_id
-    AND old_item.is_substitute = false
-
-  LEFT JOIN public.course_mappings cm
-    ON cm.mapping_id = old_item.mapping_id
-
-  LEFT JOIN public.course_mapping_item new_item
-    ON new_item.mapping_id = cm.mapping_id
-    AND new_item.is_substitute = true
-
-  LEFT JOIN public.courses s
-    ON s.course_id = new_item.course_id
-
-  WHERE sc.student_id = ${student_id}
-`;
-
-    const quarterCourses = await sql`
-  SELECT
-    course_id,
-    subject || ' ' || course_number AS course_code,
-    class_name AS course_name,
-    units
-  FROM public.courses
-  WHERE catalog_id = 1
-`;
-
-    const semesterCourses = await sql`
-  SELECT
-    course_id,
-    subject || ' ' || course_number AS course_code,
-    class_name AS course_name,
-    units
-  FROM public.courses
-  WHERE catalog_id = 2
-`;
-
-    return res.json({ courses, quarterCourses, semesterCourses });
   } catch (error) {
     console.error("Get comparison courses error:", error);
 
