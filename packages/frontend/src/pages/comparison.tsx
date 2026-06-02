@@ -273,7 +273,7 @@ export default function Comparison() {
               <div className="text-xs font-medium text-gray-800">
                 Terms Left
               </div>
-              <div className="text-xs text-gray-400">quarters</div>
+              <div className="text-xs text-gray-400">{termType}s</div>
             </div>
           </div>
           <div className="flex items-center justify-between mb-3">
