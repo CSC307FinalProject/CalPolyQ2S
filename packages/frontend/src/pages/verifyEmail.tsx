@@ -1,10 +1,12 @@
-import { use, useMemo, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { apiUrl } from "../lib/api";
 
-type Status = "success" | "expired" | "invalid";
+type Status = "verifying" | "success" | "expired" | "invalid";
 
-async function fetchStatus(token: string): Promise<Status> {
+async function fetchStatus(
+  token: string,
+): Promise<"success" | "expired" | "invalid"> {
   try {
     const res = await fetch(
       apiUrl(`/verify-email?token=${encodeURIComponent(token)}`),
@@ -19,8 +21,15 @@ async function fetchStatus(token: string): Promise<Status> {
 }
 
 function VerifyEmailResult({ token }: { token: string }) {
-  const promise = useMemo(() => fetchStatus(token), [token]);
-  const status = use(promise);
+  const [status, setStatus] = useState<Status>("verifying");
+
+  useEffect(() => {
+    fetchStatus(token).then(setStatus);
+  }, [token]);
+
+  if (status === "verifying") {
+    return <p className="text-gray-500">Verifying your email...</p>;
+  }
 
   if (status === "success") {
     return (
