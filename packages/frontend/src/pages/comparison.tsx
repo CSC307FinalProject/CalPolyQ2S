@@ -115,6 +115,22 @@ export default function Comparison() {
     null,
   );
 
+  async function handleCourseClick(course: ConversionCourse) {
+    const response = await fetch(
+      apiUrl(`/q2s-comparison/conversion-popup/${course.id}`),
+    );
+
+    const json = await response.json();
+
+    setSelectedCourse({
+      ...course,
+      convertedTitle:
+        json.conversions?.[0]?.substitute_classes || course.convertedTitle,
+      convertedCode:
+        json.conversions?.[0]?.substituted_out_classes || course.convertedCode,
+    });
+  }
+
   useEffect(() => {
     async function loadSavedCourses() {
       if (!studentId) return;
@@ -128,26 +144,38 @@ export default function Comparison() {
         return;
       }
 
-      const completedQuarterIds = new Set(
+      const completedQuarterIds = new Set<number>(
         (json.courses ?? []).map((course: ApiCourse) => course.course_id),
       );
 
-      const completedSemesterIds = new Set(
+      const completedSemesterIds = new Set<number>(
         (json.courses ?? [])
           .map((course: ApiCourse) => course.converted_course_id)
-          .filter(Boolean),
+          .filter((id: number | null): id is number => id !== null),
       );
 
-      const conversionByQuarterId = new Map<number, ApiCourse>(
-        (json.courses ?? []).map((course: ApiCourse) => [
-          course.course_id,
-          course,
-        ]),
-      );
+      const conversionByQuarterId = new Map<number, ApiCourse[]>();
+
+      (json.courses ?? []).forEach((course: ApiCourse) => {
+        const existing = conversionByQuarterId.get(course.course_id) ?? [];
+        existing.push(course);
+        conversionByQuarterId.set(course.course_id, existing);
+      });
+
+      const conversionBySemesterId = new Map<number, ApiCourse[]>();
+
+      (json.courses ?? []).forEach((course: ApiCourse) => {
+        if (!course.converted_course_id) return;
+
+        const existing =
+          conversionBySemesterId.get(course.converted_course_id) ?? [];
+        existing.push(course);
+        conversionBySemesterId.set(course.converted_course_id, existing);
+      });
 
       const quarterSaved = (json.quarterCourses ?? []).map(
         (course: CatalogCourse) => {
-          const conversion = conversionByQuarterId.get(course.course_id);
+          const conversions = conversionByQuarterId.get(course.course_id) ?? [];
 
           return {
             id: course.course_id,
@@ -157,23 +185,41 @@ export default function Comparison() {
             status: completedQuarterIds.has(course.course_id)
               ? "Completed"
               : "Remaining",
-            convertedCode: conversion?.converted_course_code ?? undefined,
-            convertedTitle: conversion?.converted_course_name ?? undefined,
-            convertedUnits: conversion?.converted_units ?? undefined,
+            convertedCode: conversions
+              .map((c) => c.converted_course_code)
+              .filter(Boolean)
+              .join(" AND "),
+            convertedTitle: conversions
+              .map((c) => c.converted_course_name)
+              .filter(Boolean)
+              .join(" AND "),
+            convertedUnits: conversions.reduce(
+              (total, c) => total + (c.converted_units ?? 0),
+              0,
+            ),
           };
         },
       );
 
       const semesterSaved = (json.semesterCourses ?? []).map(
-        (course: CatalogCourse) => ({
-          id: course.course_id,
-          code: course.course_code,
-          title: course.course_name,
-          units: course.units,
-          status: completedSemesterIds.has(course.course_id)
-            ? "Completed"
-            : "Remaining",
-        }),
+        (course: CatalogCourse) => {
+          const conversions =
+            conversionBySemesterId.get(course.course_id) ?? [];
+          const first = conversions[0];
+
+          return {
+            id: course.course_id,
+            code: course.course_code,
+            title: course.course_name,
+            units: course.units,
+            status: completedSemesterIds.has(course.course_id)
+              ? "Completed"
+              : "Remaining",
+            convertedCode: first?.course_code,
+            convertedTitle: first?.course_name,
+            convertedUnits: first?.units,
+          };
+        },
       );
 
       setQuarterCourses(quarterSaved);
@@ -301,7 +347,7 @@ export default function Comparison() {
           <CourseList
             activeFilter={activeFilter}
             courses={quarterCourses}
-            onCourseClick={setSelectedCourse}
+            onCourseClick={handleCourseClick}
           />{" "}
         </div>
 
@@ -396,7 +442,7 @@ export default function Comparison() {
             <CourseList
               activeFilter={activeFilter1}
               courses={semesterCourses}
-              onCourseClick={setSelectedCourse}
+              onCourseClick={handleCourseClick}
             />
           </div>
         </div>
