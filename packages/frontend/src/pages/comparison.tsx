@@ -331,9 +331,17 @@ export default function Comparison() {
         }
       });
 
+      function uniqueJoin(values: Array<string | null | undefined>) {
+        return Array.from(new Set(values.filter(Boolean))).join(" AND ");
+      }
+
       const quarterSaved = (json.quarterCourses ?? []).map(
         (course: CatalogCourse) => {
           const conversions = conversionByQuarterId.get(course.course_id) ?? [];
+          const progress =
+            course.group_id !== null
+              ? requirementProgressByGroupId.get(course.group_id)
+              : undefined;
 
           return {
             id: course.course_id,
@@ -364,10 +372,6 @@ export default function Comparison() {
           };
         },
       );
-
-      function uniqueJoin(values: Array<string | null | undefined>) {
-        return Array.from(new Set(values.filter(Boolean))).join(" AND ");
-      }
 
       const semesterSaved = (json.semesterCourses ?? []).map(
         (course: CatalogCourse) => {
