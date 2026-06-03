@@ -249,6 +249,9 @@ export default function Comparison() {
   const [semesterUnits, setSemesterUnits] = useState<number>(0);
   const [quarterTermsLeft, setQuarterTermsLeft] = useState<number>(8);
   const [semesterTermsLeft, setSemesterTermsLeft] = useState<number>(8);
+  const [quarterRecommended, setQuarterRecommended] = useState<boolean>(false);
+  const [semesterRecommended, setSemesterRecommended] =
+    useState<boolean>(false);
 
   const studentId = getStoredUser()?.student_id;
 
@@ -270,8 +273,10 @@ export default function Comparison() {
       setCourseMappings(json.courseMappings);
       setQuarterUnits(json.quarterUnits);
       setSemesterUnits(json.semesterUnits);
-      setQuarterTermsLeft(Math.ceil((120 - json.quarterUnits * 0.67) / 15));
+      setQuarterTermsLeft(Math.ceil((120 - json.quarterUnits / 1.5) / 15));
       setSemesterTermsLeft(Math.ceil((120 - json.semesterUnits) / 15));
+      setQuarterRecommended(json.quarterUnits > json.semesterUnits * 1.5);
+      setSemesterRecommended(json.quarterUnits < json.semesterUnits * 1.5);
     }
 
     loadSavedCourses();
@@ -289,7 +294,7 @@ export default function Comparison() {
           unitsNeeded={180}
           termsLeft={quarterTermsLeft}
           termsNeeded={8}
-          isRecommended={false}
+          isRecommended={quarterRecommended}
           requirements={quarterRequirements}
           activeFilter={quarterActiveFilter}
           setActiveFilter={setQuarterActiveFilter}
@@ -303,7 +308,7 @@ export default function Comparison() {
           unitsNeeded={120}
           termsLeft={semesterTermsLeft}
           termsNeeded={8}
-          isRecommended={false}
+          isRecommended={semesterRecommended}
           requirements={semesterRequirements}
           activeFilter={semesterActiveFilter}
           setActiveFilter={setSemesterActiveFilter}
@@ -414,6 +419,9 @@ function CatalogPanel({
           </div>
           <div className="text-xs font-medium text-gray-800">
             Semesters left
+          </div>
+          <div className="text-xs font-small text-gray-400">
+            *Assuming 15 units a semester
           </div>
         </div>
       </div>
