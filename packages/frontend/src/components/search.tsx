@@ -1,7 +1,7 @@
 "use client";
 
 import { Input } from "./input";
-import { Search } from "lucide-react";
+import { Search, X } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 
 interface SearchBarProps {
@@ -9,6 +9,7 @@ interface SearchBarProps {
   value?: string;
   options?: string[];
   onChange?: (value: string) => void;
+  disabled?: boolean;
 }
 
 function SearchBar({
@@ -16,6 +17,7 @@ function SearchBar({
   value = "",
   options,
   onChange,
+  disabled = false,
 }: SearchBarProps) {
   const id = useId();
   const [prevValue, setPrevValue] = useState(value);
@@ -83,7 +85,7 @@ function SearchBar({
   }
 
   return (
-    <div className="space-y-2 min-w-75" ref={containerRef}>
+    <div className="space-y-2 min-w-48" ref={containerRef}>
       <div className="relative">
         <Input
           id={id}
@@ -91,6 +93,7 @@ function SearchBar({
           placeholder={placeholder}
           type="search"
           value={inputValue}
+          disabled={disabled}
           onChange={(e) => {
             setInputValue(e.target.value);
             if (options) setOpen(true);
@@ -105,7 +108,7 @@ function SearchBar({
           <Search size={16} strokeWidth={2} aria-hidden="true" />
         </div>
         {options && open && filtered.length > 0 && (
-          <ul className="absolute z-10 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-md">
+          <ul className="absolute z-15 mt-1 w-full max-h-48 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-md">
             {filtered.map((option) => (
               <li
                 key={option}
@@ -116,6 +119,17 @@ function SearchBar({
               </li>
             ))}
           </ul>
+        )}
+        {inputValue && (
+          <div
+            className="absolute inset-y-0 inset-e-0 flex items-center justify-center pe-3 cursor-pointer text-gray-400 hover:text-gray-600"
+            onMouseDown={(e) => {
+              e.preventDefault();
+              commit("");
+            }}
+          >
+            <X size={16} strokeWidth={2} aria-hidden="true" />
+          </div>
         )}
       </div>
     </div>
