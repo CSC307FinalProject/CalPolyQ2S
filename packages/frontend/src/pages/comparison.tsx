@@ -74,11 +74,6 @@ type CatalogCourse = {
   option_group: number | null;
 };
 
-type CompletedRequirement = {
-  group_id: number;
-  catalog_id: number;
-};
-
 type CourseListProps = {
   activeFilter: string;
   courses: ConversionCourse[];
