@@ -11,7 +11,8 @@ import type { Course } from "../data/courses";
 
 // Maps header filter labels to their corresponding course tag values
 const FILTER_TAG_MAP: Record<string, string | null> = {
-  MAJOR: null, // null = show all
+  ALL: "ALL",
+  REQS: null, // null = show major courses with no tag filter
   GE: "GE",
   "UPPER DIV": "UPPER DIV",
   SUPPORT: "SUPPORT",
@@ -20,11 +21,19 @@ const FILTER_TAG_MAP: Record<string, string | null> = {
 
 // Controls the display order of tag sections in the course list
 const TAG_DISPLAY_ORDER = ["LOWER DIV", "UPPER DIV", "SUPPORT", "GE"];
-const FILTER_LABELS = ["MAJOR", "GE", "LOWER DIV", "UPPER DIV", "SUPPORT"];
+const FILTER_LABELS = [
+  "ALL",
+  "REQS",
+  "GE",
+  "LOWER DIV",
+  "UPPER DIV",
+  "SUPPORT",
+];
 
 // ─── ClassTable (root) ────────────────────────────────────────────────────────
 interface ClassTableProps {
   courses: Course[];
+  allCourses: Course[];
   completed: Course[];
   onAddCourse: (course: Course) => void;
   onRemoveCourse: (course_id: number) => void;
@@ -35,6 +44,7 @@ interface ClassTableProps {
 
 export default function ClassTable({
   courses,
+  allCourses,
   completed,
   onAddCourse,
   onRemoveCourse,
@@ -56,8 +66,12 @@ export default function ClassTable({
     setActiveFilter((prev) => (prev === tag ? null : tag));
   }
 
-  const visibleCourses = courses.filter((course) => {
-    const matchesTag = activeFilter === null || course.tag === activeFilter;
+  const sourceList = activeFilter === "ALL" ? allCourses : courses;
+  const visibleCourses = sourceList.filter((course) => {
+    const matchesTag =
+      activeFilter === null ||
+      activeFilter === "ALL" ||
+      course.tag === activeFilter;
 
     // get a search query
     const q = searchQuery.toLowerCase();
@@ -159,7 +173,7 @@ function TableHeader({
   return (
     <nav className="w-full flex items-center gap-2 border border-gray-400 shadow-sm rounded-2xl">
       {/* SEARCH INPUT -- Customized for this component*/}
-      <div className="space-y-2 min-w-75">
+      <div className="space-y-2 min-w-60">
         <div className="relative">
           <input
             className="flex w-full rounded-2xl transition-colors duration-300 h-full bg-background px-3 py-3 text-sm text-black shadow-black/5 placeholder:text-gray-400 focus-visible:outline-none focus:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 peer ps-9 pe-9 -my-px -mr-px"
