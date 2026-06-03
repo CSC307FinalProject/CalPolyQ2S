@@ -49,7 +49,7 @@ function parseRequirementString(requirement, catalogMap) {
         }
         const node = {
           type: "units",
-          units_required: unitsRequired,
+          units: unitsRequired,
           requirements: [],
         };
 

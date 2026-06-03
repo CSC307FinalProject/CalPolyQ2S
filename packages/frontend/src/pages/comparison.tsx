@@ -114,9 +114,11 @@ function RequirementVisualizer({
   onCourseClick: (course: Course) => void;
 }) {
   return (
-    <div>
-      {root.name}
-      <CompletionTag completion={root.completion}></CompletionTag>
+    <div className="space-y-2">
+      <div className="flex-horizontal space-x-2">
+        <span>{root.name}</span>
+        <CompletionTag completion={root.completion}></CompletionTag>
+      </div>
       <RequirementNodeVisualizer
         node={root.requirement}
         onCourseClick={onCourseClick}
@@ -137,11 +139,11 @@ function RequirementNodeVisualizer({
       return (
         <div
           onClick={() => onCourseClick(node)}
-          className="flex items-center justify-between w-full py-4 px-4 text-left transition-colors hover:bg-slate-50/80 rounded-xl cursor-pointer group"
+          className="flex items-center justify-between w-full py-2 px-4 text-left transition-colors hover:bg-slate-50/80 rounded-xl cursor-pointer group border border-slate-200/10 shadow-sm"
         >
           {/* Course code and title */}
           <div className="flex flex-col space-y-1">
-            <span className="text-black! flex">{node.code}</span>
+            <h2 className="text-black! flex">{node.code}</h2>
             <span className="text-xl text-gray-500">{node.title}</span>
           </div>
 
@@ -428,7 +430,7 @@ function CatalogPanel({
         activeFilter={activeFilter}
         requirements={requirements}
         onCourseClick={setSelectedCourse}
-      />{" "}
+      />
     </div>
   );
 }
@@ -460,9 +462,8 @@ function MiniCourseCard({ course }: { course: Course }) {
 function CourseMappingVisualization(mapping: CourseMapping) {
   console.log("Displaying: ", JSON.stringify(mapping));
   return (
-    // Outer Box wrapper containing this specific mapping relation
     <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center justify-between gap-4 w-full">
-      {/* Left Stack: Substitute Courses (Incoming/New) */}
+      {/* Left Stack: Substitute Courses */}
       <div className="flex-1 flex flex-col gap-2">
         <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider pl-1">
           Credit in
@@ -484,7 +485,7 @@ function CourseMappingVisualization(mapping: CourseMapping) {
         </div>
       </div>
 
-      {/* Middle Axis: Directional Arrow Vector */}
+      {/* Middle : Arrow */}
       <div className="flex items-center justify-center self-center text-slate-300 font-bold text-xl pt-5 px-1 select-none">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -502,7 +503,7 @@ function CourseMappingVisualization(mapping: CourseMapping) {
         </svg>
       </div>
 
-      {/* Right Stack: Substituted Out Courses (Replaced/Old) */}
+      {/* Right Stack: Substituted out Courses */}
       <div className="flex-1 flex flex-col gap-2">
         <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider pl-1">
           Counts for
@@ -537,6 +538,7 @@ function CourseConversionPopup({
   setSelectedCourse,
   courseMappings,
 }: CourseConversionPopupProps) {
+  const activeMappings = getCourseMappingsFor(selectedCourse, courseMappings);
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
@@ -558,13 +560,23 @@ function CourseConversionPopup({
             ✕
           </button>
         </div>
-        {getCourseMappingsFor(selectedCourse, courseMappings).map(
-          (mapping: CourseMapping, index) => (
-            <div key={mapping?.id || `sub-${index}`}>
-              {CourseMappingVisualization(mapping)}
+
+        <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+          {activeMappings.length > 0 ? (
+            // If mappings exist, render them out
+            activeMappings.map((mapping, index) => (
+              <div key={mapping?.id || `map-${index}`}>
+                {CourseMappingVisualization(mapping)}
+              </div>
+            ))
+          ) : (
+            <div className="flex flex-col items-center justify-center py-8 px-2 border border-dashed border-slate-200 rounded-2xl bg-slate-50/50">
+              <span className="text-sm font-medium text-slate-400 tracking-wide">
+                No Course Mappings Found
+              </span>
             </div>
-          ),
-        )}
+          )}
+        </div>
       </div>
     </div>
   );
