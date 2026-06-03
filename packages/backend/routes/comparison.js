@@ -8,65 +8,71 @@ const SEMESTER_CATALOG_ID = 2;
 function getCourse(id, catalogMap) {
   const match = catalogMap.get(id);
   return {
-    type: 'course',
+    type: "course",
     id: id,
-    title: match ? match.title : 'Unknown Course',
+    title: match ? match.title : "Unknown Course",
     code: match ? match.code : "Unknown Code",
     units: match ? match.units : "Unknown Units",
-    completion: match ? match.completion : "Unknown Completion"
+    completion: match ? match.completion : "Unknown Completion",
   };
 }
 
 // Takes in a requirement (contains for example "502 AND 503") and a map from course_id to course info and returns
 // a recursive tree representing the requirements
 function parseRequirementString(requirement, catalogMap) {
-  const expression = requirement.courses_needed
-  if (!expression || typeof expression !== 'string') {
+  const expression = requirement.courses_needed;
+  if (!expression || typeof expression !== "string") {
     console.warn(`Invalid expression received:`, expression);
     return null; // Or return { type: 'none', requirements: [] };
   }
   // Tokenize the expression, filtering out empty spaces
   // This turns "(AND (OR 123" into ['(', 'AND', '(', 'OR', '123']
-  const tokens = expression.replace(/\(/g, ' ( ').replace(/\)/g, ' ) ').trim().split(/\s+/);
+  const tokens = expression
+    .replace(/\(/g, " ( ")
+    .replace(/\)/g, " ) ")
+    .trim()
+    .split(/\s+/);
   let index = 0;
 
   function parse() {
     const token = tokens[index++];
 
-    if (token === '(') {
+    if (token === "(") {
       const operator = tokens[index++].toLowerCase(); // 'and' or 'or'
 
-      if (operator === 'units') {
+      if (operator === "units") {
         const unitsRequired = parseInt(tokens[index++], 10);
         if (isNaN(unitsRequired)) {
-          throw new Error(`Expected a number of units after UNITS operator, found: ${tokens[index - 1]}`);
+          throw new Error(
+            `Expected a number of units after UNITS operator, found: ${tokens[index - 1]}`,
+          );
         }
-        const node = { 
-          type: 'units', 
-          units_required: unitsRequired, 
-          requirements: [] 
+        const node = {
+          type: "units",
+          units_required: unitsRequired,
+          requirements: [],
         };
 
         // Gather all choices until the closing parenthesis
-        while (tokens[index] !== ')') {
+        while (tokens[index] !== ")") {
           node.requirements.push(parse());
         }
-        
+
         index++; // Consume the closing ')'
         return node;
       }
       const node = { type: operator, requirements: [] };
 
       // Keep recursively parsing arguments until we hit the closing parenthesis
-      while (tokens[index] !== ')') {
+      while (tokens[index] !== ")") {
         node.requirements.push(parse());
       }
-      
+
       index++; // Consume the closing ')'
 
       // if there is just one thing in the requirements list, just return that thing
       if (node.requirements.length === 1) {
-        return node.requirements[0]
+        return node.requirements[0];
       }
       return node;
     }
@@ -74,10 +80,12 @@ function parseRequirementString(requirement, catalogMap) {
     // Leaf node: It's a course ID
     const courseId = parseInt(token, 10);
     if (isNaN(courseId)) {
-      throw new Error(`Unexpected token in prefix expression: ${token} in ${tokens} from ${expression}`);
+      throw new Error(
+        `Unexpected token in prefix expression: ${token} in ${tokens} from ${expression}`,
+      );
     }
 
-    return getCourse(courseId, catalogMap)
+    return getCourse(courseId, catalogMap);
   }
 
   return {
@@ -85,11 +93,11 @@ function parseRequirementString(requirement, catalogMap) {
     name: requirement.name,
     completion: requirement.completion,
     requirement: parse(),
-  }
+  };
 }
 
 async function queryNeededClasses(student_id, courseMap) {
-  const result = await sql `
+  const result = await sql`
   with
   taken_quarter_courses as (
     -- Get all the quarter courses the student has taken or has credit for from classes take on semesters
@@ -241,12 +249,13 @@ async function queryNeededClasses(student_id, courseMap) {
     join requirement_groups groups on gc.group_id = groups.group_id
   order by
     gc.group_id
-  `
-  return result.map((requirement) => parseRequirementString(requirement, courseMap))
-
+  `;
+  return result.map((requirement) =>
+    parseRequirementString(requirement, courseMap),
+  );
 }
 async function queryTakenClasses(student_id) {
-  return await sql `
+  return await sql`
   -- Get all the courses and whther the student has taken or has credit for the class
 with
   mapping_group_counts as (
@@ -299,10 +308,10 @@ select
   end as completion
 from
   courses as c
-`
+`;
 }
 async function queryCourseMappings(courseMap) {
-  const result = await sql `
+  const result = await sql`
   select course_mappings.mapping_id, 
     string_agg(distinct cast(c1.course_id as varchar(10)), ' ') as substitute_classes,
     string_agg(distinct cast(c2.course_id as varchar(10)), ' ') as substituted_out_classes
@@ -315,16 +324,18 @@ async function queryCourseMappings(courseMap) {
   where item1.is_substitute = true
     and item2.is_substitute = false
   group by course_mappings.mapping_id
-`
+`;
   const mappings = result.map((row) => {
-    const substituteCourses = row.substitute_classes.split(' ')
+    const substituteCourses = row.substitute_classes
+      .split(" ")
       .map((courseId) => getCourse(parseInt(courseId, 10), courseMap));
-    const substitutedOutCourses = row.substituted_out_classes.split(' ')
+    const substitutedOutCourses = row.substituted_out_classes
+      .split(" ")
       .map((courseId) => getCourse(parseInt(courseId, 10), courseMap));
-    const id = row.mapping_id
-    return {id, substituteCourses, substitutedOutCourses}
-  })
-  return mappings
+    const id = row.mapping_id;
+    return { id, substituteCourses, substitutedOutCourses };
+  });
+  return mappings;
 }
 
 // TODO REFACTOR THIS TO GET CLASSES NEEDED TO GRAD
@@ -347,17 +358,21 @@ router.get("/", async (req, res) => {
 router.get("/:student_id", async (req, res) => {
   const { student_id } = req.params;
   const courses = await queryTakenClasses(student_id);
-// convert the courses to a map from course_id to other course info
-  const courseMap = new Map(courses.map((course) => [course.id, course]))
+  // convert the courses to a map from course_id to other course info
+  const courseMap = new Map(courses.map((course) => [course.id, course]));
 
   try {
     const requirements = await queryNeededClasses(student_id, courseMap);
     const quarterRequirements = requirements.filter((req) => req.catalog == 1);
     const semesterRequirements = requirements.filter((req) => req.catalog == 2);
     const courseMappings = await queryCourseMappings(courseMap);
-    console.log("Sending mappings: ", courseMappings)
+    console.log("Sending mappings: ", courseMappings);
 
-    return res.json({quarterRequirements, semesterRequirements, courseMappings});
+    return res.json({
+      quarterRequirements,
+      semesterRequirements,
+      courseMappings,
+    });
   } catch (error) {
     console.error("Get comparison courses error:", error);
 
