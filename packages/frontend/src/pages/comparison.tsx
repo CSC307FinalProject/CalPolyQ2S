@@ -251,7 +251,30 @@ export default function Comparison() {
 
   const Recommended = Math.min(2 * quartersLeft, 3 * semestersLeft);
 
-  type CatalogPanelProps = {
+  
+  return (
+    <div className="bg-white ">
+      <Navbar />
+      <div className="bg-white flex items-stretch">
+        {/* Quarter Panel */}
+        <CatalogPanel header="Quarter Catalog (2022-2026)" termType="quarter" 
+        unitsCompleted={quarterUnitsDone} unitsNeeded={180} termsLeft={quartersLeft} 
+        isRecommended={true} requirements={quarterRequirements} activeFilter={quarterActiveFilter}
+        setActiveFilter={setQuarterActiveFilter} setSelectedCourse={setSelectedCourse}></CatalogPanel>
+        {/* Semester panel */}
+        <CatalogPanel header="Semester Catalog (2026-2028)" termType="semester" 
+        unitsCompleted={semesterUnitsDone} unitsNeeded={120} termsLeft={semestersLeft} 
+        isRecommended={true} requirements={semesterRequirements} activeFilter={semesterActiveFilter}
+        setActiveFilter={setSemesterActiveFilter} setSelectedCourse={setSelectedCourse}></CatalogPanel>
+      </div>
+      <Link to="/class-selector" className="fixed bottom-0 left-0 m-2">
+        <BackButton />
+      </Link>
+      {selectedCourse && (<CourseConversionPopup selectedCourse={selectedCourse} setSelectedCourse={setSelectedCourse} courseMappings={courseMappings}></CourseConversionPopup>)}
+    </div>
+  );
+}
+type CatalogPanelProps = {
     header : String, 
     termType: "quarter" | "semester", 
     unitsCompleted: number, 
@@ -260,9 +283,10 @@ export default function Comparison() {
     isRecommended: boolean,
     requirements: CatalogRequirement[],
     activeFilter: Filter,
-    setActiveFilter: React.Dispatch<React.SetStateAction<Filter>>
+    setActiveFilter: React.Dispatch<React.SetStateAction<Filter>>,
+    setSelectedCourse: React.Dispatch<React.SetStateAction<Course | null>>
   }
-  function CatalogPanel({header, termType, unitsCompleted, unitsNeeded, termsLeft, isRecommended, requirements, activeFilter, setActiveFilter} : CatalogPanelProps) {
+  function CatalogPanel({header, termType, unitsCompleted, unitsNeeded, termsLeft, isRecommended, requirements, activeFilter, setActiveFilter, setSelectedCourse} : CatalogPanelProps) {
     return (
         <div
           className="bg-white rounded-xl border border-gray-200 p-5"
@@ -290,7 +314,7 @@ export default function Comparison() {
             <div className="w-full bg-gray-200 rounded-full h-1.5 mb-3">
               <div
                 className="h-1.5 rounded-full bg-calpoly-green"
-                style={{ width: `${quarterPercent}%` }}  // TODO: Make this work from an updated computation
+                style={{ width: `${99}%` }}  // TODO: Make this work from an updated computation
               ></div>
             </div>
 
@@ -303,7 +327,7 @@ export default function Comparison() {
             <div className="w-full bg-gray-200 rounded-full h-1.5">
               <div
                 className="h-1.5 rounded-full bg-calpoly-green"
-                style={{ width: `${quartersLeftPercent}%` }} // TODO: Make this work from an updated computation
+                style={{ width: `${99}%` }} // TODO: Make this work from an updated computation
               ></div>
             </div>
           </div>
@@ -356,144 +380,124 @@ export default function Comparison() {
     )
   }
 
-  function getCourseMappingsFor(course: Course) {
-    const mappings = courseMappings.filter((mapping) => {
-      return mapping.substitutedOutCourses.map((course) => course.id).includes(course.id)
-    })
-    return mappings
-  }
-  function CourseMappingVisualization(mapping: CourseMapping) {
-    console.log("Displaying: ", JSON.stringify(mapping))
-    function MiniCourseCard({ course }: { course: Course }) {
-        if (!course) return null;
-        return (
-          <div 
-            className="p-3 bg-slate-50 border border-slate-100 rounded-xl flex flex-col space-y-0.5 text-left shadow-sm min-w-[130px]"
-          >
-            <span className="text-sm font-bold text-slate-900 tracking-tight">
-              {course.code}
-            </span>
-            <span className="text-xs text-slate-500 font-normal line-clamp-1 max-w-[160px]">
-              {course.title}
-            </span>
-            <span className="text-[10px] font-medium text-slate-400 mt-0.5">
-              {course.units} units
-            </span>
-          </div>
-        );
-      }
-    return (
-    // Outer Box wrapper containing this specific mapping relation
-    <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center justify-between gap-4 w-full">
-      
-      {/* Left Stack: Substitute Courses (Incoming/New) */}
-      <div className="flex-1 flex flex-col gap-2">
-        <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider pl-1">
-          Credit in
-        </span>
-        <div className="flex flex-col gap-3">
-          {(mapping.substituteCourses || []).map((course, idx) => (
-            <Fragment key={course?.id || `sub-${idx}`}>
-              {/* Render the AND badge between rows cleanly */}
-              {idx > 0 && (
-                <div className="flex items-center justify-center h-4">
-                  <span className="text-[9px] font-black tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md uppercase select-none">
-                    and
-                  </span>
-                </div>
-              )}
-              <MiniCourseCard course={course} />
-            </Fragment>
-          ))}
-        </div>
-      </div>
-
-      {/* Middle Axis: Directional Arrow Vector */}
-      <div className="flex items-center justify-center self-center text-slate-300 font-bold text-xl pt-5 px-1 select-none">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 text-slate-400 animate-pulse">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-        </svg>
-      </div>
-
-      {/* Right Stack: Substituted Out Courses (Replaced/Old) */}
-      <div className="flex-1 flex flex-col gap-2">
-        <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider pl-1">
-          Counts for
-        </span>
-        <div className="flex flex-col gap-3">
-          {(mapping.substitutedOutCourses || []).map((course, idx) => (
-            <Fragment key={course?.id || `sub-${idx}`}>
-              {/* Render the AND badge between rows cleanly */}
-              {idx > 0 && (
-                <div className="flex items-center justify-center h-4">
-                  <span className="text-[9px] font-black tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md uppercase select-none">
-                    and
-                  </span>
-                </div>
-              )}
-              <MiniCourseCard course={course} />
-            </Fragment>
-          ))}
-        </div>
-      </div>
-
-    </div>
-  );
-  }
-
-  type CourseConversionPopupProps = {
-    selectedCourse: Course;
-  }
-  function CourseConversionPopup({selectedCourse} : CourseConversionPopupProps) {
-      return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-                  Class Conversion
-                </p>
-                <h2 className="mt-1 text-xl font-bold text-gray-900">
-                  {selectedCourse.code}
-                </h2>
-                <p className="text-sm text-gray-500">{selectedCourse.title}</p>
-              </div>
-
-              <button
-                onClick={() => setSelectedCourse(null)}
-                className="rounded-full px-3 py-1 text-sm text-gray-400 hover:bg-gray-100 hover:text-gray-700"
-              >
-                ✕
-              </button>
-            </div>
-            {getCourseMappingsFor(selectedCourse).map((mapping: CourseMapping, index) => (
-              <div key={mapping?.id || `sub-${index}`}>
-                {CourseMappingVisualization(mapping)}
-              </div>
-            ))}
-          </div>
-        </div>
-      )
-  }
+function getCourseMappingsFor(course: Course, courseMappings: CourseMapping[]) {
+  const mappings = courseMappings.filter((mapping) => {
+    return mapping.substitutedOutCourses.map((course) => course.id).includes(course.id)
+  })
+  return mappings
+}
+function MiniCourseCard({ course }: { course: Course }) {
+  if (!course) return null;
   return (
-    <div className="bg-white ">
-      <Navbar />
-      <div className="bg-white flex items-stretch">
-        {/* Quarter Panel */}
-        <CatalogPanel header="Quarter Catalog (2022-2026)" termType="quarter" 
-        unitsCompleted={quarterUnitsDone} unitsNeeded={180} termsLeft={quartersLeft} 
-        isRecommended={true} requirements={quarterRequirements} activeFilter={quarterActiveFilter}
-        setActiveFilter={setQuarterActiveFilter}></CatalogPanel>
-        {/* Semester panel */}
-        <CatalogPanel header="Semester Catalog (2026-2028)" termType="semester" 
-        unitsCompleted={semesterUnitsDone} unitsNeeded={120} termsLeft={semestersLeft} 
-        isRecommended={true} requirements={semesterRequirements} activeFilter={semesterActiveFilter}
-        setActiveFilter={setSemesterActiveFilter}></CatalogPanel>
-      </div>
-      <Link to="/class-selector" className="fixed bottom-0 left-0 m-2">
-        <BackButton />
-      </Link>
-      {selectedCourse && (<CourseConversionPopup selectedCourse={selectedCourse}></CourseConversionPopup>)}
+    <div 
+      className="p-3 bg-slate-50 border border-slate-100 rounded-xl flex flex-col space-y-0.5 text-left shadow-sm min-w-[130px]"
+    >
+      <span className="text-sm font-bold text-slate-900 tracking-tight">
+        {course.code}
+      </span>
+      <span className="text-xs text-slate-500 font-normal line-clamp-1 max-w-[160px]">
+        {course.title}
+      </span>
+      <span className="text-[10px] font-medium text-slate-400 mt-0.5">
+        {course.units} units
+      </span>
     </div>
   );
+}
+function CourseMappingVisualization(mapping: CourseMapping) {
+  console.log("Displaying: ", JSON.stringify(mapping))
+  return (
+  // Outer Box wrapper containing this specific mapping relation
+  <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center justify-between gap-4 w-full">
+    
+    {/* Left Stack: Substitute Courses (Incoming/New) */}
+    <div className="flex-1 flex flex-col gap-2">
+      <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider pl-1">
+        Credit in
+      </span>
+      <div className="flex flex-col gap-3">
+        {(mapping.substituteCourses || []).map((course, idx) => (
+          <Fragment key={course?.id || `sub-${idx}`}>
+            {/* Render the AND badge between rows cleanly */}
+            {idx > 0 && (
+              <div className="flex items-center justify-center h-4">
+                <span className="text-[9px] font-black tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md uppercase select-none">
+                  and
+                </span>
+              </div>
+            )}
+            <MiniCourseCard course={course} />
+          </Fragment>
+        ))}
+      </div>
+    </div>
+
+    {/* Middle Axis: Directional Arrow Vector */}
+    <div className="flex items-center justify-center self-center text-slate-300 font-bold text-xl pt-5 px-1 select-none">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 text-slate-400 animate-pulse">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+      </svg>
+    </div>
+
+    {/* Right Stack: Substituted Out Courses (Replaced/Old) */}
+    <div className="flex-1 flex flex-col gap-2">
+      <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider pl-1">
+        Counts for
+      </span>
+      <div className="flex flex-col gap-3">
+        {(mapping.substitutedOutCourses || []).map((course, idx) => (
+          <Fragment key={course?.id || `sub-${idx}`}>
+            {/* Render the AND badge between rows cleanly */}
+            {idx > 0 && (
+              <div className="flex items-center justify-center h-4">
+                <span className="text-[9px] font-black tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md uppercase select-none">
+                  and
+                </span>
+              </div>
+            )}
+            <MiniCourseCard course={course} />
+          </Fragment>
+        ))}
+      </div>
+    </div>
+
+  </div>
+);
+}
+
+type CourseConversionPopupProps = {
+  selectedCourse: Course;
+  setSelectedCourse: React.Dispatch<React.SetStateAction<Course | null>>;
+  courseMappings: CourseMapping[];
+}
+function CourseConversionPopup({selectedCourse, setSelectedCourse, courseMappings} : CourseConversionPopupProps) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+        <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+                Class Conversion
+              </p>
+              <h2 className="mt-1 text-xl font-bold text-gray-900">
+                {selectedCourse.code}
+              </h2>
+              <p className="text-sm text-gray-500">{selectedCourse.title}</p>
+            </div>
+
+            <button
+              onClick={() => setSelectedCourse(null)}
+              className="rounded-full px-3 py-1 text-sm text-gray-400 hover:bg-gray-100 hover:text-gray-700"
+            >
+              ✕
+            </button>
+          </div>
+          {getCourseMappingsFor(selectedCourse, courseMappings).map((mapping: CourseMapping, index) => (
+            <div key={mapping?.id || `sub-${index}`}>
+              {CourseMappingVisualization(mapping)}
+            </div>
+          ))}
+        </div>
+      </div>
+    )
 }
