@@ -102,10 +102,15 @@ router.get("/:student_id", async (req, res) => {
 const quarterCourses = await sql`
   SELECT
     c.course_id,
+    c.catalog_id,
     c.subject || ' ' || c.course_number AS course_code,
     c.class_name AS course_name,
     c.units,
-    COALESCE(rg.group_name, 'Other') AS requirement_area
+    rg.group_id,
+    rg.group_name AS requirement_area,
+    rg.required_count,
+    rg.requirement_type,
+    rgc.option_group
   FROM public.courses c
   LEFT JOIN public.requirement_group_courses rgc
     ON rgc.course_id = c.course_id
@@ -117,10 +122,15 @@ const quarterCourses = await sql`
 const semesterCourses = await sql`
   SELECT
     c.course_id,
+    c.catalog_id,
     c.subject || ' ' || c.course_number AS course_code,
     c.class_name AS course_name,
     c.units,
-    COALESCE(rg.group_name, 'Other') AS requirement_area
+    rg.group_id,
+    rg.group_name AS requirement_area,
+    rg.required_count,
+    rg.requirement_type,
+    rgc.option_group
   FROM public.courses c
   LEFT JOIN public.requirement_group_courses rgc
     ON rgc.course_id = c.course_id
@@ -129,8 +139,136 @@ const semesterCourses = await sql`
   WHERE c.catalog_id = 2
 `;
 
-    return res.json({ courses, quarterCourses, semesterCourses });
-  } catch (error) {
+const completedRequirements = await sql`
+  SELECT DISTINCT
+    rg.group_id,
+    rg.catalog_id
+  FROM public.student_courses sc
+  JOIN public.requirement_group_courses rgc
+    ON rgc.course_id = sc.course_id
+  JOIN public.requirement_groups rg
+    ON rg.group_id = rgc.group_id
+  WHERE sc.student_id = ${student_id}
+
+  UNION
+
+  SELECT DISTINCT
+    rg.group_id,
+    rg.catalog_id
+  FROM public.student_courses sc
+  JOIN public.course_mapping_item item
+    ON item.course_id = sc.course_id
+  JOIN public.course_mapping_item other_item
+    ON other_item.mapping_id = item.mapping_id
+    AND other_item.is_substitute <> item.is_substitute
+  JOIN public.requirement_group_courses rgc
+    ON rgc.course_id = other_item.course_id
+  JOIN public.requirement_groups rg
+    ON rg.group_id = rgc.group_id
+  WHERE sc.student_id = ${student_id}
+`;
+
+const requirementProgress = await sql`
+  WITH completed_courses AS (
+    SELECT sc.course_id
+    FROM public.student_courses sc
+    WHERE sc.student_id = ${student_id}
+  ),
+
+  completed_mapped_courses AS (
+    SELECT DISTINCT other_item.course_id
+    FROM public.student_courses sc
+    JOIN public.course_mapping_item item
+      ON item.course_id = sc.course_id
+    JOIN public.course_mapping_item other_item
+      ON other_item.mapping_id = item.mapping_id
+      AND other_item.is_substitute <> item.is_substitute
+    WHERE sc.student_id = ${student_id}
+  ),
+
+  completed_all AS (
+    SELECT course_id FROM completed_courses
+    UNION
+    SELECT course_id FROM completed_mapped_courses
+  ),
+
+  group_course_progress AS (
+    SELECT
+      rg.group_id,
+      rg.catalog_id,
+      rg.group_name,
+      rg.required_count,
+      rg.requirement_type,
+      rg.min_units,
+      rg.max_units,
+      rgc.option_group,
+      COUNT(DISTINCT rgc.course_id) AS option_course_count,
+      COUNT(DISTINCT CASE WHEN ca.course_id IS NOT NULL THEN rgc.course_id END) AS completed_course_count,
+      COALESCE(SUM(DISTINCT CASE WHEN ca.course_id IS NOT NULL THEN c.units END), 0) AS completed_units
+    FROM public.requirement_groups rg
+    JOIN public.requirement_group_courses rgc
+      ON rgc.group_id = rg.group_id
+    JOIN public.courses c
+      ON c.course_id = rgc.course_id
+    LEFT JOIN completed_all ca
+      ON ca.course_id = rgc.course_id
+    GROUP BY
+      rg.group_id,
+      rg.catalog_id,
+      rg.group_name,
+      rg.required_count,
+      rg.requirement_type,
+      rg.min_units,
+      rg.max_units,
+      rgc.option_group
+  )
+
+  SELECT
+    group_id,
+    catalog_id,
+    group_name,
+    required_count,
+    requirement_type,
+    min_units,
+    max_units,
+    SUM(completed_course_count) AS completed_count,
+
+CASE
+  WHEN requirement_type = 'all_courses'
+    THEN SUM(option_course_count)
+  WHEN requirement_type = 'choose_options'
+    THEN MIN(option_course_count)
+  ELSE required_count
+END AS required_courses,
+
+BOOL_OR(
+  CASE
+    WHEN requirement_type = 'all_courses'
+      THEN completed_course_count >= option_course_count
+
+    WHEN requirement_type = 'choose_courses'
+      THEN completed_course_count >= required_count
+
+    ELSE completed_course_count >= required_count
+  END
+) AS completed
+  FROM group_course_progress
+  GROUP BY
+    group_id,
+    catalog_id,
+    group_name,
+    required_count,
+    requirement_type,
+    min_units,
+    max_units
+`;
+
+return res.json({
+  courses,
+  quarterCourses,
+  semesterCourses,
+  requirementProgress,
+});  } catch (error) {
     console.error("Get comparison courses error:", error);
 
     return res.status(500).json({
