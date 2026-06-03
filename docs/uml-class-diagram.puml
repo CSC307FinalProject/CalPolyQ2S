@@ -1,0 +1,41 @@
+@startuml
+class User {
+  +id: string
+  +email: string
+  +passwordHash: string
+  +isVerified: bool
+  +createdAt: Date
+}
+class Course {
+  +id: string
+  +code: string
+  +name: string
+  +units: int
+  +catalogYear: string
+}
+class Comparison {
+  +id: string
+  +userId: string
+  +catalogA: string
+  +catalogB: string
+  +createdAt: Date
+}
+class AuthService {
+  +signUp()
+  +signIn()
+  +verifyEmail()
+  +generateToken()
+}
+class DatabaseService {
+  +connect()
+  +query()
+}
+
+User "1" -- "*" Comparison
+User "1" -- "*" Course
+Comparison "1" -- "*" Course
+AuthService --> User
+DatabaseService --> User
+DatabaseService --> Course
+DatabaseService --> Comparison
+@enduml
