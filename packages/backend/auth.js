@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import { readFileSync } from "fs";
 import crypto from "crypto";
+import rateLimit from "express-rate-limit";
 
 
 // Create a transporter using SMTP
@@ -192,6 +193,18 @@ export async function verifyEmail(req, res) {
   }
 }
 
+// Maximum 3 attempts per 15 minutes
+export const resendLimit = rateLimit({
+  // Window of 15 min
+  windowMs: 15 * 60 * 1000,
+  
+  // Max attempts
+  max: 3,
+  
+  keyGenerator: (req) => req.body?.email ?? req.ip,
+  message: { error: "Too many resend attempts. Please wait 15 minutes." },
+});
+
 // Resend Verification Email
 export async function resendVerification(req, res) {
   const { email } = req.body;
@@ -213,6 +226,7 @@ export async function resendVerification(req, res) {
       return res.status(400).json({ error: "Email already verified." });
     }
 
+    // 24 hour expiry verification token
     const verificationToken = jwt.sign(
       { email, type: "email_verification" },
       process.env.TOKEN_SECRET,

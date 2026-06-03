@@ -5,6 +5,7 @@ import Register from "./pages/register";
 import ResetPassword from "./pages/resetPassword";
 import ClassSelector from "./pages/classSelector";
 import Comparison from "./pages/comparison";
+import VerifyEmail from "./pages/verifyEmail";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/class-selector" element={<ClassSelector />} />
         <Route path="/q2s-comparison" element={<Comparison />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
       </Routes>
     </BrowserRouter>
   );

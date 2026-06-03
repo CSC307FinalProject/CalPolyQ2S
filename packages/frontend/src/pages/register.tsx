@@ -1,10 +1,75 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import RegisterForm from "../components/registerForm";
 import calPolyImg from "../assets/CalPolyArialView.jpg";
 import { Link } from "react-router-dom";
+import { apiUrl } from "../lib/api";
+
+const RESEND_COOLDOWN = 20;
 
 function Register() {
   const [registeredEmail, setRegisteredEmail] = useState("");
+  const [resendMsg, setResendMsg] = useState<string | null>(null);
+  const [resending, setResending] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, []);
+
+  // Starts a cooldown, used for when resend email button is pressed
+  function startCooldown() {
+    setCooldown(RESEND_COOLDOWN);
+    intervalRef.current = setInterval(() => {
+      setCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(intervalRef.current!);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }
+
+  async function handleResend() {
+    
+    // Disable resend capability while function is
+    // in the process of resending
+    setResending(true);
+    setResendMsg(null);
+    
+    // POST call to backend
+    try {
+      const res = await fetch(apiUrl("/resend-verification"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: registeredEmail }),
+      });
+
+      const data = await res.json();
+      
+      // Status 429 => RATE LIMITING
+      if (res.status === 429) {
+        setResendMsg("Too many attempts. Please wait 15 minutes before trying again.");
+      } 
+      else if (res.ok) {
+        setResendMsg("Verification email resent. Check your inbox.");
+        startCooldown();
+      } 
+      else {
+        setResendMsg(data.error ?? "Something went wrong. Please try again.");
+      }
+
+    } 
+    catch {
+      setResendMsg("Network error. Please try again.");
+    } 
+    
+    // Re-enable resend functionality once done
+    finally {
+      setResending(false);
+    }
+  }
 
   return (
     <div className="flex flex-col md:flex-row w-full min-h-screen">
@@ -36,13 +101,19 @@ function Register() {
                 <p className="text-sm text-gray-500">
                   Didn't receive an email?<br />Check your spam folder or resend below.
                 </p>
-              
+
                 <button
                   type="button"
-                  className="mt-3 w-full py-3 rounded-lg bg-black text-white font-semibold cursor-pointer hover:bg-calpoly-green"
+                  onClick={handleResend}
+                  disabled={resending || cooldown > 0}
+                  className="mt-3 mb-6 w-full py-3 rounded-lg bg-black text-white font-semibold cursor-pointer hover:bg-calpoly-green disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Resend Email
+                  {resending ? "Sending..." : cooldown > 0 ? `Resend Email (${cooldown}s)` : "Resend Email"}
                 </button>
+
+                {resendMsg && (
+                  <p className="mt-6 text-sm text-gray-500">{resendMsg}</p>
+                )}
               
               </div>
             </div>
