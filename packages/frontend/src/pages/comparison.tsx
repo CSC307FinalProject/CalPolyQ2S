@@ -150,7 +150,8 @@ function CourseList({ activeFilter, courses, onCourseClick }: CourseListProps) {
                     </span>
                   </div>
                   <p className="text-xs text-gray-400">
-                    {group.completedCount} / {group.requiredCourses} courses completed
+                    {group.completedCount} / {group.requiredCourses} courses
+                    completed
                   </p>
                 </div>
               </button>
@@ -367,15 +368,15 @@ export default function Comparison() {
               (total, c) => total + (c.converted_units ?? 0),
               0,
             ),
-completedCount: progress?.completed_count ?? 0,
-requiredCourses: progress?.required_courses ?? 0,
+            completedCount: progress?.completed_count ?? 0,
+            requiredCourses: progress?.required_courses ?? 0,
           };
         },
       );
 
-function uniqueJoin(values: Array<string | null | undefined>) {
-  return Array.from(new Set(values.filter(Boolean))).join(" AND ");
-}
+      function uniqueJoin(values: Array<string | null | undefined>) {
+        return Array.from(new Set(values.filter(Boolean))).join(" AND ");
+      }
 
       const semesterSaved = (json.semesterCourses ?? []).map(
         (course: CatalogCourse) => {
@@ -410,8 +411,8 @@ function uniqueJoin(values: Array<string | null | undefined>) {
               (total, c) => total + (c.converted_units ?? 0),
               0,
             ),
-completedCount: progress?.completed_count ?? 0,
-requiredCourses: progress?.required_courses ?? 0,
+            completedCount: progress?.completed_count ?? 0,
+            requiredCourses: progress?.required_courses ?? 0,
           };
         },
       );

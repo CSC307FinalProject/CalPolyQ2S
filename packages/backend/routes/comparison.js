@@ -99,7 +99,7 @@ router.get("/:student_id", async (req, res) => {
   WHERE sc.student_id = ${student_id}
 `;
 
-const quarterCourses = await sql`
+    const quarterCourses = await sql`
   SELECT
     c.course_id,
     c.catalog_id,
@@ -119,7 +119,7 @@ const quarterCourses = await sql`
   WHERE c.catalog_id = 1
 `;
 
-const semesterCourses = await sql`
+    const semesterCourses = await sql`
   SELECT
     c.course_id,
     c.catalog_id,
@@ -139,7 +139,7 @@ const semesterCourses = await sql`
   WHERE c.catalog_id = 2
 `;
 
-const completedRequirements = await sql`
+    const completedRequirements = await sql`
   SELECT DISTINCT
     rg.group_id,
     rg.catalog_id
@@ -168,7 +168,7 @@ const completedRequirements = await sql`
   WHERE sc.student_id = ${student_id}
 `;
 
-const requirementProgress = await sql`
+    const requirementProgress = await sql`
   WITH completed_courses AS (
     SELECT sc.course_id
     FROM public.student_courses sc
@@ -263,12 +263,13 @@ BOOL_OR(
     max_units
 `;
 
-return res.json({
-  courses,
-  quarterCourses,
-  semesterCourses,
-  requirementProgress,
-});  } catch (error) {
+    return res.json({
+      courses,
+      quarterCourses,
+      semesterCourses,
+      requirementProgress,
+    });
+  } catch (error) {
     console.error("Get comparison courses error:", error);
 
     return res.status(500).json({
