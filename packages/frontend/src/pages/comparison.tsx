@@ -245,6 +245,11 @@ export default function Comparison() {
   >([]);
   const [courseMappings, setCourseMappings] = useState<CourseMapping[]>([]);
 
+  const [quarterUnits, setQuarterUnits] = useState<number>(0);
+  const [semesterUnits, setSemesterUnits] = useState<number>(0);
+  const [quarterTermsLeft, setQuarterTermsLeft] = useState<number>(8);
+  const [semesterTermsLeft, setSemesterTermsLeft] = useState<number>(8);
+
   const studentId = getStoredUser()?.student_id;
 
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
@@ -263,20 +268,14 @@ export default function Comparison() {
       setQuarterRequirements(json.quarterRequirements);
       setSemesterRequirements(json.semesterRequirements);
       setCourseMappings(json.courseMappings);
+      setQuarterUnits(json.quarterUnits);
+      setSemesterUnits(json.semesterUnits);
+      setQuarterTermsLeft(Math.ceil((120 - json.quarterUnits * 0.67) / 15));
+      setSemesterTermsLeft(Math.ceil((120 - json.semesterUnits) / 15));
     }
 
     loadSavedCourses();
   }, [studentId]);
-
-  const semesterUnitsDone = 0;
-  // const semesterPercent = Math.min((semesterUnitsDone / 120) * 100, 100);
-  const semestersLeft = Math.ceil((120 - semesterUnitsDone) / 15);
-  // const semestersLeftPercent = Math.min(((9 - semestersLeft) / 8) * 100, 100);
-  const quarterUnitsDone = 0;
-  // const quarterPercent = Math.min((quarterUnitsDone / 180) * 100, 100);
-  const quartersLeft = Math.ceil((180 - quarterUnitsDone) / 16);
-  // const quartersLeftPercent = Math.min(((12 - quartersLeft) / 12) * 100, 100);
-  // const Recommended = Math.min(2 * quartersLeft, 3 * semestersLeft);
 
   return (
     <div className="bg-white ">
@@ -286,10 +285,11 @@ export default function Comparison() {
         <CatalogPanel
           header="Quarter Catalog (2022-2026)"
           termType="quarter"
-          unitsCompleted={quarterUnitsDone}
+          unitsCompleted={quarterUnits}
           unitsNeeded={180}
-          termsLeft={quartersLeft}
-          isRecommended={true}
+          termsLeft={quarterTermsLeft}
+          termsNeeded={8}
+          isRecommended={false}
           requirements={quarterRequirements}
           activeFilter={quarterActiveFilter}
           setActiveFilter={setQuarterActiveFilter}
@@ -299,10 +299,11 @@ export default function Comparison() {
         <CatalogPanel
           header="Semester Catalog (2026-2028)"
           termType="semester"
-          unitsCompleted={semesterUnitsDone}
+          unitsCompleted={semesterUnits}
           unitsNeeded={120}
-          termsLeft={semestersLeft}
-          isRecommended={true}
+          termsLeft={semesterTermsLeft}
+          termsNeeded={8}
+          isRecommended={false}
           requirements={semesterRequirements}
           activeFilter={semesterActiveFilter}
           setActiveFilter={setSemesterActiveFilter}
@@ -328,6 +329,7 @@ type CatalogPanelProps = {
   unitsCompleted: number;
   unitsNeeded: number;
   termsLeft: number;
+  termsNeeded: number;
   isRecommended: boolean;
   requirements: CatalogRequirement[];
   activeFilter: Filter;
@@ -340,12 +342,20 @@ function CatalogPanel({
   unitsCompleted,
   unitsNeeded,
   termsLeft,
+  termsNeeded,
   isRecommended,
   requirements,
   activeFilter,
   setActiveFilter,
   setSelectedCourse,
 }: CatalogPanelProps) {
+  const cleanUnitsDone = unitsCompleted ?? 0;
+  const completionPercent = Math.min(100, (cleanUnitsDone / unitsNeeded) * 100);
+  const termsLeftPercent = Math.min(
+    ((termsNeeded - termsLeft) / termsNeeded) * 100,
+    100,
+  );
+
   return (
     <div
       className="bg-white rounded-xl border border-gray-200 p-5"
@@ -367,13 +377,13 @@ function CatalogPanel({
         <div className="flex justify-between text-xs text-gray-500 mb-1">
           <span>Units completed</span>
           <span className="font-medium text-gray-900">
-            {unitsCompleted} / {unitsNeeded}
+            {cleanUnitsDone} / {unitsNeeded}
           </span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-1.5 mb-3">
           <div
             className="h-1.5 rounded-full bg-calpoly-green"
-            style={{ width: `${99}%` }} // TODO: Make this work from an updated computation
+            style={{ width: `${completionPercent}%` }} // TODO: Make this work from an updated computation
           ></div>
         </div>
 
@@ -386,14 +396,14 @@ function CatalogPanel({
         <div className="w-full bg-gray-200 rounded-full h-1.5">
           <div
             className="h-1.5 rounded-full bg-calpoly-green"
-            style={{ width: `${99}%` }} // TODO: Make this work from an updated computation
+            style={{ width: `${termsLeftPercent}%` }} // TODO: Make this work from an updated computation
           ></div>
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2 mb-4">
         <div className="bg-gray-50 rounded-lg p-4">
           <div className="text-3xl font-semibold text-gray-900 leading-none mb-1">
-            {unitsCompleted}
+            {cleanUnitsDone}
           </div>
           <div className="text-xs font-medium text-gray-800">Units Done</div>
           <div className="text-xs text-gray-400">{termType} units</div>
@@ -402,8 +412,9 @@ function CatalogPanel({
           <div className="text-3xl font-semibold text-gray-900 leading-none mb-1">
             {termsLeft}
           </div>
-          <div className="text-xs font-medium text-gray-800">Terms Left</div>
-          <div className="text-xs text-gray-400">{termType}s</div>
+          <div className="text-xs font-medium text-gray-800">
+            Semesters left
+          </div>
         </div>
       </div>
       <div className="flex items-center justify-between mb-3">
@@ -460,7 +471,6 @@ function MiniCourseCard({ course }: { course: Course }) {
   );
 }
 function CourseMappingVisualization(mapping: CourseMapping) {
-  console.log("Displaying: ", JSON.stringify(mapping));
   return (
     <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center justify-between gap-4 w-full">
       {/* Left Stack: Substitute Courses */}

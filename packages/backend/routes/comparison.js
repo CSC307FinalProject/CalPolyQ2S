@@ -95,6 +95,15 @@ function parseRequirementString(requirement, catalogMap) {
     requirement: parse(),
   };
 }
+async function queryQuarterUnits(student_id) {
+  const result = await sql`
+  select sum(case when c.catalog_id = 1 then units else units * 1.5 end ) as quarter_units
+  from student_courses as sc
+    join courses as c on c.course_id = sc.course_id
+    and sc.student_id = ${student_id}
+  `;
+  return result[0].quarter_units;
+}
 
 async function queryNeededClasses(student_id, courseMap) {
   const result = await sql`
@@ -366,12 +375,15 @@ router.get("/:student_id", async (req, res) => {
     const quarterRequirements = requirements.filter((req) => req.catalog == 1);
     const semesterRequirements = requirements.filter((req) => req.catalog == 2);
     const courseMappings = await queryCourseMappings(courseMap);
-    console.log("Sending mappings: ", courseMappings);
+    const quarterUnits = await queryQuarterUnits(student_id);
+    const semesterUnits = quarterUnits / 1.5;
 
     return res.json({
       quarterRequirements,
       semesterRequirements,
       courseMappings,
+      quarterUnits,
+      semesterUnits,
     });
   } catch (error) {
     console.error("Get comparison courses error:", error);
