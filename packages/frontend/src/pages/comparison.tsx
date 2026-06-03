@@ -6,12 +6,11 @@ import { Link } from "react-router-dom";
 import { apiUrl } from "../lib/api";
 import { Filter } from "lucide-react";
 
-
 type Completion =
   "Completed"
   | 'Remaining'
   | 'All'
-const allPredicate : CompletionPredicate = ((_: Completion) => true);
+const allPredicate : CompletionPredicate = (() => true);
 const completedPredicate : CompletionPredicate = ((completion: Completion) => completion === "Completed");
 const remainingPredicate : CompletionPredicate = ((completion: Completion) => completion === "Remaining");
 type CompletionPredicate = (completion: Completion) => boolean;
@@ -65,7 +64,7 @@ Course
 | AndRequirement
 | UnitRequirement
 type CatalogRequirement = {
-  name: String;
+  name: string;
   completion: Completion;
   requirement: Requirement
 }
@@ -74,7 +73,6 @@ type CourseMapping = {
   substituteCourses: Course[];
   substitutedOutCourses: Course[] 
 }
-
 
 const getStatusStyles = (status: Completion) => {
   switch (status) {
@@ -112,7 +110,6 @@ function RequirementVisualizer({root, onCourseClick}: {root: CatalogRequirement;
   </div>)
 
 }
-
 
 function RequirementNodeVisualizer({ node, onCourseClick }: { node: Requirement; onCourseClick: (course: Course) => void }) {
   switch (node.type) {
@@ -234,23 +231,14 @@ export default function Comparison() {
   }, [studentId]);
 
   const semesterUnitsDone = 0
-
-  const semesterPercent = Math.min((semesterUnitsDone / 120) * 100, 100);
-
+  // const semesterPercent = Math.min((semesterUnitsDone / 120) * 100, 100);
   const semestersLeft = Math.ceil((120 - semesterUnitsDone) / 15);
-
-  const semestersLeftPercent = Math.min(((9 - semestersLeft) / 8) * 100, 100);
-
+  // const semestersLeftPercent = Math.min(((9 - semestersLeft) / 8) * 100, 100);
   const quarterUnitsDone = 0
-
-  const quarterPercent = Math.min((quarterUnitsDone / 180) * 100, 100);
-
+  // const quarterPercent = Math.min((quarterUnitsDone / 180) * 100, 100);
   const quartersLeft = Math.ceil((180 - quarterUnitsDone) / 16);
-
-  const quartersLeftPercent = Math.min(((12 - quartersLeft) / 12) * 100, 100);
-
-  const Recommended = Math.min(2 * quartersLeft, 3 * semestersLeft);
-
+  // const quartersLeftPercent = Math.min(((12 - quartersLeft) / 12) * 100, 100);
+  // const Recommended = Math.min(2 * quartersLeft, 3 * semestersLeft);
   
   return (
     <div className="bg-white ">
@@ -275,7 +263,7 @@ export default function Comparison() {
   );
 }
 type CatalogPanelProps = {
-    header : String, 
+    header : string, 
     termType: "quarter" | "semester", 
     unitsCompleted: number, 
     unitsNeeded: number,
