@@ -95,14 +95,56 @@ function parseRequirementString(requirement, catalogMap) {
     requirement: parse(),
   };
 }
-async function queryQuarterUnits(student_id) {
+async function queryUnitsForCatalog(student_id, catalog_id) {
   const result = await sql`
-  select sum(case when c.catalog_id = 1 then units else units * 1.5 end ) as quarter_units
-  from student_courses as sc
-    join courses as c on c.course_id = sc.course_id
-    and sc.student_id = ${student_id}
+with
+  taken_quarter_courses as (
+    -- Get all the quarter courses the student has taken or has credit for from classes take on semesters
+    with
+      mapping_group_counts as (
+        select
+          item1.mapping_id,
+          Count(*) as substitute_classes -- get the number of substitute classes the student has taken for each mapping group
+        from
+          student_courses as sc
+          join course_mapping_item item1 on item1.course_id = sc.course_id
+          and item1.is_substitute = true
+        where
+          sc.student_id = ${student_id}
+        group by
+          item1.mapping_id
+      )
+    select distinct
+      c.course_id
+    from
+      mapping_group_counts as m_counts
+      join course_mappings as m on m.mapping_id = m_counts.mapping_id
+      and m.substitute_classes_needed = m_counts.substitute_classes -- if the student has taken all the classes in the mapping group, include it.
+      join course_mapping_item item on item.mapping_id = m.mapping_id
+      join courses as c on c.course_id = item.course_id
+      -- include all classes that have been taken, or the student has taken all the classes on other catalog needed for credit
+    union
+    select
+      c.course_id
+    from
+      student_courses as sc
+      join courses as c on c.course_id = sc.course_id
+    where
+      sc.student_id = ${student_id}
+      and c.catalog_id = ${catalog_id}
+  ),
+degree_applicable_classes as (select distinct c.*
+from requirement_groups as rg
+join requirement_group_courses as rgc on rg.group_id = rgc.group_id
+join taken_quarter_courses as tqc on tqc.course_id = rgc.course_id
+join courses as c on c.course_id = rgc.course_id
+where
+rg.catalog_id = ${catalog_id})
+select sum(units) as units
+from degree_applicable_classes
   `;
-  return result[0].quarter_units;
+  console.log(result);
+  return result[0].units;
 }
 
 async function queryNeededClasses(student_id, courseMap) {
@@ -375,8 +417,8 @@ router.get("/:student_id", async (req, res) => {
     const quarterRequirements = requirements.filter((req) => req.catalog == 1);
     const semesterRequirements = requirements.filter((req) => req.catalog == 2);
     const courseMappings = await queryCourseMappings(courseMap);
-    const quarterUnits = await queryQuarterUnits(student_id);
-    const semesterUnits = quarterUnits / 1.5;
+    const quarterUnits = await queryUnitsForCatalog(student_id, 1);
+    const semesterUnits = await queryUnitsForCatalog(student_id, 2);
 
     return res.json({
       quarterRequirements,
