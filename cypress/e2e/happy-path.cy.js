@@ -253,7 +253,8 @@ describe("Cal Poly Q2S happy path", () => {
 
     cy.contains("Quarter Catalog (2022-2026)").should("be.visible");
     cy.contains("Semester Catalog (2026-2028)").should("be.visible");
-    cy.contains("h2", "CSC 101").click();
+    cy.contains("Introductory Courses").click();
+    cy.contains("CSC 101").click();
     cy.contains("Class Conversion").should("be.visible");
     cy.contains("CSC 1001").should("be.visible");
     cy.get(".fixed.inset-0 button").last().click({ force: true });
