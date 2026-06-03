@@ -16,7 +16,6 @@ function ResetPassword() {
             <div className="text-left leading-tight font-bold text-4xl sm:text-5xl md:text-6xl">
               Reset Your Password
             </div>
-
           </div>
 
           <div className="mt-8 md:mt-10 w-full max-w-sm">

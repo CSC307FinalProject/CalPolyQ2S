@@ -2,7 +2,14 @@ import "dotenv/config";
 import cors from "cors";
 import express from "express";
 import postgres from "postgres";
-import { authenticateUser, loginUser, registerUser, verifyEmail, resendVerification, resendLimit } from "./auth.js";
+import {
+  authenticateUser,
+  loginUser,
+  registerUser,
+  verifyEmail,
+  resendVerification,
+  resendLimit,
+} from "./auth.js";
 import classSelectorRouter from "./routes/class-selector.js";
 import comparisonRouter from "./routes/comparison.js";
 

@@ -9,7 +9,6 @@ import { readFileSync } from "fs";
 import crypto from "crypto";
 import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
-
 // Create a transporter using SMTP
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -19,32 +18,30 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-
 // Send Email
 export async function sendEmail(email, token) {
   try {
-    
     // Generate verification link variable from base url and generated token
     const verificationLink = `${process.env.VERIFICATION_LINK_BASE_URL}/verify-email?token=${token}`;
-    
+
     // Add verification link into html email body
-    const emailHtml = readFileSync(new URL("./components/email-body.html", import.meta.url), "utf-8")
-      .replace("{{VERIFICATION_LINK}}", verificationLink);
+    const emailHtml = readFileSync(
+      new URL("./components/email-body.html", import.meta.url),
+      "utf-8",
+    ).replace("{{VERIFICATION_LINK}}", verificationLink);
 
     const info = await transporter.sendMail({
       from: `"Cal Poly Q2S" <${process.env.SMTP_USER}>`,
       to: email,
       subject: "Verify your Cal Poly Q2S Account",
-      html: emailHtml
+      html: emailHtml,
     });
 
     console.log("Message sent: %s", info.messageId);
-
   } catch (err) {
     console.error("Error while sending mail:", err);
   }
 }
-
 
 // Registration
 export async function registerUser(req, res) {
@@ -85,13 +82,11 @@ export async function registerUser(req, res) {
     const verificationToken = jwt.sign(
       { email, type: "email_verification" },
       process.env.TOKEN_SECRET,
-      { expiresIn: "24h" }
+      { expiresIn: "24h" },
     );
     await sendEmail(email, verificationToken);
     return res.status(201).json({ student_id: newUser.student_id, email });
-
-  } 
-  catch (error) {
+  } catch (error) {
     console.error("Register error:", error);
     return res
       .status(500)
@@ -132,7 +127,9 @@ export async function loginUser(req, res) {
 
     // Block login if email not verified
     if (!user.email_verified) {
-      return res.status(403).json({ error: "Email not verified. Please check your inbox." });
+      return res
+        .status(403)
+        .json({ error: "Email not verified. Please check your inbox." });
     }
 
     // Generate and return access token
@@ -182,11 +179,12 @@ export async function verifyEmail(req, res) {
     `;
 
     return res.status(200).json({ message: "Email verified successfully." });
-
   } catch (error) {
     // jwt.verify throws if expired or invalid
     if (error.name === "TokenExpiredError") {
-      return res.status(400).json({ error: "Token expired. Please request a new verification email." });
+      return res.status(400).json({
+        error: "Token expired. Please request a new verification email.",
+      });
     }
     console.error("Verify email error:", error);
     return res.status(400).json({ error: "Invalid token." });
@@ -197,10 +195,10 @@ export async function verifyEmail(req, res) {
 export const resendLimit = rateLimit({
   // Window of 15 min
   windowMs: 15 * 60 * 1000,
-  
+
   // Max attempts
   max: 3,
-  
+
   // Generate key based on IPv6
   keyGenerator: (req) => req.body?.email ?? ipKeyGenerator(req),
   message: { error: "Too many resend attempts. Please wait 15 minutes." },
@@ -231,15 +229,17 @@ export async function resendVerification(req, res) {
     const verificationToken = jwt.sign(
       { email, type: "email_verification" },
       process.env.TOKEN_SECRET,
-      { expiresIn: "24h" }
+      { expiresIn: "24h" },
     );
 
     await sendEmail(email, verificationToken);
     return res.status(200).json({ message: "Verification email resent." });
-
   } catch (error) {
     console.error("Resend verification error:", error);
-    return res.status(500).json({ error: "Failed to resend verification.", details: error.message });
+    return res.status(500).json({
+      error: "Failed to resend verification.",
+      details: error.message,
+    });
   }
 }
 

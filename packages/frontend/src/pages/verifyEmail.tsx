@@ -38,14 +38,16 @@ function VerifyEmail() {
           <Link to="/">Cal Poly Q2S</Link>
         </div>
 
-        {loading && (
-          <p className="text-gray-500">Verifying your email...</p>
-        )}
+        {loading && <p className="text-gray-500">Verifying your email...</p>}
 
         {success && (
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-5">Email verified!</h2>
-            <p className="text-gray-500 mb-6">Your account is now active. You can log in.</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-5">
+              Email verified!
+            </h2>
+            <p className="text-gray-500 mb-6">
+              Your account is now active. You can log in.
+            </p>
             <Link
               to="/login"
               className="mt-6 block w-full py-3 rounded-lg bg-black text-white font-semibold hover:bg-calpoly-green"
@@ -57,9 +59,12 @@ function VerifyEmail() {
 
         {error === "expired" && (
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">Link expired</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              Link expired
+            </h2>
             <p className="text-gray-500 mb-6">
-              This verification link has expired. Request a new one from the login page.
+              This verification link has expired. Request a new one from the
+              login page.
             </p>
             <Link
               to="/login"
@@ -72,7 +77,9 @@ function VerifyEmail() {
 
         {error === "invalid" && (
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">Invalid link</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">
+              Invalid link
+            </h2>
             <p className="text-gray-500 mb-6">
               This verification link is invalid or has already been used.
             </p>
