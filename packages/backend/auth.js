@@ -22,7 +22,7 @@ const transporter = nodemailer.createTransport({
 export async function sendEmail(email, token) {
   try {
     // Generate verification link variable from base url and generated token
-    const verificationLink = `${process.env.VERIFICATION_LINK_BASE_URL}/verify-email?token=${token}`;
+    const verificationLink = `${process.env.VERIFICATION_LINK_BASE_URL}verify-email?token=${token}`;
 
     // Add verification link into html email body
     const emailHtml = readFileSync(
