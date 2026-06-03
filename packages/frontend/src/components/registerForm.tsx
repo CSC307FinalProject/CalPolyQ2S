@@ -1,7 +1,7 @@
 import { useState, type ChangeEvent, type ComponentProps } from "react";
 import { Eye, EyeOff, Circle, CircleCheckBig } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { apiUrl } from "../lib/api";
+import { Link } from "react-router-dom";
+import { API_URL } from "../lib/api";
 
 interface FormData {
   email: string;
@@ -11,9 +11,11 @@ interface FormData {
 
 type FormSubmitHandler = NonNullable<ComponentProps<"form">["onSubmit"]>;
 
-export default function RegisterForm() {
-  const navigate = useNavigate();
-
+export default function RegisterForm({
+  onRegistered,
+}: {
+  onRegistered: (email: string) => void;
+}) {
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
@@ -21,6 +23,7 @@ export default function RegisterForm() {
   });
 
   const [showPassword, setShowPassword] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value, type, checked } = event.target;
@@ -32,42 +35,24 @@ export default function RegisterForm() {
 
   const handleSubmit: FormSubmitHandler = async (event) => {
     event.preventDefault();
-    console.log("Register submit clicked");
+    setEmailError("");
 
-    try {
-      const response = await fetch(apiUrl("/register"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
-      });
-
-      const payload = await response.json();
-
-      if (!response.ok) {
-        console.error(payload.error || "Registration failed.");
-        return;
-      }
-
-      const userObj = JSON.stringify({
-        student_id: payload.student_id,
-        email: payload.email,
-      });
-
-      if (formData.staySignedIn) {
-        localStorage.setItem("token", payload.token);
-        localStorage.setItem("user", userObj);
-      } else {
-        sessionStorage.setItem("token", payload.token);
-        sessionStorage.setItem("user", userObj);
-      }
-
-      navigate("/class-selector");
-    } catch (error) {
-      console.error("Register error:", error);
-    }
+    fetch(`${API_URL}/register`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+      }),
+    })
+      .then((response) => {
+        if (response.status === 201) {
+          onRegistered(formData.email);
+        } else if (response.status === 409) {
+          setEmailError("An account with this email already exists.");
+        }
+      })
+      .catch(() => {});
   };
 
   return (
@@ -84,6 +69,9 @@ export default function RegisterForm() {
           onChange={handleChange}
           className="px-4 py-3 rounded-lg border border-gray-300 bg-white text-black placeholder-gray-400 outline-none focus:border-gray-500 w-full"
         />
+        {emailError && (
+          <p className="mt-1 text-sm text-red-500">{emailError}</p>
+        )}
       </div>
 
       <div className="gap-1 mt-6">
