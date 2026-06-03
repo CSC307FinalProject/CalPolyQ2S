@@ -7,7 +7,7 @@ import jwt from "jsonwebtoken";
 import nodemailer from "nodemailer";
 import { readFileSync } from "fs";
 import crypto from "crypto";
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
 
 // Create a transporter using SMTP
@@ -201,7 +201,8 @@ export const resendLimit = rateLimit({
   // Max attempts
   max: 3,
   
-  keyGenerator: (req) => req.body?.email ?? req.ip,
+  // Generate key based on IPv6
+  keyGenerator: (req) => req.body?.email ?? ipKeyGenerator(req),
   message: { error: "Too many resend attempts. Please wait 15 minutes." },
 });
 
