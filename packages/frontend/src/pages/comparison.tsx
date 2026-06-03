@@ -338,10 +338,6 @@ export default function Comparison() {
       const quarterSaved = (json.quarterCourses ?? []).map(
         (course: CatalogCourse) => {
           const conversions = conversionByQuarterId.get(course.course_id) ?? [];
-          const progress =
-            course.group_id !== null
-              ? requirementProgressByGroupId.get(course.group_id)
-              : undefined;
 
           return {
             id: course.course_id,
