@@ -261,7 +261,6 @@ export default function Comparison() {
     async function loadSavedCourses() {
       if (!studentId) return;
       const response = await fetch(apiUrl(`/q2s-comparison/${studentId}`));
-
       const json = await response.json();
 
       if (!response.ok) {
