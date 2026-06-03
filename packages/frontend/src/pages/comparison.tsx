@@ -364,31 +364,81 @@ export default function Comparison() {
   }
   function CourseMappingVisualization(mapping: CourseMapping) {
     console.log("Displaying: ", JSON.stringify(mapping))
-    function CourseVisualization(course: Course, index: number) {
-      return (
-        <div key={course?.id || `sub-${index}`}>
-          <div>
-            {course.code}
+    function MiniCourseCard({ course }: { course: Course }) {
+        if (!course) return null;
+        return (
+          <div 
+            className="p-3 bg-slate-50 border border-slate-100 rounded-xl flex flex-col space-y-0.5 text-left shadow-sm min-w-[130px]"
+          >
+            <span className="text-sm font-bold text-slate-900 tracking-tight">
+              {course.code}
+            </span>
+            <span className="text-xs text-slate-500 font-normal line-clamp-1 max-w-[160px]">
+              {course.title}
+            </span>
+            <span className="text-[10px] font-medium text-slate-400 mt-0.5">
+              {course.units} units
+            </span>
           </div>
-          <div>
-            {course.title}
-          </div>
-        </div>
-      )
-    }
-
+        );
+      }
     return (
-      <div className="flex flex-row items-start justify-between w-full gap-6">
-        <div>
-          Substituted
-          {(mapping.substituteCourses || []).map(CourseVisualization)}
+    // Outer Box wrapper containing this specific mapping relation
+    <div className="p-4 bg-white border border-slate-100 rounded-2xl shadow-sm flex items-center justify-between gap-4 w-full">
+      
+      {/* Left Stack: Substitute Courses (Incoming/New) */}
+      <div className="flex-1 flex flex-col gap-2">
+        <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider pl-1">
+          Credit in
+        </span>
+        <div className="flex flex-col gap-3">
+          {(mapping.substituteCourses || []).map((course, idx) => (
+            <Fragment key={course?.id || `sub-${idx}`}>
+              {/* Render the AND badge between rows cleanly */}
+              {idx > 0 && (
+                <div className="flex items-center justify-center h-4">
+                  <span className="text-[9px] font-black tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md uppercase select-none">
+                    and
+                  </span>
+                </div>
+              )}
+              <MiniCourseCard course={course} />
+            </Fragment>
+          ))}
         </div>
-        <div>
-          Substituted Out
-          {(mapping.substitutedOutCourses || []).map(CourseVisualization)}        
-          </div>
       </div>
-    )
+
+      {/* Middle Axis: Directional Arrow Vector */}
+      <div className="flex items-center justify-center self-center text-slate-300 font-bold text-xl pt-5 px-1 select-none">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5 text-slate-400 animate-pulse">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+        </svg>
+      </div>
+
+      {/* Right Stack: Substituted Out Courses (Replaced/Old) */}
+      <div className="flex-1 flex flex-col gap-2">
+        <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider pl-1">
+          Counts for
+        </span>
+        <div className="flex flex-col gap-3">
+          {(mapping.substitutedOutCourses || []).map((course, idx) => (
+            <Fragment key={course?.id || `sub-${idx}`}>
+              {/* Render the AND badge between rows cleanly */}
+              {idx > 0 && (
+                <div className="flex items-center justify-center h-4">
+                  <span className="text-[9px] font-black tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md uppercase select-none">
+                    and
+                  </span>
+                </div>
+              )}
+              <MiniCourseCard course={course} />
+            </Fragment>
+          ))}
+        </div>
+      </div>
+
+    </div>
+  );
   }
 
   type CourseConversionPopupProps = {
@@ -421,48 +471,6 @@ export default function Comparison() {
                 {CourseMappingVisualization(mapping)}
               </div>
             ))}
-
-            {/* <div className="mt-6 rounded-xl border border-gray-200 p-4">
-              <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
-                Quarter Course
-              </p>
-              <div className="mt-2 flex justify-between gap-4">
-                <div>
-                  <p className="font-semibold text-gray-900">
-                    {selectedCourse.code}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {selectedCourse.title}
-                  </p>
-                </div>
-                <p className="text-sm text-gray-500">
-                  {selectedCourse.units} units
-                </p>
-              </div>
-            </div> */}
-
-            {/* <div className="mt-3 rounded-xl border border-calpoly-green/30 bg-green-50 p-4">
-              <p className="text-xs font-semibold uppercase tracking-widest text-green-700">
-                Semester Equivalent
-              </p>
-              <div className="mt-2 flex justify-between gap-4">
-                TODO: Rework conversion data
-                <div>
-                  <p className="font-semibold text-gray-900">
-                    {selectedCourse.convertedCode || "No conversion found"}
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    {selectedCourse.convertedTitle ||
-                      "This course may need advisor review."}
-                  </p>
-                </div>
-                <p className="text-sm text-gray-500">
-                  {selectedCourse.convertedUnits
-                    ? `${selectedCourse.convertedUnits} units`
-                    : ""}
-                </p> 
-              </div>
-            </div> */}
           </div>
         </div>
       )
