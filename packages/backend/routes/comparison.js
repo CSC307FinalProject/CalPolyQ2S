@@ -143,7 +143,6 @@ rg.catalog_id = ${catalog_id})
 select sum(units) as units
 from degree_applicable_classes
   `;
-  console.log(result);
   return result[0].units;
 }
 
