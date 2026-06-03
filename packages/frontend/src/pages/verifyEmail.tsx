@@ -6,7 +6,9 @@ type Status = "success" | "expired" | "invalid";
 
 async function fetchStatus(token: string): Promise<Status> {
   try {
-    const res = await fetch(apiUrl(`/verify-email?token=${encodeURIComponent(token)}`));
+    const res = await fetch(
+      apiUrl(`/verify-email?token=${encodeURIComponent(token)}`),
+    );
     const data = await res.json();
     if (data.message) return "success";
     if (data.error?.toLowerCase().includes("expired")) return "expired";
