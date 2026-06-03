@@ -20,7 +20,7 @@ We are bummed that due to deploying on Azure using a student account, we cannot 
 
 https://www.figma.com/design/51lOIbYsvbNh3ut76eCnOM/Goal-Diggers?node-id=0-1&p=f (Last Updated May 1, 2026)
 
-## Documentation
+## UML Class Diagram
 
 - [UML Class Diagram](docs/uml-class-diagram.md)
 
