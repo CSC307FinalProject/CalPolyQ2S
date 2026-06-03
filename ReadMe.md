@@ -1,7 +1,8 @@
 ## Project Summary
 
-This is the CalPolyQ2S tool. The upcoming quarter to semester and catalog switch is creating a lot of confusion for students at Cal Poly, and we wanted to help clear the confusion. Students have the right to pick the catalog that suits them best, and we want to help them make an informed decision. The original scope of this project was all majors, but with time limitations, was narrowed down to just Computer Science. Some core features include: 
-- Two Factor User Authentication 
+This is the CalPolyQ2S tool. The upcoming quarter to semester and catalog switch is creating a lot of confusion for students at Cal Poly, and we wanted to help clear the confusion. Students have the right to pick the catalog that suits them best, and we want to help them make an informed decision. The original scope of this project was all majors, but with time limitations, was narrowed down to just Computer Science. Some core features include:
+
+- Two Factor User Authentication
 - Class search by major and concentration
 - Save courses by user into our database
 - Class comparison page (main feature)
@@ -18,6 +19,58 @@ We are bummed that due to deploying on Azure using a student account, we cannot 
 ## UI Prototypes
 
 https://www.figma.com/design/51lOIbYsvbNh3ut76eCnOM/Goal-Diggers?node-id=0-1&p=f (Last Updated May 1, 2026)
+
+## UML Class Diagram
+
+- [UML Class Diagram](docs/uml-class-diagram.md)
+
+## Development Environment Setup
+
+### Prerequisites
+
+- Node.js 22.x
+- npm (included with Node.js)
+- Git
+
+### Install dependencies
+
+From the repository root:
+
+```bash
+npm install
+```
+
+This installs the workspace dependencies for both the frontend and backend.
+
+### Environment variables
+
+Create a local environment file from the example:
+
+```bash
+cp .env.example .env
+```
+
+Then open `.env` and update the values for:
+
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_ANON_KEY`
+- `DATABASE_URL`
+- `TOKEN_SECRET`
+- `VERIFICATION_LINK_BASE_URL`
+- `SMTP_PASS`
+- `SMTP_USER`
+
+Keep `VITE_API_URL` as `http://localhost:3000` for local development.
+
+### Useful commands
+
+- `npm run dev` — start frontend and backend concurrently
+- `npm run dev:frontend` — start only the frontend
+- `npm run dev:backend` — start only the backend
+- `npm run build` — build the frontend
+- `npm run start` — start the backend in production mode
+- `npm run lint` — run frontend lint checks
+- `npm test` — run backend syntax checks
 
 ## Contributing
 
