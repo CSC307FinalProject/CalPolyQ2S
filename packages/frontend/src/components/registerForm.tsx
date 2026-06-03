@@ -11,7 +11,11 @@ interface FormData {
 
 type FormSubmitHandler = NonNullable<ComponentProps<"form">["onSubmit"]>;
 
-export default function RegisterForm({ onRegistered }: { onRegistered: (email: string) => void }) {
+export default function RegisterForm({
+  onRegistered,
+}: {
+  onRegistered: (email: string) => void;
+}) {
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
@@ -36,7 +40,10 @@ export default function RegisterForm({ onRegistered }: { onRegistered: (email: s
     fetch(`${API_URL}/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: formData.email, password: formData.password }),
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+      }),
     })
       .then((response) => {
         if (response.status === 201) {
