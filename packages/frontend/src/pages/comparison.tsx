@@ -113,16 +113,51 @@ function RequirementVisualizer({
   root: CatalogRequirement;
   onCourseClick: (course: Course) => void;
 }) {
+  // dropdown toggle state
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
-    <div className="space-y-2">
-      <div className="flex-horizontal space-x-2">
-        <span>{root.name}</span>
-        <CompletionTag completion={root.completion}></CompletionTag>
+    <div className="border border-slate-100 rounded-2xl bg-white shadow-sm overflow-hidden transition-all duration-200">
+      <div
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center justify-between p-4 cursor-pointer hover:bg-slate-50/60 select-none transition-colors"
+      >
+        <div className="flex items-center space-x-3">
+          {/* Arrow Indicator Icon */}
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            strokeWidth={2.5}
+            stroke="currentColor"
+            // Dynamic rotation class based on the toggle state
+            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ease-out ${
+              isOpen ? "rotate-180" : "rotate-90"
+            }`}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="m19.5 8.25-7.5 7.5-7.5-7.5"
+            />
+          </svg>
+
+          <span className="font-bold text-slate-800 tracking-tight text-sm sm:text-base">
+            {root.name}
+          </span>
+        </div>
+
+        <CompletionTag completion={root.completion} />
       </div>
-      <RequirementNodeVisualizer
-        node={root.requirement}
-        onCourseClick={onCourseClick}
-      ></RequirementNodeVisualizer>
+
+      {isOpen && (
+        <div className="px-4 pb-4 pt-1 border-t border-slate-50 bg-slate-50/10 animate-fadeIn">
+          <RequirementNodeVisualizer
+            node={root.requirement}
+            onCourseClick={onCourseClick}
+          />
+        </div>
+      )}
     </div>
   );
 }
@@ -488,7 +523,7 @@ function CourseMappingVisualization(mapping: CourseMapping) {
         <div className="flex flex-col gap-3">
           {(mapping.substituteCourses || []).map((course, idx) => (
             <Fragment key={course?.id || `sub-${idx}`}>
-              {/* Render the AND badge between rows cleanly */}
+              {/* AND between rows */}
               {idx > 0 && (
                 <div className="flex items-center justify-center h-4">
                   <span className="text-[9px] font-black tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md uppercase select-none">
@@ -528,7 +563,7 @@ function CourseMappingVisualization(mapping: CourseMapping) {
         <div className="flex flex-col gap-3">
           {(mapping.substitutedOutCourses || []).map((course, idx) => (
             <Fragment key={course?.id || `sub-${idx}`}>
-              {/* Render the AND badge between rows cleanly */}
+              {/* AND between rows */}
               {idx > 0 && (
                 <div className="flex items-center justify-center h-4">
                   <span className="text-[9px] font-black tracking-widest text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md uppercase select-none">
