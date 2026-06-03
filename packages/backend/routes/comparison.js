@@ -5,6 +5,18 @@ const router = express.Router();
 const QUARTER_CATALOG_ID = 1;
 const SEMESTER_CATALOG_ID = 2;
 
+function getCourse(id, catalogMap) {
+  const match = catalogMap.get(id);
+  return {
+    type: 'course',
+    id: id,
+    title: match ? match.title : 'Unknown Course',
+    code: match ? match.code : "Unknown Code",
+    units: match ? match.units : "Unknown Units",
+    completion: match ? match.completion : "Unknown Completion"
+  };
+}
+
 // Takes in a requirement (contains for example "502 AND 503") and a map from course_id to course info and returns
 // a recursive tree representing the requirements
 function parseRequirementString(requirement, catalogMap) {
@@ -64,16 +76,8 @@ function parseRequirementString(requirement, catalogMap) {
     if (isNaN(courseId)) {
       throw new Error(`Unexpected token in prefix expression: ${token} in ${tokens} from ${expression}`);
     }
-    const match = catalogMap.get(courseId);
 
-    return {
-      type: 'course',
-      id: courseId,
-      title: match ? match.course_name : 'Unknown Course',
-      code: match ? match.course_code : "Unknown Code",
-      units: match ? match.units : "Unknown Units",
-      completion: match ? match.completion : "Unknown Completion"
-    };
+    return getCourse(courseId, catalogMap)
   }
 
   return {
@@ -243,7 +247,7 @@ async function queryNeededClasses(student_id, courseMap) {
 }
 async function queryTakenClasses(student_id) {
   return await sql `
-  -- Get all the quarter courses the student has taken or has credit for from classes take on semesters
+  -- Get all the courses and whther the student has taken or has credit for the class
 with
   mapping_group_counts as (
     select
@@ -278,9 +282,9 @@ with
       sc.student_id = ${student_id}
   )
 select
-  c.course_id,
-  (c.subject || ' ' || c.course_number) as course_code,
-  c.class_name as course_name,
+  c.course_id as id,
+  (c.subject || ' ' || c.course_number) as code,
+  c.class_name as title,
   c.units,
   case
     when (
@@ -297,8 +301,8 @@ from
   courses as c
 `
 }
-async function queryCourseMappings() {
-  result = await sql `
+async function queryCourseMappings(courseMap) {
+  const result = await sql `
   select course_mappings.mapping_id, 
     string_agg(distinct cast(c1.course_id as varchar(10)), ' ') as substitute_classes,
     string_agg(distinct cast(c2.course_id as varchar(10)), ' ') as substituted_out_classes
@@ -312,10 +316,15 @@ async function queryCourseMappings() {
     and item2.is_substitute = false
   group by course_mappings.mapping_id
 `
-  return result.map((row) => {
-    substituteCourses: row.substitute_classes.split(' ');
-    substitutedOutCourses: row.substituted_out_classes.split(' ');
+  const mappings = result.map((row) => {
+    const substituteCourses = row.substitute_classes.split(' ')
+      .map((courseId) => getCourse(parseInt(courseId, 10), courseMap));
+    const substitutedOutCourses = row.substituted_out_classes.split(' ')
+      .map((courseId) => getCourse(parseInt(courseId, 10), courseMap));
+    const id = row.mapping_id
+    return {id, substituteCourses, substitutedOutCourses}
   })
+  return mappings
 }
 
 // TODO REFACTOR THIS TO GET CLASSES NEEDED TO GRAD
@@ -339,14 +348,14 @@ router.get("/:student_id", async (req, res) => {
   const { student_id } = req.params;
   const courses = await queryTakenClasses(student_id);
 // convert the courses to a map from course_id to other course info
-  const courseMap = new Map(courses.map((course) => [course.course_id, course]))
+  const courseMap = new Map(courses.map((course) => [course.id, course]))
 
   try {
     const requirements = await queryNeededClasses(student_id, courseMap);
     const quarterRequirements = requirements.filter((req) => req.catalog == 1);
     const semesterRequirements = requirements.filter((req) => req.catalog == 2);
-    console.log("Quarter Requirements: " + JSON.stringify(quarterRequirements[0]));
-    const courseMappings = queryCourseMappings();
+    const courseMappings = await queryCourseMappings(courseMap);
+    console.log("Sending mappings: ", courseMappings)
 
     return res.json({quarterRequirements, semesterRequirements, courseMappings});
   } catch (error) {

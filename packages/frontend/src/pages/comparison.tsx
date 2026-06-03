@@ -70,7 +70,8 @@ type CatalogRequirement = {
   requirement: Requirement
 }
 type CourseMapping = {
-  substitutedCourses: Course[];
+  id: number;
+  substituteCourses: Course[];
   substitutedOutCourses: Course[] 
 }
 
@@ -204,7 +205,7 @@ export default function Comparison() {
 
   const [quarterRequirements, setQuarterRequirements] = useState<CatalogRequirement[]>([]);
   const [semesterRequirements, setSemesterRequirements] = useState<CatalogRequirement[]>([]);
-  const [courseMappings, setCourseMappings] = useState<CourseMapping>();
+  const [courseMappings, setCourseMappings] = useState<CourseMapping[]>([]);
 
   const studentId = getStoredUser()?.student_id;
 
@@ -223,7 +224,6 @@ export default function Comparison() {
         console.error(json.error || "Failed to load saved courses.");
         return;
       }
-      console.log("Received: ", JSON.stringify(json))
       setQuarterRequirements(json.quarterRequirements);
       setSemesterRequirements(json.semesterRequirements);
       setCourseMappings(json.courseMappings)
@@ -355,6 +355,42 @@ export default function Comparison() {
         </div>
     )
   }
+
+  function getCourseMappingsFor(course: Course) {
+    const mappings = courseMappings.filter((mapping) => {
+      return mapping.substitutedOutCourses.map((course) => course.id).includes(course.id)
+    })
+    return mappings
+  }
+  function CourseMappingVisualization(mapping: CourseMapping) {
+    console.log("Displaying: ", JSON.stringify(mapping))
+    function CourseVisualization(course: Course, index: number) {
+      return (
+        <div key={course?.id || `sub-${index}`}>
+          <div>
+            {course.code}
+          </div>
+          <div>
+            {course.title}
+          </div>
+        </div>
+      )
+    }
+
+    return (
+      <div className="flex flex-row items-start justify-between w-full gap-6">
+        <div>
+          Substituted
+          {(mapping.substituteCourses || []).map(CourseVisualization)}
+        </div>
+        <div>
+          Substituted Out
+          {(mapping.substitutedOutCourses || []).map(CourseVisualization)}        
+          </div>
+      </div>
+    )
+  }
+
   type CourseConversionPopupProps = {
     selectedCourse: Course;
   }
@@ -380,8 +416,13 @@ export default function Comparison() {
                 ✕
               </button>
             </div>
+            {getCourseMappingsFor(selectedCourse).map((mapping: CourseMapping, index) => (
+              <div key={mapping?.id || `sub-${index}`}>
+                {CourseMappingVisualization(mapping)}
+              </div>
+            ))}
 
-            <div className="mt-6 rounded-xl border border-gray-200 p-4">
+            {/* <div className="mt-6 rounded-xl border border-gray-200 p-4">
               <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
                 Quarter Course
               </p>
@@ -398,15 +439,15 @@ export default function Comparison() {
                   {selectedCourse.units} units
                 </p>
               </div>
-            </div>
+            </div> */}
 
-            <div className="mt-3 rounded-xl border border-calpoly-green/30 bg-green-50 p-4">
+            {/* <div className="mt-3 rounded-xl border border-calpoly-green/30 bg-green-50 p-4">
               <p className="text-xs font-semibold uppercase tracking-widest text-green-700">
                 Semester Equivalent
               </p>
               <div className="mt-2 flex justify-between gap-4">
                 TODO: Rework conversion data
-                {/* <div>
+                <div>
                   <p className="font-semibold text-gray-900">
                     {selectedCourse.convertedCode || "No conversion found"}
                   </p>
@@ -419,9 +460,9 @@ export default function Comparison() {
                   {selectedCourse.convertedUnits
                     ? `${selectedCourse.convertedUnits} units`
                     : ""}
-                </p> */}
+                </p> 
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       )
