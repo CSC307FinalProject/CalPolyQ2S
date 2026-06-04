@@ -1,4 +1,4 @@
-import express from "express";
+import express, { json } from "express";
 import sql from "../index.js";
 
 const router = express.Router();
@@ -138,7 +138,7 @@ from requirement_groups as rg
 join requirement_group_courses as rgc on rg.group_id = rgc.group_id
 join taken_quarter_courses as tqc on tqc.course_id = rgc.course_id
 join courses as c on c.course_id = rgc.course_id
-join students as s on s.student_id = 31 and (rg.concentration_id is null or rg.concentration_id = s.concentration_id)
+join students as s on s.student_id = ${student_id} and (rg.concentration_id is null or rg.concentration_id = s.concentration_id)
 where
 rg.catalog_id = ${catalog_id})
 select sum(units) as units
@@ -214,7 +214,7 @@ async function queryNeededClasses(student_id, courseMap) {
       join requirement_groups as groups on groups.group_id = gc.group_id
       left join taken_quarter_courses as tcs on tcs.course_id = gc.course_id
       left join courses on courses.course_id = tcs.course_id
-      join students as s on s.student_id = 31 and (groups.concentration_id is null or groups.concentration_id = s.concentration_id)
+      join students as s on s.student_id = ${student_id} and (groups.concentration_id is null or groups.concentration_id = s.concentration_id)
     group by
       groups.group_id,
       groups.catalog_id,
