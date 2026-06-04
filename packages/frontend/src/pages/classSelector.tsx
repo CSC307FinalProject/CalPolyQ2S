@@ -15,6 +15,7 @@ function ClassSelector() {
   const [completed, setCompleted] = useState<Course[]>([]);
 
   // all courses
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
 
   // major related queries
@@ -71,7 +72,7 @@ function ClassSelector() {
         return [];
       })
       .then((data) => {
-        setCourses(data?.courses ?? []);
+        setAllCourses(data?.courses ?? []);
         setMajors(data?.majors ?? []);
         setConcentrations(data?.concentrations ?? []);
       })
@@ -125,6 +126,12 @@ function ClassSelector() {
   }
 
   const filteredCourses = courses.filter((course) => {
+    if (courseType === "Q") return course.catalog_id === 1;
+    if (courseType === "S") return course.catalog_id === 2;
+    return true;
+  });
+
+  const filteredAllCourses = allCourses.filter((course) => {
     if (courseType === "Q") return course.catalog_id === 1;
     if (courseType === "S") return course.catalog_id === 2;
     return true;
@@ -190,6 +197,7 @@ function ClassSelector() {
           <div className="mt-4 flex-1 min-h-0 h-full">
             <ClassTable
               courses={filteredCourses}
+              allCourses={filteredAllCourses}
               completed={completed}
               onAddCourse={handleAddCourse}
               onRemoveCourse={handleRemoveCourse}

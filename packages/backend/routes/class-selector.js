@@ -16,9 +16,9 @@ router.get("/", async (req, res) => {
         class_name AS course_name,
         catalog_id,
         CASE
-          WHEN course_number ~ '^[3-5]' THEN 'UPPER DIV'
-          WHEN subject LIKE 'Gen Ed%' THEN 'GE'
           WHEN tech_elective_eligible THEN 'SUPPORT'
+          WHEN subject LIKE 'Gen Ed%' THEN 'GE'
+          WHEN course_number ~ '^[3-5]' THEN 'UPPER DIV'
           ELSE 'LOWER DIV'
         END AS tag
       FROM courses
@@ -100,7 +100,7 @@ router.get("/:student_id/courses", async (req, res) => {
   try {
     // get all the major required courses for the user
     const majorCourses = await sql`
-    SELECT DISTINCT 
+    SELECT DISTINCT
     c.course_id,
     c.subject || ' ' || c.course_number AS "course_code",
     c.class_name AS course_name,
@@ -114,10 +114,7 @@ router.get("/:student_id/courses", async (req, res) => {
     FROM courses c
     JOIN requirement_group_courses rgc ON c.course_id = rgc.course_id
     JOIN requirement_groups rg ON rgc.group_id = rg.group_id
-    JOIN students s ON s.major_id = rg.major_id
-    LEFT JOIN concentrations con ON con.concentration_id = s.concentration_id
-    WHERE s.student_id =${student_id}
-    AND rg.major_id = ${major}
+    WHERE rg.major_id = ${major}
     AND (rg.concentration_id IS NULL OR rg.concentration_id = ${concentration})
     `;
     return res.status(200).json({ majorCourses });
