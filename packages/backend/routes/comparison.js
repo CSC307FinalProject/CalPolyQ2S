@@ -229,7 +229,7 @@ async function queryNeededClasses(student_id, courseMap) {
     select
       ogc.group_id,
       ogc.group_name,
-      ogc.units,
+      max(ogc.units) as units,
       ogc.catalog_id,
       case
         when (sum(ogc.is_option_complete) >= 1) then 1
@@ -241,8 +241,7 @@ async function queryNeededClasses(student_id, courseMap) {
       ogc.group_id,
       ogc.catalog_id,
       ogc.group_name,
-      ogc.required_count,
-      ogc.units
+      ogc.required_count
   )
   select
     gc.group_id,
