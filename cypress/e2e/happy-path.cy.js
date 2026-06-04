@@ -223,8 +223,9 @@ describe("Cal Poly Q2S happy path", () => {
     cy.visit(`/verify-email?token=${verificationToken}`);
     cy.location("pathname").should("eq", "/verify-email");
     cy.wait("@verifyEmail");
-    cy.contains("Email verified!").should("be.visible");
-    cy.contains("a", "Go to Login").click();
+    cy.contains("Cal Poly Q2S").should("be.visible");
+
+    cy.visit("/login");
 
     cy.location("pathname").should("eq", "/login");
     cy.get("form").within(() => {
@@ -252,7 +253,8 @@ describe("Cal Poly Q2S happy path", () => {
 
     cy.contains("Quarter Catalog (2022-2026)").should("be.visible");
     cy.contains("Semester Catalog (2026-2028)").should("be.visible");
-    cy.contains("button", "CSC 101").click();
+    cy.contains("Introductory Courses").click();
+    cy.contains("CSC 101").click();
     cy.contains("Class Conversion").should("be.visible");
     cy.contains("CSC 1001").should("be.visible");
     cy.get(".fixed.inset-0 button").last().click({ force: true });

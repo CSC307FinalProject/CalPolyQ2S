@@ -83,7 +83,7 @@ function Homepage() {
         </Link>
         <div
           ref={learnMoreRef}
-          className={`text-left text-white text-base sm:text-xl px-3 py-8 bg-black/5 backdrop-blur-sm rounded-xl w-full md:w-[70vw] lg:w-[55vw] mt-5 border transition-all duration-500 ${
+          className={`text-left text-white text-base sm:text-xl px-3 py-8 bg-black/5 backdrop-blur-sm rounded-xl w-full md:w-[70vw] lg:w-[55vw] mt-5 transition-all duration-500 ${
             isLearnMoreHighlighted
               ? "border-[#D7F5FF] shadow-[0_0_28px_rgba(215,245,255,0.55)]"
               : "border-white/10 shadow-none"
