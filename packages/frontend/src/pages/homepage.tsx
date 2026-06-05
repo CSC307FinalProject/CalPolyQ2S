@@ -10,8 +10,25 @@ function Homepage() {
   const fadeTimeoutRef = useRef<number | null>(null);
   const [isLearnMoreHighlighted, setIsLearnMoreHighlighted] = useState(false);
 
+  // Gets from session storage so that page does not fade from black on refresh
+  const [fading, setFading] = useState(
+    () => sessionStorage.getItem("homepage_visited") === "true",
+  );
+
   useEffect(() => {
+    let timeOutMs: number;
+
+    if (!fading) {
+      sessionStorage.setItem("homepage_visited", "true");
+      
+      // Set how many ms to stay on black
+      timeOutMs = window.setTimeout(() => setFading(true), 500);
+    }
+
     return () => {
+      // After timeOutMs, clear
+      window.clearTimeout(timeOutMs);
+
       if (highlightTimeoutRef.current !== null) {
         window.clearTimeout(highlightTimeoutRef.current);
       }
@@ -50,6 +67,10 @@ function Homepage() {
       id="root"
       className="relative w-full min-h-screen overflow-x-hidden bg-black"
     >
+      <div
+        className={`fixed inset-0 z-50 bg-black pointer-events-none transition-opacity duration-1000 ${fading ? "opacity-0" : "opacity-100"}`}
+      />
+
       <video
         autoPlay
         loop
