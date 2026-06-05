@@ -133,6 +133,7 @@ Database: postgres
 User: postgres
 Password: your database password
 ```
+
 ---
 
 ## Project Documentation
