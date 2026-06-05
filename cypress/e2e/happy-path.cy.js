@@ -238,7 +238,7 @@ describe("Cal Poly Q2S happy path", () => {
 
     cy.wait(["@loadCatalog", "@loadSavedCourses"]);
 
-    cy.contains("Search for your catalog").should("be.visible");
+    cy.contains("Search for your Classes").should("be.visible");
     cy.get("input[placeholder='Major...']").type("Computer");
     cy.contains("li", "Computer Science").click();
     cy.wait("@loadMajorCourses");
