@@ -122,7 +122,7 @@ export default function RegisterForm({
         Sign Up
       </button>
 
-      <label className="text-sm text-center text-gray-600">
+      <label className="block text-left text-sm text-center text-gray-600">
         Account already exists?{" "}
         <Link
           to="/login"
