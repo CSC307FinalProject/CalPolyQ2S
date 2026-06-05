@@ -65,7 +65,9 @@ export default function NewPasswordForm({ token }: Props) {
   return (
     <form className="gap-4 mt-4 w-full text-left" onSubmit={handleSubmit}>
       <div className="gap-1">
-        <label className="text-sm text-gray-800 font-medium">New Password</label>
+        <label className="text-sm text-gray-800 font-medium">
+          New Password
+        </label>
 
         <div className="relative">
           <input
@@ -131,7 +133,7 @@ export default function NewPasswordForm({ token }: Props) {
         {loading ? "Saving..." : "Set New Password"}
       </button>
 
-      <label className="block text-left text-sm text-center text-gray-600 mt-2">
+      <label className="block text-left text-sm text-gray-600 mt-2">
         Remember your password?{" "}
         <Link
           to="/login"

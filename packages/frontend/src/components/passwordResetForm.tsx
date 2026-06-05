@@ -69,10 +69,11 @@ export default function PasswordResetForm() {
         />
       </div>
 
-      <div className={`mt-2 text-sm ${isSuccess ? "text-calpoly-green font-bold" : "text-red-600"} ${!authMessage && "invisible"}`}>
+      <div
+        className={`mt-2 text-sm ${isSuccess ? "text-calpoly-green font-bold" : "text-red-600"} ${!authMessage && "invisible"}`}
+      >
         {authMessage ?? "placeholder"}
       </div>
-
 
       <button
         type="submit"
@@ -82,7 +83,7 @@ export default function PasswordResetForm() {
         {loading ? "Sending..." : "Send Reset Link"}
       </button>
 
-      <label className="block text-left text-sm text-center text-gray-600 mt-2">
+      <label className="block text-left text-sm text-gray-600 mt-2">
         Remember your password?{" "}
         <Link
           to="/login"
@@ -91,7 +92,6 @@ export default function PasswordResetForm() {
           Login
         </Link>
       </label>
-
     </form>
   );
 }
