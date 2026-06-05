@@ -1,6 +1,11 @@
 {
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/assets/*", "/favicon.svg", "/hero.mp4", "/icons.svg"]
+    "exclude": [
+      "/assets/*",
+      "/Cal_Poly_Mustangs_logo.svg.png",
+      "/hero.mp4",
+      "/icons.svg"
+    ]
   }
 }
