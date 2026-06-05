@@ -141,6 +141,10 @@ Password: your database password
 
 <img width="886" height="531" alt="User_Signup_Sequence_Diagram" src="docs/sprint_tracking.png" />
 
+## CI/CD
+
+This project uses GitHub Actions to automate checks and deployments. The CI workflow runs linting, formatting checks, the frontend build, backend syntax tests, and the Cypress end-to-end test. The frontend is deployed through Azure Static Web Apps, while the backend is deployed separately to an Azure Web App. Deployment secrets are stored in GitHub Actions so the application can build and deploy without committing sensitive credentials.
+
 ## UI Prototypes
 
 https://www.figma.com/design/51lOIbYsvbNh3ut76eCnOM/Goal-Diggers?node-id=0-1&p=f (Last Updated May 1, 2026)
