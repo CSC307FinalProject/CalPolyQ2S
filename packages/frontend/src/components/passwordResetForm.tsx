@@ -11,7 +11,7 @@ interface FormData {
 
 type FormSubmitHandler = NonNullable<ComponentProps<"form">["onSubmit"]>;
 
-export default function LoginForm() {
+export default function PasswordResetForm() {
   const [formData, setFormData] = useState<FormData>({
     email: "",
     password: "",
@@ -98,74 +98,13 @@ export default function LoginForm() {
         />
       </div>
 
-      <div className="gap-1 mt-6">
-        <label className="text-sm text-gray-800 font-medium">Password</label>
-
-        <div className="relative">
-          <input
-            name="password"
-            type={showPassword ? "text" : "password"}
-            placeholder="Enter your password"
-            value={formData.password}
-            onChange={handleChange}
-            className="px-4 py-3 rounded-lg border border-gray-300 bg-white text-black placeholder-gray-400 outline-none focus:border-gray-500 w-full pr-12"
-          />
-
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-xs cursor-pointer"
-          >
-            {showPassword ? <EyeOff /> : <Eye />}
-          </button>
-        </div>
-      </div>
-
-      <label className="mt-2 mb-8 flex items-center gap-2 text-sm text-black cursor-pointer select-none hover:text-gray-600">
-        <input
-          name="staySignedIn"
-          type="checkbox"
-          checked={formData.staySignedIn}
-          onChange={handleChange}
-          className="sr-only"
-        />
-        {formData.staySignedIn ? (
-          <CircleCheckBig className="w-4" />
-        ) : (
-          <Circle className="w-4" />
-        )}
-        Keep me signed in
-      </label>
-
-      {authMessage ? (
-        <div className="mb-4 text-sm text-red-600">{authMessage}</div>
-      ) : null}
-
-      <button
-        type="submit"
-        disabled={loading}
-        className="mb-2 w-full py-3 rounded-lg bg-black text-white font-semibold cursor-pointer hover:bg-calpoly-green disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        {loading ? "Signing in..." : "Sign In"}
-      </button>
-
-      <label className="block text-left text-sm text-center text-gray-600">
-        Need to sign up?{" "}
-        <Link
-          to="/register"
-          className="text-calpoly-green font-bold hover:underline"
-        >
-          Create Account
-        </Link>
-      </label>
-      
       <label className="block text-left text-sm text-center text-gray-600 mt-2">
-        Forgot your password?{" "}
+        Remember your password?{" "}
         <Link
-          to="/reset-password"
+          to="/login"
           className="text-calpoly-green font-bold hover:underline"
         >
-          Reset Password
+          Login
         </Link>
       </label>
 

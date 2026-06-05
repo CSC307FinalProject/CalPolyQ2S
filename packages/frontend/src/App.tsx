@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Homepage from "./pages/homepage";
 import Login from "./pages/login";
+import PasswordReset from "./pages/passwordReset";
 import Register from "./pages/register";
 import ClassSelector from "./pages/classSelector";
 import Comparison from "./pages/comparison";
@@ -12,6 +13,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Homepage />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/reset-password" element={<PasswordReset />} />
         <Route path="/register" element={<Register />} />
         <Route path="/class-selector" element={<ClassSelector />} />
         <Route path="/q2s-comparison" element={<Comparison />} />
