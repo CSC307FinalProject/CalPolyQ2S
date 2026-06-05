@@ -131,7 +131,7 @@ export default function NewPasswordForm({ token }: Props) {
         {loading ? "Saving..." : "Set New Password"}
       </button>
 
-      <label className="block text-sm text-center text-gray-600 mt-2">
+      <label className="block text-left text-sm text-center text-gray-600 mt-2">
         Remember your password?{" "}
         <Link
           to="/login"
