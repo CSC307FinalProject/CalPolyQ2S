@@ -166,14 +166,14 @@ function ClassSelector() {
     : [];
 
   return (
-    <div className="h-screen bg-white overflow-hidden flex flex-col">
+    <div className="min-h-screen lg:h-screen bg-white lg:overflow-hidden flex flex-col">
       <Navbar />
-      <main className="flex-1 min-h-0 p-5 w-full grid grid-cols-3 gap-5">
-        <div className="col-span-2 flex flex-col min-h-0">
-          <div className="text-left text-5xl text-black font-bold mb-10">
+      <main className="lg:flex-1 lg:min-h-0 p-3 lg:p-5 w-full grid grid-cols-1 lg:grid-cols-3 gap-3 lg:gap-5">
+        <div className="lg:col-span-2 flex flex-col lg:min-h-0">
+          <div className="text-left text-2xl sm:text-4xl lg:text-5xl text-black font-bold mb-4 lg:mb-10">
             Search for your Classes
           </div>
-          <div className="flex items-center gap-4 mb-15">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-4 mb-6 lg:mb-15">
             <SearchBar
               placeholder="Major..."
               value={major}
@@ -189,12 +189,12 @@ function ClassSelector() {
             />
           </div>
 
-          <div className="flex items-center justify-between w-full text-left text-2xl text-black font-bold">
+          <div className="flex items-center justify-between w-full text-left text-sm sm:text-lg lg:text-2xl text-black font-bold">
             Major - Search for courses
             <Q2SFilter value={courseType} onChange={setCourseType} />
           </div>
 
-          <div className="mt-4 flex-1 min-h-0 h-full">
+          <div className="mt-3 lg:mt-4 min-h-96 lg:flex-1 lg:min-h-0 lg:h-full">
             <ClassTable
               courses={filteredCourses}
               allCourses={filteredAllCourses}
@@ -206,7 +206,7 @@ function ClassSelector() {
           </div>
         </div>
 
-        <div className="col-span-1 flex flex-col min-h-0">
+        <div className="col-span-1 flex flex-col min-h-64 lg:min-h-0">
           <CompletedTable
             courses={completed}
             onRemoveCourse={handleRemoveCourse}
