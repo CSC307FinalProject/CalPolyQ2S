@@ -20,7 +20,7 @@ function Homepage() {
 
     if (!fading) {
       sessionStorage.setItem("homepage_visited", "true");
-      
+
       // Set how many ms to stay on black
       timeOutMs = window.setTimeout(() => setFading(true), 500);
     }
