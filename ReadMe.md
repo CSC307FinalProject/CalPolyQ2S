@@ -2,7 +2,8 @@
 
 This is the CalPolyQ2S tool. The upcoming quarter to semester and catalog switch is creating a lot of confusion for students at Cal Poly, and we wanted to help clear the confusion. Students have the right to pick the catalog that suits them best, and we want to help them make an informed decision. The original scope of this project was all majors, but with time limitations, was narrowed down to just Computer Science. Some core features include:
 
-- Two Factor User Authentication
+- Email Verification
+- Password Reset Through Email
 - Class search by major and concentration
 - Save courses by user into our database
 - Class comparison page (main feature)
@@ -10,19 +11,15 @@ This is the CalPolyQ2S tool. The upcoming quarter to semester and catalog switch
   - Units remaining
   - Terms remaining
 
+## Demo Video
+
+<img width="886" height="531" alt="User_Signup_Sequence_Diagram" src="docs/demo.mp4" />
+
 ## Deployed Application Website
 
 Website URL - https://orange-bay-0a230d710.7.azurestaticapps.net/
 
 We are bummed that due to deploying on Azure using a student account, we cannot use a custom domain.
-
-## UI Prototypes
-
-https://www.figma.com/design/51lOIbYsvbNh3ut76eCnOM/Goal-Diggers?node-id=0-1&p=f (Last Updated May 1, 2026)
-
-## UML Class Diagram
-
-- [UML Class Diagram](docs/uml-class-diagram.md)
 
 ## Development Environment Setup
 
@@ -136,8 +133,29 @@ Database: postgres
 User: postgres
 Password: your database password
 ```
-
 ---
+
+## Project Documentation
+
+## Sprint Tracking Bar Chart
+
+<img width="886" height="531" alt="User_Signup_Sequence_Diagram" src="docs/sprint_tracking.png" />
+
+## UI Prototypes
+
+https://www.figma.com/design/51lOIbYsvbNh3ut76eCnOM/Goal-Diggers?node-id=0-1&p=f (Last Updated May 1, 2026)
+
+## UML Class Diagram
+
+- [UML Class Diagram](docs/uml-class-diagram.md)
+
+## User Stories
+
+- [User Stores](docs/user_stories.txt)
+
+## Database Architecture
+
+<img width="886" height="531" alt="User_Signup_Sequence_Diagram" src="docs/supabase_architecture.png" />
 
 # Sequence Diagrams
 

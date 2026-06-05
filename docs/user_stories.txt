@@ -1,0 +1,24 @@
+Hayk
+As a counselor, I want to be able to download information regarding a student’s remaining classes in a concise format in order to better prepare for academic counseling sessions with students confused about which catalog to be on.
+As a Cal Poly administrator, I can advertise the website as a helpful tool to students in order to reduce the load on counselors.
+As a student, I want to know what classes I would need to take during each semester to fulfill the quarter catalog requirements.
+
+Camden
+As a student, I want a personalized recommendation score or indicator that evaluates whether switching catalogs is advantageous for me so that I can make a confident decision without manually comparing every requirement.
+As a student, I want to explore different “what-if” scenarios (like retaking courses, changing load, or delaying classes) across both systems so that I can see how flexible each catalog is with my situation. 
+As a student, I want to know what classes I would need to take during each semester to fulfill the semester catalog requirements.
+
+Jaxon 
+As a student, I want to know the cost comparison of staying on quarters versus switching to semesters.
+As a teacher, I want to know how many students will be staying on quarters, so I know what classes I am likely to be teaching more. 
+As a student, I want to see what classes correlate to workplace skills so I can tailor my schedule to certain jobs.
+
+Tyler
+As a student, I want to know how many more units and terms I would need to take, depending on whether I switch to the semester catalog so that I can see which catalog would allow me to graduate earlier.
+As a student, I want to easily search by class numbers for classes and enter the ones I’ve already taken so that I can quickly get to the comparison of catalogs.
+As a student, I want to easily search by keywords for classes and enter the ones I’ve already taken so that I can quickly get to the comparison of catalogs.
+
+Curren
+As a parent, I want to use the quarter-to-semester tool as a guest to track my child’s academic progress so that I can ensure they are on track to graduate.
+As a student, I want my information to be saved throughout sessions so that I can easily access my information at a later time without having to re-enter it all over again.
+As a user, I want my password to be protected and hidden when typing it in if I am with a counselor or another person when logging into the website.
