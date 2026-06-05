@@ -2,7 +2,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { getStoredUser, logout } from "./authStorage";
 
-export default function Navbar({ showDisclaimer = false }: { showDisclaimer?: boolean }) {
+export default function Navbar({
+  showDisclaimer = false,
+}: {
+  showDisclaimer?: boolean;
+}) {
   const [showLogoutPopup, setShowLogoutPopup] = useState(false);
 
   const user = getStoredUser();
@@ -24,7 +28,8 @@ export default function Navbar({ showDisclaimer = false }: { showDisclaimer?: bo
 
         {showDisclaimer && (
           <div className="text-black text-xs">
-            * Do not solely rely on Calpoly Q2S for academic advice. Speak with your counselors and use your DPR. *
+            * Do not solely rely on Calpoly Q2S for academic advice. Speak with
+            your counselors and use your DPR. *
           </div>
         )}
 
