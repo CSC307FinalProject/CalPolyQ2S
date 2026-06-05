@@ -132,7 +132,7 @@ function RequirementVisualizer({
             stroke="currentColor"
             // Dynamic rotation class based on the toggle state
             className={`w-4 h-4 text-slate-400 transition-transform duration-200 ease-out ${
-              isOpen ? "rotate-180" : "rotate-90"
+              isOpen ? "rotate-0" : "-rotate-90"
             }`}
           >
             <path
