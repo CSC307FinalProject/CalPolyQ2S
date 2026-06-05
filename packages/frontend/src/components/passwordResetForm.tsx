@@ -1,84 +1,53 @@
 import { useState, type ChangeEvent, type ComponentProps } from "react";
-import { Eye, EyeOff, Circle, CircleCheckBig } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { apiUrl } from "../lib/api";
-
-interface FormData {
-  email: string;
-  password: string;
-  staySignedIn: boolean;
-}
 
 type FormSubmitHandler = NonNullable<ComponentProps<"form">["onSubmit"]>;
 
 export default function PasswordResetForm() {
-  const [formData, setFormData] = useState<FormData>({
-    email: "",
-    password: "",
-    staySignedIn: false,
-  });
-
-  const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
   const [authMessage, setAuthMessage] = useState<string | null>(null);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-
-  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = event.target;
-    setFormData({
-      ...formData,
-      [name]: type === "checkbox" ? checked : value,
-    });
-  };
 
   const handleSubmit: FormSubmitHandler = async (event) => {
     event.preventDefault();
     setLoading(true);
     setAuthMessage(null);
+    setIsSuccess(false);
 
-    if (!formData.email || !formData.password) {
-      setAuthMessage("Please enter both email and password.");
+    if (!email) {
+      setAuthMessage("Please enter your email address.");
       setLoading(false);
       return;
     }
 
     try {
-      const response = await fetch(apiUrl("/login"), {
+      const response = await fetch(apiUrl("/forgot-password"), {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: formData.email,
-          password: formData.password,
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
       });
 
       const json = await response.json();
       setLoading(false);
 
-      if (!response.ok) {
-        setAuthMessage(json.error || "Login failed. Please try again.");
+      if (response.status === 404) {
+        setAuthMessage("Your email is not registered on Cal Poly Q2S.");
         return;
       }
 
-      // create a user obj for session
-      const userObj = JSON.stringify({
-        token: json.token,
-        student_id: json.student_id,
-        email: formData.email,
-      });
-      if (formData.staySignedIn) {
-        localStorage.setItem("user", userObj);
-      } else {
-        sessionStorage.setItem("user", userObj);
+      if (!response.ok) {
+        setAuthMessage(json.error || "Something went wrong. Please try again.");
+        return;
       }
 
-      navigate("/class-selector");
+      setIsSuccess(true);
+      setAuthMessage(json.message);
     } catch (error) {
       setLoading(false);
-      setAuthMessage("Unable to reach the login server.");
-      console.error("Login error:", error);
+      setAuthMessage("Unable to reach the server.");
+      console.error("Password reset error:", error);
     }
   };
 
@@ -92,11 +61,26 @@ export default function PasswordResetForm() {
           name="email"
           type="email"
           placeholder="Enter your email address"
-          value={formData.email}
-          onChange={handleChange}
+          value={email}
+          onChange={(e: ChangeEvent<HTMLInputElement>) =>
+            setEmail(e.target.value)
+          }
           className="px-4 py-3 rounded-lg border border-gray-300 bg-white text-black placeholder-gray-400 outline-none focus:border-gray-500 w-full"
         />
       </div>
+
+      <div className={`mt-2 text-sm ${isSuccess ? "text-calpoly-green font-bold" : "text-red-600"} ${!authMessage && "invisible"}`}>
+        {authMessage ?? "placeholder"}
+      </div>
+
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="mb-2 mt-12 w-full py-3 rounded-lg bg-black text-white font-semibold cursor-pointer hover:bg-calpoly-green disabled:cursor-not-allowed disabled:opacity-60"
+      >
+        {loading ? "Sending..." : "Send Reset Link"}
+      </button>
 
       <label className="block text-left text-sm text-center text-gray-600 mt-2">
         Remember your password?{" "}

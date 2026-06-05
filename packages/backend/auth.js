@@ -243,6 +243,120 @@ export async function resendVerification(req, res) {
   }
 }
 
+// Maximum 3 attempts per 15 minutes
+export const forgotPasswordLimit = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 3,
+  keyGenerator: (req) => req.body?.email ?? ipKeyGenerator(req),
+  message: { error: "Too many reset attempts. Please wait 15 minutes." },
+});
+
+// Send Password Reset Email
+async function sendPasswordResetEmail(email, token) {
+  const resetLink = `${process.env.VERIFICATION_LINK_BASE_URL}reset-password?token=${token}`;
+  const emailHtml = readFileSync(
+    new URL("./components/password-reset-email.html", import.meta.url),
+    "utf-8",
+  ).replace("{{RESET_LINK}}", resetLink);
+
+  const info = await transporter.sendMail({
+    from: `"Cal Poly Q2S" <${process.env.SMTP_USER}>`,
+    to: email,
+    subject: "Reset your Cal Poly Q2S Password",
+    html: emailHtml,
+  });
+
+  console.log("Password reset email sent: %s", info.messageId);
+}
+
+// Forgot Password
+export async function forgotPassword(req, res) {
+  const { email } = req.body;
+
+  // Validate email field
+  if (!email) {
+    return res.status(400).json({ error: "Missing email." });
+  }
+
+  try {
+    
+    // Select student based on the email param
+    const [student] =
+      await sql`SELECT student_id FROM students WHERE email = ${email}`;
+
+    // Validate student_id
+    if (!student) {
+      return res.status(404).json({ error: "Email not found." });
+    }
+
+    // Sign and send a reset token that 
+    const resetToken = jwt.sign(
+      { email, type: "password_reset" },
+      process.env.TOKEN_SECRET,
+      { expiresIn: "10m" },
+    );
+
+    // Sends the email with reset token
+    await sendPasswordResetEmail(email, resetToken);
+    return res.status(200).json({ message: "Reset link sent. Check your inbox." });
+  } 
+  catch (error) {
+    console.error("Forgot password error:", error);
+    return res.status(500).json({ error: "Failed to process request." });
+  }
+}
+
+// Reset Password
+export async function resetPassword(req, res) {
+  const { token, new_password } = req.body;
+
+  // Verify that both reset token AND a new password have been sent
+  if (!token || !new_password) {
+    return res.status(400).json({ error: "Missing token or new password." });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.TOKEN_SECRET);
+
+    if (decoded.type !== "password_reset") {
+      return res.status(400).json({ error: "Invalid token." });
+    }
+
+    // Select student from param
+    const [student] =
+      await sql`SELECT student_id FROM students WHERE email = ${decoded.email}`;
+
+    // Validate that student exists
+    if (!student) {
+      return res.status(400).json({ error: "Account not found." });
+    }
+
+    // Use salt and hashing like before to set new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(new_password, salt);
+
+    // Update user's password in the database
+    await sql`UPDATE students SET password_hash = ${hashedPassword} WHERE email = ${decoded.email}`;
+
+    // Return with success status
+    return res.status(200).json({ message: "Password reset successfully." });
+
+  } 
+  catch (error) {
+    
+    // Expired error
+    if (error.name === "TokenExpiredError") {
+      return res
+        .status(400)
+        .json({ error: "Reset link expired. Please request a new one." });
+    }
+    
+    console.error("Reset password error:", error);
+    
+    return res.status(400).json({ error: "Invalid token." });
+  }
+}
+
 // ----------------------------------------------------------------------
 
 function generateAccessToken(email) {
