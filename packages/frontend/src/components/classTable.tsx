@@ -171,9 +171,9 @@ function TableHeader({
   }
 
   return (
-    <nav className="w-full flex items-center gap-2 border border-gray-400 shadow-sm rounded-2xl">
+    <nav className="w-full flex flex-col sm:flex-row sm:items-center overflow-hidden border border-gray-400 shadow-sm rounded-2xl">
       {/* SEARCH INPUT -- Customized for this component*/}
-      <div className="space-y-2 min-w-60">
+      <div className="min-w-24 sm:min-w-40 lg:min-w-60">
         <div className="relative">
           <input
             className="flex w-full rounded-2xl transition-colors duration-300 h-full bg-background px-3 py-3 text-sm text-black shadow-black/5 placeholder:text-gray-400 focus-visible:outline-none focus:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50 peer ps-9 pe-9 -my-px -mr-px"
@@ -198,56 +198,58 @@ function TableHeader({
         </div>
       </div>
 
-      {/* FILTER TABS -- used to filter courses*/}
-      <ul
-        ref={filterListRef}
-        onMouseLeave={handleFilterListLeave}
-        className="relative w-full justify-between flex items-center rounded-full p-1"
-      >
-        <div
-          className="absolute z-0 h-full rounded-full bg-black transition-all duration-200"
-          style={{
-            left: hoverCursor.left,
-            width: hoverCursor.width,
-            opacity: hoverCursor.opacity,
-          }}
-        />
-        {/* looping over filters to apply active filters and animations  */}
-        {FILTER_LABELS.map((label) => {
-          const isActive = activeFilter === FILTER_TAG_MAP[label];
-          return (
-            <li
-              key={label}
-              onMouseEnter={handleFilterHover}
-              onClick={() => onFilterChange(label)}
-              className={`relative z-10 px-3 py-1 text-xs font-semibold uppercase cursor-pointer rounded-full select-none transition-colors duration-150
+      {/* FILTER TABS + SAVE -- grouped so they share one row on mobile */}
+      <div className="flex items-center flex-1">
+        <ul
+          ref={filterListRef}
+          onMouseLeave={handleFilterListLeave}
+          className="relative flex-1 justify-between flex items-center rounded-full p-1"
+        >
+          <div
+            className="absolute z-0 h-full rounded-full bg-black transition-all duration-200"
+            style={{
+              left: hoverCursor.left,
+              width: hoverCursor.width,
+              opacity: hoverCursor.opacity,
+            }}
+          />
+          {/* looping over filters to apply active filters and animations  */}
+          {FILTER_LABELS.map((label) => {
+            const isActive = activeFilter === FILTER_TAG_MAP[label];
+            return (
+              <li
+                key={label}
+                onMouseEnter={handleFilterHover}
+                onClick={() => onFilterChange(label)}
+                className={`relative z-10 px-3 py-1 text-xs font-semibold uppercase cursor-pointer rounded-full select-none transition-colors duration-150
                     ${
                       isActive
                         ? "bg-black text-white"
                         : "mix-blend-difference text-white"
                     }`}
-            >
-              {label}
-            </li>
-          );
-        })}
-      </ul>
+              >
+                {label}
+              </li>
+            );
+          })}
+        </ul>
 
-      {/*SAVE BUTTON -- save current completed courses */}
-      <button
-        type="button"
-        onClick={handleSave}
-        disabled={saveState !== "idle"}
-        className={`self-stretch ml-auto -my-px -mr-px justify-end rounded-l-xl cursor-pointer transition-all duration-300 p-3 text-sm rounded-r-2xl disabled:cursor-default
+        {/*SAVE BUTTON -- save current completed courses */}
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={saveState !== "idle"}
+          className={`self-stretch ml-auto -my-px -mr-px justify-end rounded-l-xl cursor-pointer transition-all duration-300 p-3 text-sm rounded-r-2xl disabled:cursor-default
           ${saveState === "saved" ? "bg-calpoly-green text-white" : saveState === "failed" ? "bg-red-600 text-white" : "bg-black text-gray-400 hover:text-white"}`}
-      >
-        {saveState === "saving" && (
-          <LoaderCircle className="animate-spin" size={24} />
-        )}
-        {saveState === "saved" && <CircleCheckBig size={24} />}
-        {saveState === "failed" && <CircleX size={24} />}
-        {saveState === "idle" && <Save size={24} />}
-      </button>
+        >
+          {saveState === "saving" && (
+            <LoaderCircle className="animate-spin" size={24} />
+          )}
+          {saveState === "saved" && <CircleCheckBig size={24} />}
+          {saveState === "failed" && <CircleX size={24} />}
+          {saveState === "idle" && <Save size={24} />}
+        </button>
+      </div>
     </nav>
   );
 }

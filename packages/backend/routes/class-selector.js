@@ -16,9 +16,9 @@ router.get("/", async (req, res) => {
     c.class_name AS course_name,
     c.catalog_id,
     CASE
-      WHEN course_number ~ '^[3-5]' THEN 'UPPER DIV'
-      WHEN subject LIKE '%GE%' THEN 'GE'
+      WHEN rg.group_name LIKE '%GE%' THEN 'GE'
       WHEN rg.group_name LIKE '%Support%' THEN 'SUPPORT'
+      WHEN course_number ~ '^[3-5]' THEN 'UPPER DIV'
       ELSE 'LOWER DIV'
     END AS tag
     FROM courses c
@@ -56,9 +56,9 @@ router.get("/:student_id", async (req, res) => {
           courses.catalog_id,
           courses.units,
           CASE
-            WHEN courses.course_number ~ '^[3-5]' THEN 'UPPER DIV'
             WHEN courses.subject LIKE 'GE%' THEN 'GE'
             WHEN courses.tech_elective_eligible THEN 'SUPPORT'
+            WHEN courses.course_number ~ '^[3-5]' THEN 'UPPER DIV'
             ELSE 'LOWER DIV'
           END AS tag
         FROM student_courses
@@ -108,9 +108,9 @@ router.get("/:student_id/courses", async (req, res) => {
     c.class_name AS course_name,
     c.catalog_id,
     CASE
-      WHEN course_number ~ '^[3-5]' THEN 'UPPER DIV'
       WHEN rg.group_name LIKE '%GE%' THEN 'GE'
       WHEN rg.group_name LIKE '%Support%' THEN 'SUPPORT'
+      WHEN course_number ~ '^[3-5]' THEN 'UPPER DIV'
       ELSE 'LOWER DIV'
     END AS tag
     FROM courses c
