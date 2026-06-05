@@ -149,7 +149,7 @@ export default function LoginForm() {
         {loading ? "Signing in..." : "Sign In"}
       </button>
 
-      <label className="block text-left text-sm text-center text-gray-600">
+      <label className="block text-left text-sm text-gray-600">
         Need to sign up?{" "}
         <Link
           to="/register"
@@ -158,8 +158,8 @@ export default function LoginForm() {
           Create Account
         </Link>
       </label>
-      
-      <label className="block text-left text-sm text-center text-gray-600 mt-2">
+
+      <label className="block text-left text-sm text-gray-600 mt-2">
         Forgot your password?{" "}
         <Link
           to="/reset-password"
@@ -168,7 +168,6 @@ export default function LoginForm() {
           Reset Password
         </Link>
       </label>
-
     </form>
   );
 }
