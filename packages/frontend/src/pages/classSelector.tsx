@@ -171,7 +171,7 @@ function ClassSelector() {
       <main className="flex-1 min-h-0 p-5 w-full grid grid-cols-3 gap-5">
         <div className="col-span-2 flex flex-col min-h-0">
           <div className="text-left text-5xl text-black font-bold mb-10">
-            Search for your catalog
+            Search for your Classes
           </div>
           <div className="flex items-center gap-4 mb-15">
             <SearchBar

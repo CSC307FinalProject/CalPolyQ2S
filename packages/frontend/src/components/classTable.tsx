@@ -54,7 +54,7 @@ export default function ClassTable({
 }: ClassTableProps) {
   // set up filters and query states
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<string | null>("ALL");
 
   async function handleSaveCourses() {
     await onSaveCourses(completed);

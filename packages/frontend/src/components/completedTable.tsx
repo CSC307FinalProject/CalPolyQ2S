@@ -1,7 +1,7 @@
 import { X, Trash2 } from "lucide-react";
 import type { Course } from "../data/courses";
-import { ContinueButton, BackButton } from "./navButtons";
-import { Link, useNavigate } from "react-router-dom";
+import { ContinueButton } from "./navButtons";
+import { useNavigate } from "react-router-dom";
 
 // ─── CompletedCourseItem ──────────────────────────────────────────────────────
 // Dedicated row component for the completed-courses sidebar.
@@ -112,12 +112,8 @@ export default function CompletedTable({
         </div>
       </div>
 
-      <div className="border-t flex justify-between border-gray-200 pt-3">
-        <Link to="/login">
-          <BackButton />
-        </Link>
-
-        <ContinueButton label="Translate Classes" onClick={handleContinue} />
+      <div className="border-t border-gray-200 pt-3">
+        <ContinueButton label="Translate Classes" onClick={handleContinue} className="w-full" />
       </div>
     </div>
   );
