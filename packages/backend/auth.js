@@ -279,7 +279,6 @@ export async function forgotPassword(req, res) {
   }
 
   try {
-    
     // Select student based on the email param
     const [student] =
       await sql`SELECT student_id FROM students WHERE email = ${email}`;
@@ -289,7 +288,7 @@ export async function forgotPassword(req, res) {
       return res.status(404).json({ error: "Email not found." });
     }
 
-    // Sign and send a reset token that 
+    // Sign and send a reset token that has a 10 min expiry
     const resetToken = jwt.sign(
       { email, type: "password_reset" },
       process.env.TOKEN_SECRET,
@@ -298,9 +297,10 @@ export async function forgotPassword(req, res) {
 
     // Sends the email with reset token
     await sendPasswordResetEmail(email, resetToken);
-    return res.status(200).json({ message: "Reset link sent. Check your inbox." });
-  } 
-  catch (error) {
+    return res
+      .status(200)
+      .json({ message: "Reset link sent. Check your inbox." });
+  } catch (error) {
     console.error("Forgot password error:", error);
     return res.status(500).json({ error: "Failed to process request." });
   }
@@ -340,19 +340,16 @@ export async function resetPassword(req, res) {
 
     // Return with success status
     return res.status(200).json({ message: "Password reset successfully." });
-
-  } 
-  catch (error) {
-    
+  } catch (error) {
     // Expired error
     if (error.name === "TokenExpiredError") {
       return res
         .status(400)
         .json({ error: "Reset link expired. Please request a new one." });
     }
-    
+
     console.error("Reset password error:", error);
-    
+
     return res.status(400).json({ error: "Invalid token." });
   }
 }
