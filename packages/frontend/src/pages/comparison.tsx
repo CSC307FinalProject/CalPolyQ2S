@@ -318,7 +318,7 @@ export default function Comparison() {
 
   return (
     <div className="bg-white ">
-      <Navbar />
+      <Navbar showDisclaimer />
       <div className="bg-white flex items-stretch">
         {/* Quarter Panel */}
         <CatalogPanel
