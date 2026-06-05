@@ -10,18 +10,20 @@ router.get("/", async (req, res) => {
     // use case when to aggregate data during sql query for table (tag)
     const [courses, majors, concentrations] = await Promise.all([
       sql`
-      SELECT 
-        course_id,
-        subject || ' ' || course_number AS "course_code",
-        class_name AS course_name,
-        catalog_id,
-        CASE
-          WHEN tech_elective_eligible THEN 'SUPPORT'
-          WHEN subject LIKE 'Gen Ed%' THEN 'GE'
-          WHEN course_number ~ '^[3-5]' THEN 'UPPER DIV'
-          ELSE 'LOWER DIV'
-        END AS tag
-      FROM courses
+    SELECT DISTINCT
+    c.course_id,
+    c.subject || ' ' || c.course_number AS "course_code",
+    c.class_name AS course_name,
+    c.catalog_id,
+    CASE
+      WHEN course_number ~ '^[3-5]' THEN 'UPPER DIV'
+      WHEN subject LIKE '%GE%' THEN 'GE'
+      WHEN rg.group_name LIKE '%Support%' THEN 'SUPPORT'
+      ELSE 'LOWER DIV'
+    END AS tag
+    FROM courses c
+    JOIN requirement_group_courses rgc ON c.course_id = rgc.course_id
+    JOIN requirement_groups rg ON rgc.group_id = rg.group_id
     `,
       sql`
       SELECT *
@@ -107,8 +109,8 @@ router.get("/:student_id/courses", async (req, res) => {
     c.catalog_id,
     CASE
       WHEN course_number ~ '^[3-5]' THEN 'UPPER DIV'
-      WHEN subject LIKE 'Gen Ed%' THEN 'GE'
-      WHEN tech_elective_eligible THEN 'SUPPORT'
+      WHEN rg.group_name LIKE '%GE%' THEN 'GE'
+      WHEN rg.group_name LIKE '%Support%' THEN 'SUPPORT'
       ELSE 'LOWER DIV'
     END AS tag
     FROM courses c
