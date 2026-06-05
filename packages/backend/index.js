@@ -9,6 +9,9 @@ import {
   verifyEmail,
   resendVerification,
   resendLimit,
+  forgotPassword,
+  forgotPasswordLimit,
+  resetPassword,
 } from "./auth.js";
 import classSelectorRouter from "./routes/class-selector.js";
 import comparisonRouter from "./routes/comparison.js";
@@ -61,6 +64,8 @@ app.post("/login", loginUser);
 app.post("/register", registerUser);
 app.get("/verify-email", verifyEmail);
 app.post("/resend-verification", resendLimit, resendVerification);
+app.post("/forgot-password", forgotPasswordLimit, forgotPassword);
+app.post("/reset-password", resetPassword);
 
 app.post("/users", authenticateUser, async (req, res) => {
   const { email } = req.body;

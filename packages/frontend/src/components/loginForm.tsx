@@ -149,13 +149,23 @@ export default function LoginForm() {
         {loading ? "Signing in..." : "Sign In"}
       </button>
 
-      <label className="text-sm text-center text-gray-600">
+      <label className="block text-left text-sm text-gray-600">
         Need to sign up?{" "}
         <Link
           to="/register"
           className="text-calpoly-green font-bold hover:underline"
         >
           Create Account
+        </Link>
+      </label>
+
+      <label className="block text-left text-sm text-gray-600 mt-2">
+        Forgot your password?{" "}
+        <Link
+          to="/reset-password"
+          className="text-calpoly-green font-bold hover:underline"
+        >
+          Reset Password
         </Link>
       </label>
     </form>
