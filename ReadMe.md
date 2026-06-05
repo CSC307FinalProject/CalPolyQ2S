@@ -13,7 +13,7 @@ This is the CalPolyQ2S tool. The upcoming quarter to semester and catalog switch
 
 ## Demo Video
 
-<img width="886" height="531" alt="User_Signup_Sequence_Diagram" src="docs/demo.mp4" />
+https://www.youtube.com/watch?v=XsMiOMuN1eI
 
 ## Deployed Application Website
 
